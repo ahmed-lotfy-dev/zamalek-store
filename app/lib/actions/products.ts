@@ -5,23 +5,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function getProducts() {
-  try {
-    const products = await prisma.product.findMany({
-      where: {
-        isArchived: false,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-    return products;
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    return [];
-  }
-
-
-export async function getProducts() {
   return await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
     include: { category: true },
