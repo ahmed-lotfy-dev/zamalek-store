@@ -28,7 +28,12 @@ export async function getDashboardStats() {
     const totalProducts = await prisma.product.count();
 
     // 4. Total Customers
-    const totalCustomers = await prisma.user.count();
+    // 4. Total Customers (exclude admins)
+    const totalCustomers = await prisma.user.count({
+      where: {
+        role: "USER",
+      },
+    });
 
     return {
       totalRevenue,

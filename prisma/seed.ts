@@ -30,7 +30,7 @@ async function main() {
 
   if (adminEmail && adminPassword) {
     try {
-      await auth.api.signUpEmail({
+      const { user: createdUser } = await auth.api.signUpEmail({
         body: {
           email: adminEmail,
           password: adminPassword,
@@ -38,9 +38,73 @@ async function main() {
         },
         headers: new Headers(),
       });
-      console.log(`Created admin user: ${adminEmail}`);
-    } catch (error) {
-      console.error("Error creating admin user:", error);
+
+      if (createdUser) {
+        await prisma.user.update({
+          where: { id: createdUser.id },
+          data: { role: "ADMIN" },
+        });
+        console.log(`Created admin user: ${adminEmail} with role ADMIN`);
+      }
+    } catch (error: any) {
+      if (error.body?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
+        console.log("Admin user already exists. Updating role to ADMIN...");
+        const existingUser = await prisma.user.findUnique({
+          where: { email: adminEmail },
+        });
+        if (existingUser) {
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: { role: "ADMIN" },
+          });
+          console.log(
+            `Updated existing admin user: ${adminEmail} to role ADMIN`
+          );
+        }
+      } else {
+        console.error("Error creating admin user:", error);
+      }
+    }
+
+    // Create Test User (Viewer)
+    const testEmail = "testuser@gmail.com";
+    const testPassword = "00000000";
+
+    try {
+      const { user: createdTestUser } = await auth.api.signUpEmail({
+        body: {
+          email: testEmail,
+          password: testPassword,
+          name: "Test User",
+        },
+        headers: new Headers(),
+      });
+
+      if (createdTestUser) {
+        await prisma.user.update({
+          where: { id: createdTestUser.id },
+          data: { role: "VIEWER" },
+        });
+        console.log(`Created test user: ${testEmail} with role VIEWER`);
+      }
+    } catch (error: any) {
+      if (error.body?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
+        console.log("Test user already exists. Updating role to VIEWER...");
+        const existingTestUser = await prisma.user.findUnique({
+          where: { email: testEmail },
+        });
+        if (existingTestUser) {
+          await prisma.user.update({
+            where: { id: existingTestUser.id },
+            data: { role: "VIEWER" },
+          });
+          console.log(
+            `Updated existing test user: ${testEmail} to role VIEWER`
+          );
+        }
+      } else {
+        console.error("Error creating test user:", error);
+      }
     }
   } else {
     console.warn(

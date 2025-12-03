@@ -1,6 +1,5 @@
 import { getProducts } from "@/app/lib/actions/products";
 import { getCategories } from "@/app/lib/actions/categories";
-import StoreNavbar from "@/app/components/store-navbar";
 import ProductListing from "@/app/components/store/product-listing";
 
 export default async function ProductsPage({
@@ -23,7 +22,6 @@ export default async function ProductsPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <StoreNavbar />
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <ProductListing
           key={initialCategoryIds.join("-")}

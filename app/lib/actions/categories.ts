@@ -11,7 +11,16 @@ export async function getCategories() {
   });
 }
 
+import { auth } from "@/app/lib/auth";
+import { headers } from "next/headers";
+
 export async function createCategory(formData: FormData) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  // @ts-ignore
+  if (session?.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
   const name = formData.get("name") as string;
 
   await prisma.category.create({
@@ -23,6 +32,12 @@ export async function createCategory(formData: FormData) {
 }
 
 export async function deleteCategory(id: string) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  // @ts-ignore
+  if (session?.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
   await prisma.category.delete({ where: { id } });
   revalidatePath("/admin/categories");
 }

@@ -29,7 +29,16 @@ export async function getNewArrivals() {
   }
 }
 
+import { auth } from "@/app/lib/auth";
+import { headers } from "next/headers";
+
 export async function createProduct(formData: FormData) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  // @ts-ignore
+  if (session?.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
   const price = parseFloat(formData.get("price") as string);
@@ -53,6 +62,12 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function deleteProduct(id: string) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  // @ts-ignore
+  if (session?.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
   await prisma.product.delete({ where: { id } });
   revalidatePath("/admin/products");
 }
