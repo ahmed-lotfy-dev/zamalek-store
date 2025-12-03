@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
-import { Button } from "@heroui/react";
+import {
+  Button,
+  Input,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Link as HeroLink,
+} from "@heroui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -12,7 +20,8 @@ export default function SignInForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSignIn = async () => {
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     await authClient.signIn.email({
       email,
@@ -30,51 +39,56 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-md mx-auto p-6 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800">
-      <h1 className="text-2xl font-bold text-center mb-2">Welcome Back</h1>
-      <p className="text-center text-zinc-500 dark:text-zinc-400 mb-6">
-        Sign in to your account to continue
-      </p>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader className="flex flex-col gap-1 items-center justify-center pb-0">
+        <h1 className="text-2xl font-bold">Welcome Back</h1>
+        <p className="text-small text-default-500">
+          Sign in to your account to continue
+        </p>
+      </CardHeader>
+      <CardBody>
+        <form onSubmit={handleSignIn} className="flex flex-col gap-4">
+          <Input
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="john@example.com"
+            variant="bordered"
+            isRequired
+          />
 
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="p-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all"
-          placeholder="john@example.com"
-        />
-      </div>
+          <Input
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            variant="bordered"
+            isRequired
+          />
 
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="p-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent focus:ring-2 focus:ring-black dark:focus:ring-white outline-none transition-all"
-          placeholder="••••••••"
-        />
-      </div>
-
-      <Button
-        isLoading={loading}
-        onPress={handleSignIn}
-        className="w-full bg-black text-white dark:bg-white dark:text-black font-medium mt-4"
-      >
-        Sign In
-      </Button>
-
-      <div className="text-center text-sm mt-4">
-        Don't have an account?{" "}
-        <Link
-          href="/sign-up"
-          className="font-medium underline hover:text-zinc-600 dark:hover:text-zinc-300"
-        >
-          Sign Up
-        </Link>
-      </div>
-    </div>
+          <Button
+            type="submit"
+            isLoading={loading}
+            color="primary"
+            className="w-full font-medium mt-2"
+          >
+            Sign In
+          </Button>
+        </form>
+      </CardBody>
+      <CardFooter className="justify-center pt-0">
+        <div className="text-center text-small">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/sign-up"
+            className="font-medium underline hover:text-primary"
+          >
+            Sign Up
+          </Link>
+        </div>
+      </CardFooter>
+    </Card>
   );
 }
