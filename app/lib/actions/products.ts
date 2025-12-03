@@ -34,8 +34,7 @@ export async function createProduct(formData: FormData) {
   const price = parseFloat(formData.get("price") as string);
   const stock = parseInt(formData.get("stock") as string);
   const categoryId = formData.get("categoryId") as string;
-  // Images handling would go here (e.g., upload to cloud and get URL)
-  // For now, we'll assume a placeholder or simple string if provided
+  const imageUrl = formData.get("imageUrl") as string;
 
   await prisma.product.create({
     data: {
@@ -44,7 +43,7 @@ export async function createProduct(formData: FormData) {
       price,
       stock,
       categoryId,
-      images: [], // Placeholder
+      images: imageUrl ? [imageUrl] : [],
     },
   });
 
