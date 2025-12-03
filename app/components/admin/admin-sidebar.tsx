@@ -2,7 +2,8 @@
 
 import { Link } from "@heroui/link";
 import { Button } from "@heroui/button";
-import { usePathname } from "next/navigation";
+import { authClient } from "@/app/lib/auth-client";
+import { useRouter, usePathname } from "next/navigation";
 import {
   X,
   LayoutDashboard,
@@ -10,6 +11,7 @@ import {
   ListTree,
   ShoppingCart,
   Home,
+  LogOut,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -19,6 +21,17 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/");
+        },
+      },
+    });
+  };
 
   const links = [
     { href: "/", label: "Storefront", icon: Home },
@@ -35,6 +48,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         w-64 bg-content1 border-r border-divider p-6
         transform transition-transform duration-200 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        flex flex-col min-h-screen
       `}
     >
       <div className="mb-8 flex justify-between items-center">
@@ -53,7 +67,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
           <X size={20} />
         </Button>
       </div>
-      <nav className="flex flex-col gap-2">
+      <nav className="flex flex-col gap-2 flex-1">
         {links.map((link) => {
           const Icon = link.icon;
           const isActive = pathname === link.href;
@@ -74,6 +88,20 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
           );
         })}
       </nav>
+
+      <div className="mt-auto pt-4 border-t border-divider">
+        <Button
+          variant="light"
+          color="danger"
+          className="justify-start gap-4"
+          size="lg"
+          fullWidth
+          onPress={handleSignOut}
+        >
+          <LogOut size={20} />
+          Sign Out
+        </Button>
+      </div>
     </aside>
   );
 }

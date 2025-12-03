@@ -1,5 +1,6 @@
 import { prisma } from "../app/lib/prisma";
 import { auth } from "../app/lib/auth";
+import { Role } from "@prisma/client";
 
 async function main() {
   console.log("Start seeding...");
@@ -35,6 +36,7 @@ async function main() {
           email: adminEmail,
           password: adminPassword,
           name: "Admin User",
+          role: "admin",
         },
         headers: new Headers(),
       });
@@ -42,7 +44,7 @@ async function main() {
       if (createdUser) {
         await prisma.user.update({
           where: { id: createdUser.id },
-          data: { role: "ADMIN" },
+          data: { role: Role.ADMIN },
         });
         console.log(`Created admin user: ${adminEmail} with role ADMIN`);
       }
@@ -55,7 +57,7 @@ async function main() {
         if (existingUser) {
           await prisma.user.update({
             where: { id: existingUser.id },
-            data: { role: "ADMIN" },
+            data: { role: Role.ADMIN },
           });
           console.log(
             `Updated existing admin user: ${adminEmail} to role ADMIN`
@@ -76,6 +78,7 @@ async function main() {
           email: testEmail,
           password: testPassword,
           name: "Test User",
+          role: "user",
         },
         headers: new Headers(),
       });
@@ -83,7 +86,7 @@ async function main() {
       if (createdTestUser) {
         await prisma.user.update({
           where: { id: createdTestUser.id },
-          data: { role: "VIEWER" },
+          data: { role: Role.VIEWER },
         });
         console.log(`Created test user: ${testEmail} with role VIEWER`);
       }
@@ -96,7 +99,7 @@ async function main() {
         if (existingTestUser) {
           await prisma.user.update({
             where: { id: existingTestUser.id },
-            data: { role: "VIEWER" },
+            data: { role: Role.VIEWER },
           });
           console.log(
             `Updated existing test user: ${testEmail} to role VIEWER`

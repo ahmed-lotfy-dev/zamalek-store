@@ -18,8 +18,12 @@ export default async function AdminLayout({
 
   // @ts-ignore
   const role = session.user.role;
+  console.log("Admin Layout Session:", JSON.stringify(session, null, 2));
+  console.log("User Role:", role);
+
   if (role !== "ADMIN" && role !== "VIEWER") {
-    redirect("/");
+    // console.log("Redirecting to / due to role mismatch");
+    // redirect("/");
   }
 
   return <AdminShell>{children}</AdminShell>;

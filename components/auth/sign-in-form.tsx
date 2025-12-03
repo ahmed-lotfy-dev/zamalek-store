@@ -13,6 +13,7 @@ import {
 } from "@heroui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "@/app/components/ui/toast";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
@@ -31,7 +32,9 @@ export default function SignInForm() {
           router.push("/admin");
         },
         onError: (ctx: any) => {
-          alert(ctx.error.message);
+          const message =
+            ctx.error.message || "An error occurred during sign in";
+          toast.error(message);
           setLoading(false);
         },
       },
