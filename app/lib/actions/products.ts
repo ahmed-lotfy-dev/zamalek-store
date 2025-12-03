@@ -11,6 +11,24 @@ export async function getProducts() {
   });
 }
 
+export async function getNewArrivals() {
+  try {
+    const products = await prisma.product.findMany({
+      take: 4,
+      include: {
+        category: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return products;
+  } catch (error) {
+    console.error("Error fetching new arrivals:", error);
+    return [];
+  }
+}
+
 export async function createProduct(formData: FormData) {
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
