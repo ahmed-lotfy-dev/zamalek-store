@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import { signInAction } from "@/app/lib/actions/auth-actions";
+import { useState } from "react";
+import { authClient } from "@/app/lib/auth-client";
 import {
   Button,
   Input,
@@ -12,9 +12,31 @@ import {
   Link as HeroLink,
 } from "@heroui/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SignInForm() {
-  const [state, dispatch, isPending] = useActionState(signInAction, null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    await authClient.signIn.email({
+      email,
+      password,
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/admin");
+        },
+        onError: (ctx: any) => {
+          alert(ctx.error.message);
+          setLoading(false);
+        },
+      },
+    });
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -25,16 +47,12 @@ export default function SignInForm() {
         </p>
       </CardHeader>
       <CardBody>
-        <form action={dispatch} className="flex flex-col gap-4">
-          {state?.error && (
-            <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg">
-              {state.error}
-            </div>
-          )}
+        <form onSubmit={handleSignIn} className="flex flex-col gap-4">
           <Input
             label="Email"
-            name="email"
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="john@example.com"
             variant="bordered"
             isRequired
@@ -42,8 +60,9 @@ export default function SignInForm() {
 
           <Input
             label="Password"
-            name="password"
             type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             variant="bordered"
             isRequired
@@ -51,7 +70,7 @@ export default function SignInForm() {
 
           <Button
             type="submit"
-            isLoading={isPending}
+            isLoading={loading}
             color="primary"
             className="w-full font-medium mt-2"
           >
