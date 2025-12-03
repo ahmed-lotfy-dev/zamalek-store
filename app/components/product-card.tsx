@@ -11,7 +11,11 @@ type Product = {
   category: { name: string } | null;
 };
 
+import { useCart } from "@/app/context/cart-context";
+
 export default function ProductCard({ product }: { product: Product }) {
+  const { addToCart } = useCart();
+
   return (
     <Card
       shadow="sm"
@@ -42,10 +46,7 @@ export default function ProductCard({ product }: { product: Product }) {
               className="w-full font-medium shadow-lg"
               color="primary"
               radius="full"
-              onPress={() => {
-                console.log("Add to cart", product.id);
-                // TODO: Implement add to cart logic
-              }}
+              onPress={() => addToCart(product)}
             >
               Add to Cart
             </Button>
