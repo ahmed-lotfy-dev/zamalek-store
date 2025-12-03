@@ -1,4 +1,5 @@
 import { prisma } from "../app/lib/prisma";
+import { auth } from "../app/lib/auth";
 
 async function main() {
   console.log("Start seeding...");
@@ -28,27 +29,19 @@ async function main() {
   const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (adminEmail && adminPassword) {
-    const user = await prisma.user.create({
-      data: {
-        name: "Admin User",
-        email: adminEmail,
-        emailVerified: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
-
-    await prisma.account.create({
-      data: {
-        userId: user.id,
-        accountId: user.id,
-        providerId: "credential",
-        password: adminPassword, // Note: In a real app, this should be hashed
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
-    console.log(`Created admin user: ${adminEmail}`);
+    try {
+      await auth.api.signUpEmail({
+        body: {
+          email: adminEmail,
+          password: adminPassword,
+          name: "Admin User",
+        },
+        headers: new Headers(),
+      });
+      console.log(`Created admin user: ${adminEmail}`);
+    } catch (error) {
+      console.error("Error creating admin user:", error);
+    }
   } else {
     console.warn(
       "ADMIN_EMAIL or ADMIN_PASSWORD not set, skipping admin user creation."

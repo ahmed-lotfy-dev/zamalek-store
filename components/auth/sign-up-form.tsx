@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { authClient } from "@/app/lib/auth-client";
+import { useActionState } from "react";
+import { signUpAction } from "@/app/lib/actions/auth-actions";
 import {
   Button,
   Input,
@@ -11,33 +11,9 @@ import {
   CardFooter,
 } from "@heroui/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function SignUpForm() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    await authClient.signUp.email({
-      email,
-      password,
-      name,
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/");
-        },
-        onError: (ctx: any) => {
-          alert(ctx.error.message);
-          setLoading(false);
-        },
-      },
-    });
-  };
+  const [state, dispatch, isPending] = useActionState(signUpAction, null);
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -46,12 +22,16 @@ export default function SignUpForm() {
         <p className="text-small text-default-500">Join Zamalek Store today</p>
       </CardHeader>
       <CardBody>
-        <form onSubmit={handleSignUp} className="flex flex-col gap-4">
+        <form action={dispatch} className="flex flex-col gap-4">
+          {state?.error && (
+            <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              {state.error}
+            </div>
+          )}
           <Input
             label="Name"
+            name="name"
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
             placeholder="John Doe"
             variant="bordered"
             isRequired
@@ -59,9 +39,8 @@ export default function SignUpForm() {
 
           <Input
             label="Email"
+            name="email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             placeholder="john@example.com"
             variant="bordered"
             isRequired
@@ -69,9 +48,8 @@ export default function SignUpForm() {
 
           <Input
             label="Password"
+            name="password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             variant="bordered"
             isRequired
@@ -79,7 +57,7 @@ export default function SignUpForm() {
 
           <Button
             type="submit"
-            isLoading={loading}
+            isLoading={isPending}
             color="primary"
             className="w-full font-medium mt-2"
           >
