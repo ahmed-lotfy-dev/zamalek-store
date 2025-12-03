@@ -49,7 +49,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex min-h-screen relative">
+    <div className="flex min-h-screen relative w-full max-w-[100vw] overflow-x-hidden">
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-zinc-900 text-white flex items-center px-4 z-40">
         <button
@@ -112,7 +112,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 bg-zinc-50 dark:bg-zinc-950 p-8 pt-24 md:pt-8">
+      <main className="flex-1 min-w-0 bg-zinc-50 dark:bg-zinc-950 p-4 pt-20 md:p-8 md:pt-8 w-full">
         {children}
       </main>
     </div>
