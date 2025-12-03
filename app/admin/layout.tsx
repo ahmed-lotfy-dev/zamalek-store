@@ -1,7 +1,7 @@
 import { auth } from "@/app/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import AdminLayoutClient from "./layout-client";
+import AdminShell from "@/app/components/admin/admin-shell";
 
 export default async function AdminLayout({
   children,
@@ -22,5 +22,5 @@ export default async function AdminLayout({
     redirect("/");
   }
 
-  return <AdminLayoutClient>{children}</AdminLayoutClient>;
+  return <AdminShell>{children}</AdminShell>;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardBody, CardFooter, Image, Button } from "@heroui/react";
+import Link from "next/link";
 
 type Product = {
   id: string;
@@ -15,8 +16,6 @@ export default function ProductCard({ product }: { product: Product }) {
     <Card
       shadow="sm"
       key={product.id}
-      isPressable
-      onPress={() => console.log("item pressed")}
       className="group relative overflow-hidden"
     >
       <CardBody className="overflow-visible p-0">
@@ -31,14 +30,19 @@ export default function ProductCard({ product }: { product: Product }) {
               product.images[0] || "https://placehold.co/600x800?text=No+Image"
             }
           />
+          {/* Link Overlay */}
+          <Link
+            href={`/products/${product.id}`}
+            className="absolute inset-0 z-10"
+          />
+
           {/* Add to Cart Overlay */}
           <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0 z-20">
             <Button
               className="w-full font-medium shadow-lg"
               color="primary"
               radius="full"
-              onPress={(e: any) => {
-                e.continuePropagation(); // Prevent card press
+              onPress={() => {
                 console.log("Add to cart", product.id);
                 // TODO: Implement add to cart logic
               }}

@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import AdminSidebar from "@/app/components/admin/admin-sidebar";
 
-export default function AdminLayoutClient({
+export default function AdminShell({
   children,
 }: {
   children: React.ReactNode;

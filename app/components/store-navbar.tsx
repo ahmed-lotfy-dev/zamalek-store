@@ -36,12 +36,7 @@ export default function StoreNavbar() {
       </NavbarContent>
       <NavbarContent justify="end">
         <NavbarItem>
-          <Button
-            as={Link}
-            color="primary"
-            href="/admin/products"
-            variant="flat"
-          >
+          <Button as={Link} color="primary" href="/admin/" variant="flat">
             Admin Dashboard
           </Button>
         </NavbarItem>
