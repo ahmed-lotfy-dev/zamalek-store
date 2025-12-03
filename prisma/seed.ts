@@ -49,8 +49,9 @@ async function main() {
   }
 
   // Create Products
+  // Create Products
   // 1. Home Jersey
-  await prisma.product.create({
+  const homeJersey = await prisma.product.create({
     data: {
       name: "Zamalek SC Home Jersey 24/25",
       description:
@@ -66,7 +67,7 @@ async function main() {
   });
 
   // 2. Away Jersey
-  await prisma.product.create({
+  const awayJersey = await prisma.product.create({
     data: {
       name: "Zamalek SC Away Jersey 24/25",
       description:
@@ -81,7 +82,7 @@ async function main() {
   });
 
   // 3. 1911 Legacy T-Shirt
-  await prisma.product.create({
+  const legacyTee = await prisma.product.create({
     data: {
       name: "1911 Legacy T-Shirt",
       description:
@@ -94,7 +95,7 @@ async function main() {
   });
 
   // 4. White Knights T-Shirt
-  await prisma.product.create({
+  const wkTee = await prisma.product.create({
     data: {
       name: "White Knights Fan Tee",
       description:
@@ -107,7 +108,7 @@ async function main() {
   });
 
   // 5. Zamalek Scarf
-  await prisma.product.create({
+  const scarf = await prisma.product.create({
     data: {
       name: "Classic Zamalek Scarf",
       description:
@@ -118,6 +119,125 @@ async function main() {
       images: ["https://placehold.co/600x400/red/white?text=Zamalek+Scarf"],
     },
   });
+
+  // Create Orders
+  const user = await prisma.user.findUnique({
+    where: { email: adminEmail },
+  });
+
+  if (user) {
+    // Order 1: PENDING
+    await prisma.order.create({
+      data: {
+        userId: user.id,
+        status: "PENDING",
+        total: 89.98,
+        address: "123 Zamalek St, Cairo, Egypt",
+        phone: "+201234567890",
+        orderItems: {
+          create: [
+            {
+              productId: homeJersey.id,
+              quantity: 1,
+              price: 59.99,
+            },
+            {
+              productId: legacyTee.id,
+              quantity: 1,
+              price: 29.99,
+            },
+          ],
+        },
+      },
+    });
+
+    // Order 2: PAID
+    await prisma.order.create({
+      data: {
+        userId: user.id,
+        status: "PAID",
+        total: 59.99,
+        isPaid: true,
+        address: "456 Mohandessin, Giza, Egypt",
+        phone: "+201098765432",
+        orderItems: {
+          create: [
+            {
+              productId: awayJersey.id,
+              quantity: 1,
+              price: 59.99,
+            },
+          ],
+        },
+      },
+    });
+
+    // Order 3: SHIPPED
+    await prisma.order.create({
+      data: {
+        userId: user.id,
+        status: "SHIPPED",
+        total: 49.98,
+        isPaid: true,
+        address: "789 Dokki, Giza, Egypt",
+        phone: "+201122334455",
+        orderItems: {
+          create: [
+            {
+              productId: wkTee.id,
+              quantity: 2,
+              price: 24.99,
+            },
+          ],
+        },
+      },
+    });
+
+    // Order 4: DELIVERED
+    await prisma.order.create({
+      data: {
+        userId: user.id,
+        status: "DELIVERED",
+        total: 19.99,
+        isPaid: true,
+        address: "321 Maadi, Cairo, Egypt",
+        phone: "+201555666777",
+        orderItems: {
+          create: [
+            {
+              productId: scarf.id,
+              quantity: 1,
+              price: 19.99,
+            },
+          ],
+        },
+      },
+    });
+
+    // Order 5: CANCELLED
+    await prisma.order.create({
+      data: {
+        userId: user.id,
+        status: "CANCELLED",
+        total: 119.98,
+        address: "654 Heliopolis, Cairo, Egypt",
+        phone: "+201000111222",
+        orderItems: {
+          create: [
+            {
+              productId: homeJersey.id,
+              quantity: 2,
+              price: 59.99,
+            },
+          ],
+        },
+      },
+    });
+
+    console.log("Created 5 sample orders with different statuses.");
+  } else {
+    console.warn("Admin user not found, skipping order creation.");
+  }
 
   console.log("Seeding finished.");
 }
