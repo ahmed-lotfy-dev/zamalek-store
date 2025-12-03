@@ -8,11 +8,14 @@ import EmptyState from "@/app/components/empty-state";
 export default function ProductListing({
   products,
   categories,
+  initialCategoryIds = [],
 }: {
   products: any[];
   categories: any[];
+  initialCategoryIds?: string[];
 }) {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] =
+    useState<string[]>(initialCategoryIds);
 
   const filteredProducts = useMemo(() => {
     if (selectedCategories.length === 0) return products;
