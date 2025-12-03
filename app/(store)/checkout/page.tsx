@@ -40,7 +40,7 @@ export default async function CheckoutPage() {
     initialPhone = lastOrder.phone || "";
     // Try to parse address from last order if it exists
     if (lastOrder.address) {
-      const parts = lastOrder.address.split(",").map((s) => s.trim());
+      const parts = lastOrder.address.split(",").map((s: string) => s.trim());
       if (parts.length >= 2) {
         initialCity = parts.pop() || "";
         initialAddress = parts.join(", ");

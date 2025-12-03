@@ -13,7 +13,6 @@ import {
 } from "@heroui/react";
 import { EyeIcon } from "lucide-react";
 import Link from "next/link";
-import { OrderStatus } from "@prisma/client";
 
 import { getStatusColor } from "@/app/lib/utils";
 

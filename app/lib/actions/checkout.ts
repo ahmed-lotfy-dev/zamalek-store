@@ -55,7 +55,7 @@ export async function createOrder(prevState: any, formData: FormData) {
     const { items, paymentMethod, address, city, phone } = validatedData.data;
 
     // 3. Transaction: Check Stock -> Create Order -> Update Stock
-    const order = await prisma.$transaction(async (tx) => {
+    const order = await prisma.$transaction(async (tx: any) => {
       // Check stock for all items
       for (const item of items) {
         const product = await tx.product.findUnique({

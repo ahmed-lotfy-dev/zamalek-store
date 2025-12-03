@@ -57,7 +57,7 @@ export default async function OrderDetailsPage({
             </CardHeader>
             <CardBody className="py-4">
               <div className="space-y-4">
-                {order.orderItems.map((item) => (
+                {order.orderItems.map((item: any) => (
                   <div key={item.id} className="flex gap-4">
                     <div className="w-20 h-20 bg-default-100 rounded-lg overflow-hidden shrink-0">
                       <Image

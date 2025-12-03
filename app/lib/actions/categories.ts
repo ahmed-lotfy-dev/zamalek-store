@@ -16,7 +16,7 @@ import { headers } from "next/headers";
 
 export async function createCategory(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() });
-  // @ts-ignore
+
   if (session?.user.role !== "ADMIN") {
     throw new Error("Unauthorized");
   }
@@ -33,7 +33,7 @@ export async function createCategory(formData: FormData) {
 
 export async function deleteCategory(id: string) {
   const session = await auth.api.getSession({ headers: await headers() });
-  // @ts-ignore
+
   if (session?.user.role !== "ADMIN") {
     throw new Error("Unauthorized");
   }

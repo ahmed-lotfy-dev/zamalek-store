@@ -17,7 +17,7 @@ export async function getDashboardStats() {
     });
 
     const totalRevenue = paidOrders.reduce(
-      (acc, order) => acc + Number(order.total),
+      (acc: number, order: any) => acc + Number(order.total),
       0
     );
 

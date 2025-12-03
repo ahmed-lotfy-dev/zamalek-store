@@ -62,7 +62,6 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
     formDataToSend.append("items", JSON.stringify(items));
 
     try {
-      // @ts-ignore - useActionState is not yet available in this React version, using direct call
       const result = await createOrder(null, formDataToSend);
 
       if (result.error) {

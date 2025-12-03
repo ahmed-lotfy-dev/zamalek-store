@@ -35,7 +35,7 @@ export default async function OrderHistoryPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {orders.map((order) => (
+            {orders.map((order: any) => (
               <div
                 key={order.id}
                 className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border border-divider rounded-lg hover:bg-default-50 transition-colors"

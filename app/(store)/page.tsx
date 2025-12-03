@@ -18,7 +18,7 @@ export default async function Home() {
 
           {/* New Arrivals Section */}
           <NewArrivals
-            products={newArrivals.map((p) => ({
+            products={newArrivals.map((p: any) => ({
               ...p,
               price: Number(p.price),
             }))}

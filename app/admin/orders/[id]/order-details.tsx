@@ -9,19 +9,17 @@ import {
   Image,
   Select,
   SelectItem,
-  Button,
 } from "@heroui/react";
-import { OrderStatus } from "@prisma/client";
 import { updateOrderStatus } from "@/app/lib/actions/orders";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const statusOptions = [
-  { label: "Pending", value: OrderStatus.PENDING },
-  { label: "Paid", value: OrderStatus.PAID },
-  { label: "Shipped", value: OrderStatus.SHIPPED },
-  { label: "Delivered", value: OrderStatus.DELIVERED },
-  { label: "Cancelled", value: OrderStatus.CANCELLED },
+  { label: "Pending", value: "PENDING" },
+  { label: "Paid", value: "PAID" },
+  { label: "Shipped", value: "SHIPPED" },
+  { label: "Delivered", value: "DELIVERED" },
+  { label: "Cancelled", value: "CANCELLED" },
 ];
 
 export default function OrderDetails({ order }: { order: any }) {
@@ -31,12 +29,12 @@ export default function OrderDetails({ order }: { order: any }) {
   const handleStatusChange = async (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    const newStatus = e.target.value as OrderStatus;
+    const newStatus = e.target.value;
     if (!newStatus) return;
 
     setLoading(true);
     try {
-      await updateOrderStatus(order.id, newStatus);
+      await updateOrderStatus(order.id, newStatus as any);
       router.refresh();
     } catch (error) {
       console.error("Failed to update status", error);

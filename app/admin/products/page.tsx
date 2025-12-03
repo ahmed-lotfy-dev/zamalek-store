@@ -6,7 +6,7 @@ export default async function AdminProductsPage() {
 
   return (
     <ProductList
-      products={products.map((p) => ({ ...p, price: Number(p.price) }))}
+      products={products.map((p: any) => ({ ...p, price: Number(p.price) }))}
     />
   );
 }

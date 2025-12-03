@@ -34,7 +34,7 @@ import { headers } from "next/headers";
 
 export async function createProduct(formData: FormData) {
   const session = await auth.api.getSession({ headers: await headers() });
-  // @ts-ignore
+
   if (session?.user.role !== "ADMIN") {
     throw new Error("Unauthorized");
   }
@@ -63,7 +63,7 @@ export async function createProduct(formData: FormData) {
 
 export async function deleteProduct(id: string) {
   const session = await auth.api.getSession({ headers: await headers() });
-  // @ts-ignore
+
   if (session?.user.role !== "ADMIN") {
     throw new Error("Unauthorized");
   }

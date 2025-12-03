@@ -35,7 +35,7 @@ export default function FeaturedCategories() {
             Shop by Category
           </h2>
           <p className="text-default-500 mt-1">
-            Find exactly what you're looking for.
+            Find exactly what you&apos;re looking for.
           </p>
         </div>
         <Button
