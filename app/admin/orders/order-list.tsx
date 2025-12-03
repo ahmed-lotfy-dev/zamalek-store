@@ -15,16 +15,7 @@ import { EyeIcon } from "lucide-react";
 import Link from "next/link";
 import { OrderStatus } from "@prisma/client";
 
-const statusColorMap: Record<
-  string,
-  "success" | "danger" | "warning" | "default" | "primary" | "secondary"
-> = {
-  [OrderStatus.PAID]: "success",
-  [OrderStatus.DELIVERED]: "success",
-  [OrderStatus.PENDING]: "warning",
-  [OrderStatus.SHIPPED]: "primary",
-  [OrderStatus.CANCELLED]: "danger",
-};
+import { getStatusColor } from "@/app/lib/utils";
 
 export default function OrderList({ orders }: { orders: any[] }) {
   return (
@@ -53,7 +44,7 @@ export default function OrderList({ orders }: { orders: any[] }) {
             <TableCell>
               <Chip
                 className="capitalize"
-                color={statusColorMap[order.status]}
+                color={getStatusColor(order.status)}
                 size="sm"
                 variant="flat"
               >
