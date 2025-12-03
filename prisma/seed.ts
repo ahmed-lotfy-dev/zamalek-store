@@ -36,7 +36,7 @@ async function main() {
           email: adminEmail,
           password: adminPassword,
           name: "Admin User",
-          role: "admin",
+          role: "ADMIN",
         },
         headers: new Headers(),
       });
@@ -72,13 +72,24 @@ async function main() {
     const testEmail = "testuser@gmail.com";
     const testPassword = "00000000";
 
+    // Delete existing test user to ensure fresh state
+    const existingTestUser = await prisma.user.findUnique({
+      where: { email: testEmail },
+    });
+    if (existingTestUser) {
+      await prisma.user.delete({
+        where: { id: existingTestUser.id },
+      });
+      console.log(`Deleted existing test user: ${testEmail}`);
+    }
+
     try {
       const { user: createdTestUser } = await auth.api.signUpEmail({
         body: {
           email: testEmail,
           password: testPassword,
           name: "Test User",
-          role: "user",
+          role: "USER",
         },
         headers: new Headers(),
       });
@@ -91,23 +102,7 @@ async function main() {
         console.log(`Created test user: ${testEmail} with role VIEWER`);
       }
     } catch (error: any) {
-      if (error.body?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
-        console.log("Test user already exists. Updating role to VIEWER...");
-        const existingTestUser = await prisma.user.findUnique({
-          where: { email: testEmail },
-        });
-        if (existingTestUser) {
-          await prisma.user.update({
-            where: { id: existingTestUser.id },
-            data: { role: Role.VIEWER },
-          });
-          console.log(
-            `Updated existing test user: ${testEmail} to role VIEWER`
-          );
-        }
-      } else {
-        console.error("Error creating test user:", error);
-      }
+      console.error("Error creating test user:", error);
     }
   } else {
     console.warn(
