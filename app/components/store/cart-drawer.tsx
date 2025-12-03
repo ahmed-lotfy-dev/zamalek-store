@@ -6,6 +6,7 @@ import { Card, CardBody } from "@heroui/card";
 import { Image } from "@heroui/image";
 import { Divider } from "@heroui/divider";
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
+import { Link } from "@heroui/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function CartDrawer() {
@@ -157,10 +158,13 @@ export default function CartDrawer() {
                   </span>
                 </div>
                 <Button
+                  as={Link}
+                  href="/checkout"
                   color="primary"
                   size="lg"
                   className="w-full font-semibold"
                   endContent={<ShoppingBag className="w-4 h-4" />}
+                  onPress={() => setIsCartOpen(false)}
                 >
                   Checkout
                 </Button>

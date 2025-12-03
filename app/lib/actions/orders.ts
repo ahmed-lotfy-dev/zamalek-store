@@ -19,7 +19,18 @@ export async function getOrders() {
         createdAt: "desc",
       },
     });
-    return orders;
+    return orders.map((order) => ({
+      ...order,
+      total: Number(order.total),
+      orderItems: order.orderItems.map((item) => ({
+        ...item,
+        price: Number(item.price),
+        product: {
+          ...item.product,
+          price: Number(item.product.price),
+        },
+      })),
+    }));
   } catch (error) {
     console.error("Error fetching orders:", error);
     return [];
@@ -39,7 +50,20 @@ export async function getOrder(id: string) {
         },
       },
     });
-    return order;
+    if (!order) return null;
+
+    return {
+      ...order,
+      total: Number(order.total),
+      orderItems: order.orderItems.map((item) => ({
+        ...item,
+        price: Number(item.price),
+        product: {
+          ...item.product,
+          price: Number(item.product.price),
+        },
+      })),
+    };
   } catch (error) {
     console.error("Error fetching order:", error);
     return null;
