@@ -9,10 +9,12 @@ export default function ProductListing({
   products,
   categories,
   initialCategoryIds = [],
+  savedItemIds = [],
 }: {
   products: any[];
   categories: any[];
   initialCategoryIds?: string[];
+  savedItemIds?: string[];
 }) {
   const [selectedCategories, setSelectedCategories] =
     useState<string[]>(initialCategoryIds);
@@ -55,6 +57,7 @@ export default function ProductListing({
                 <ProductCard
                   key={product.id}
                   product={{ ...product, price: Number(product.price) }}
+                  isSaved={savedItemIds.includes(product.id)}
                 />
               ))}
             </div>

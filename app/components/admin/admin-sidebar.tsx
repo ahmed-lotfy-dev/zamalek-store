@@ -12,6 +12,7 @@ import {
   ShoppingCart,
   Home,
   LogOut,
+  Ticket,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -39,6 +40,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     { href: "/admin/products", label: "Products", icon: Package },
     { href: "/admin/categories", label: "Categories", icon: ListTree },
     { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+    { href: "/admin/coupons", label: "Coupons", icon: Ticket },
   ];
 
   return (

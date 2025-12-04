@@ -1,5 +1,6 @@
 import { getProducts } from "@/app/lib/actions/products";
 import { getCategories } from "@/app/lib/actions/categories";
+import { getSavedItems } from "@/app/lib/actions/saved-items";
 import ProductListing from "@/app/components/store/product-listing";
 
 export default async function ProductsPage({
@@ -7,11 +8,17 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<{ category?: string }>;
 }) {
-  const [products, categories, resolvedSearchParams] = await Promise.all([
-    getProducts(),
-    getCategories(),
-    searchParams,
-  ]);
+  const [products, categories, savedItems, resolvedSearchParams] =
+    await Promise.all([
+      getProducts(),
+      getCategories(),
+      getSavedItems(),
+      searchParams,
+    ]);
+
+  const savedItemIds = savedItems.map(
+    (item: { productId: string }) => item.productId
+  );
 
   const categoryParam = resolvedSearchParams.category;
   const initialCategoryIds = categoryParam
@@ -33,6 +40,7 @@ export default async function ProductsPage({
           }))}
           categories={categories}
           initialCategoryIds={initialCategoryIds}
+          savedItemIds={savedItemIds}
         />
       </main>
     </div>

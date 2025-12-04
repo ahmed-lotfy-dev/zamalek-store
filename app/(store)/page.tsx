@@ -1,10 +1,18 @@
 import { getNewArrivals } from "@/app/lib/actions/products";
+import { getSavedItems } from "@/app/lib/actions/saved-items";
 import NewArrivals from "@/app/components/store/new-arrivals";
 import HeroSection from "@/app/components/store/hero-section";
 import FeaturedCategories from "@/app/components/store/featured-categories";
 
 export default async function Home() {
-  const newArrivals = await getNewArrivals();
+  const [newArrivals, savedItems] = await Promise.all([
+    getNewArrivals(),
+    getSavedItems(),
+  ]);
+
+  const savedItemIds = savedItems.map(
+    (item: { productId: string }) => item.productId
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -22,6 +30,7 @@ export default async function Home() {
               ...p,
               price: Number(p.price),
             }))}
+            savedItemIds={savedItemIds}
           />
         </div>
       </main>

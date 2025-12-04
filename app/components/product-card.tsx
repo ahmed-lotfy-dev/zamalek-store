@@ -13,7 +13,15 @@ type Product = {
 
 import { useCart } from "@/app/context/cart-context";
 
-export default function ProductCard({ product }: { product: Product }) {
+import SaveButton from "./store/save-button";
+
+export default function ProductCard({
+  product,
+  isSaved = false,
+}: {
+  product: Product;
+  isSaved?: boolean;
+}) {
   const { addToCart } = useCart();
 
   return (
@@ -39,6 +47,11 @@ export default function ProductCard({ product }: { product: Product }) {
             href={`/products/${product.id}`}
             className="absolute inset-0 z-10"
           />
+
+          {/* Save Button */}
+          <div className="absolute top-2 right-2 z-20">
+            <SaveButton productId={product.id} isSaved={isSaved} />
+          </div>
 
           {/* Add to Cart Overlay */}
           <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0 z-20">

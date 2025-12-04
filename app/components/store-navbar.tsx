@@ -14,7 +14,7 @@ import {
   DropdownItem,
   Avatar,
 } from "@heroui/react";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Heart } from "lucide-react";
 import { useCart } from "@/app/context/cart-context";
 import CartDrawer from "./store/cart-drawer";
 import { authClient } from "@/app/lib/auth-client";
@@ -48,6 +48,17 @@ export default function StoreNavbar({ user }: { user?: any }) {
           </NavbarItem>
         </NavbarContent>
         <NavbarContent justify="end">
+          <NavbarItem>
+            <Button
+              isIconOnly
+              variant="light"
+              as={Link}
+              href="/saved"
+              aria-label="Saved Items"
+            >
+              <Heart className="w-5 h-5" />
+            </Button>
+          </NavbarItem>
           <NavbarItem>
             <Badge
               content={cartCount}

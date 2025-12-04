@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/app/components/ui/toast";
 import { createOrder } from "@/app/lib/actions/checkout";
+import { validateCoupon } from "@/app/lib/actions/coupons";
 
 interface CheckoutFormProps {
   initialData: {
@@ -26,6 +27,16 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
   const { items, cartTotal, clearCart } = useCart();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discount: number;
+    type: "PERCENTAGE" | "FIXED";
+    value: number;
+  } | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -40,6 +51,39 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+
+    setIsValidatingCoupon(true);
+    try {
+      const result = await validateCoupon(couponCode, cartTotal);
+
+      if (result.error) {
+        toast.error(result.error);
+        setAppliedCoupon(null);
+      } else if (result.success && result.discount !== undefined) {
+        toast.success(`Coupon applied! Saved $${result.discount.toFixed(2)}`);
+        setAppliedCoupon({
+          code: result.couponCode!,
+          discount: result.discount,
+          type: result.type!,
+          value: result.value!,
+        });
+      }
+    } catch (error) {
+      console.error("Coupon validation error:", error);
+      toast.error("Failed to apply coupon");
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    toast.success("Coupon removed");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,6 +104,9 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
     formDataToSend.append("city", formData.city);
     formDataToSend.append("paymentMethod", formData.paymentMethod);
     formDataToSend.append("items", JSON.stringify(items));
+    if (appliedCoupon) {
+      formDataToSend.append("couponCode", appliedCoupon.code);
+    }
 
     try {
       const result = await createOrder(null, formDataToSend);
@@ -198,7 +245,7 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
               <div className="space-y-4 my-4">
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4 items-center">
-                    <div className="w-16 h-16 bg-default-100 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="w-16 h-16 bg-default-100 rounded-lg overflow-hidden shrink-0">
                       <Image
                         src={item.image}
                         alt={item.name}
@@ -234,11 +281,65 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
                   <span className="text-default-500">Shipping</span>
                   <span>Free</span>
                 </div>
+
+                {appliedCoupon && (
+                  <div className="flex justify-between text-sm text-success font-medium">
+                    <span>Discount ({appliedCoupon.code})</span>
+                    <span>-${appliedCoupon.discount.toFixed(2)}</span>
+                  </div>
+                )}
+
                 <Divider className="my-2" />
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>${cartTotal.toFixed(2)}</span>
+                  <span>
+                    ${(cartTotal - (appliedCoupon?.discount || 0)).toFixed(2)}
+                  </span>
                 </div>
+              </div>
+
+              <div className="mt-6 space-y-2">
+                {!appliedCoupon ? (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Coupon code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      size="sm"
+                      variant="bordered"
+                    />
+                    <Button
+                      size="sm"
+                      color="primary"
+                      variant="flat"
+                      isLoading={isValidatingCoupon}
+                      onPress={handleApplyCoupon}
+                      isDisabled={!couponCode.trim()}
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-center bg-success-50 p-2 rounded-lg border border-success-200">
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-success-700">
+                        Coupon Applied
+                      </span>
+                      <span className="text-xs text-success-600">
+                        {appliedCoupon.code}
+                      </span>
+                    </div>
+                    <Button
+                      size="sm"
+                      color="danger"
+                      variant="light"
+                      onPress={handleRemoveCoupon}
+                      className="min-w-0 h-8 px-2"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <Button

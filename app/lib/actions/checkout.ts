@@ -19,6 +19,7 @@ const checkoutSchema = z.object({
       price: z.number(),
     })
   ),
+  couponCode: z.string().optional(),
 });
 
 export async function createOrder(prevState: any, formData: FormData) {
@@ -41,6 +42,7 @@ export async function createOrder(prevState: any, formData: FormData) {
       city: formData.get("city"),
       paymentMethod: formData.get("paymentMethod"),
       items: JSON.parse(formData.get("items") as string),
+      couponCode: formData.get("couponCode"),
     };
 
     const validatedData = checkoutSchema.safeParse(rawData);
@@ -52,7 +54,8 @@ export async function createOrder(prevState: any, formData: FormData) {
       };
     }
 
-    const { items, paymentMethod, address, city, phone } = validatedData.data;
+    const { items, paymentMethod, address, city, phone, couponCode } =
+      validatedData.data;
 
     // 3. Transaction: Check Stock -> Create Order -> Update Stock
     const order = await prisma.$transaction(async (tx: any) => {
@@ -72,10 +75,52 @@ export async function createOrder(prevState: any, formData: FormData) {
       }
 
       // Calculate total
-      const total = items.reduce(
-        (acc, item) => acc + item.price * item.quantity,
+      let total = items.reduce(
+        (acc: number, item: any) => acc + item.price * item.quantity,
         0
       );
+
+      let discountAmount = 0;
+      let couponId = null;
+
+      // Validate and Apply Coupon
+      if (couponCode) {
+        const coupon = await tx.coupon.findUnique({
+          where: { code: couponCode },
+        });
+
+        if (coupon) {
+          if (!coupon.isActive) {
+            throw new Error("Coupon is not active");
+          }
+          if (coupon.expiresAt && new Date() > coupon.expiresAt) {
+            throw new Error("Coupon has expired");
+          }
+          if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
+            throw new Error("Coupon usage limit reached");
+          }
+
+          if (coupon.type === "PERCENTAGE") {
+            discountAmount = (total * Number(coupon.amount)) / 100;
+          } else {
+            discountAmount = Number(coupon.amount);
+          }
+
+          // Ensure discount doesn't exceed total
+          if (discountAmount > total) {
+            discountAmount = total;
+          }
+
+          total -= discountAmount;
+          couponId = coupon.id;
+
+          // Increment used count
+          await tx.coupon.update({
+            where: { id: coupon.id },
+            data: { usedCount: { increment: 1 } },
+          });
+        }
+      }
 
       // Create Order
       const newOrder = await tx.order.create({
@@ -86,8 +131,10 @@ export async function createOrder(prevState: any, formData: FormData) {
           isPaid: false, // COD is unpaid initially
           phone: phone,
           address: `${address}, ${city}`,
+          couponId: couponId,
+          discount: discountAmount,
           orderItems: {
-            create: items.map((item) => ({
+            create: items.map((item: any) => ({
               productId: item.id,
               quantity: item.quantity,
               price: item.price,

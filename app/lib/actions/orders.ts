@@ -4,7 +4,18 @@ import { prisma } from "@/app/lib/prisma";
 import { OrderStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
+import { auth } from "@/app/lib/auth";
+import { headers } from "next/headers";
+
 export async function getOrders() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (session?.user.role !== "ADMIN") {
+    return [];
+  }
+
   try {
     const orders = await prisma.order.findMany({
       include: {
@@ -19,10 +30,10 @@ export async function getOrders() {
         createdAt: "desc",
       },
     });
-    return orders.map((order) => ({
+    return orders.map((order: any) => ({
       ...order,
       total: Number(order.total),
-      orderItems: order.orderItems.map((item) => ({
+      orderItems: order.orderItems.map((item: any) => ({
         ...item,
         price: Number(item.price),
         product: {
@@ -38,6 +49,14 @@ export async function getOrders() {
 }
 
 export async function getOrder(id: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (session?.user.role !== "ADMIN") {
+    return null;
+  }
+
   try {
     const order = await prisma.order.findUnique({
       where: { id },
@@ -55,7 +74,7 @@ export async function getOrder(id: string) {
     return {
       ...order,
       total: Number(order.total),
-      orderItems: order.orderItems.map((item) => ({
+      orderItems: order.orderItems.map((item: any) => ({
         ...item,
         price: Number(item.price),
         product: {
@@ -71,6 +90,14 @@ export async function getOrder(id: string) {
 }
 
 export async function updateOrderStatus(id: string, status: OrderStatus) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (session?.user.role !== "ADMIN") {
+    return { success: false, error: "Unauthorized" };
+  }
+
   try {
     await prisma.order.update({
       where: { id },

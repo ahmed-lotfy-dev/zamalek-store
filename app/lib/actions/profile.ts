@@ -52,10 +52,10 @@ export async function getUserOrders() {
     });
 
     // Serialize Decimal to number
-    return orders.map((order) => ({
+    return orders.map((order:any) => ({
       ...order,
       total: Number(order.total),
-      orderItems: order.orderItems.map((item) => ({
+      orderItems: order.orderItems.map((item:any) => ({
         ...item,
         price: Number(item.price),
         product: {
@@ -98,7 +98,7 @@ export async function getUserOrder(id: string) {
     return {
       ...order,
       total: Number(order.total),
-      orderItems: order.orderItems.map((item) => ({
+      orderItems: order.orderItems.map((item:any) => ({
         ...item,
         price: Number(item.price),
         product: {

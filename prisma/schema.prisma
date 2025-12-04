@@ -36,6 +36,7 @@ model User {
   orders        Order[]
   addresses     Address[]
   reviews       Review[]
+  savedItems    SavedItem[]
 }
 
 model Session {
@@ -93,6 +94,7 @@ model Product {
   category    Category    @relation(fields: [categoryId], references: [id])
   orderItems  OrderItem[]
   reviews     Review[]
+  savedItems  SavedItem[]
 }
 
 model Category {
@@ -117,6 +119,10 @@ model Order {
 
   orderItems OrderItem[]
   payment    Payment?
+  
+  couponId   String?
+  coupon     Coupon?     @relation(fields: [couponId], references: [id])
+  discount   Decimal     @default(0) @db.Decimal(10, 2)
 }
 
 model OrderItem {
@@ -163,3 +169,34 @@ model Review {
   createdAt DateTime @default(now())
 }
 
+
+model SavedItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+}
+
+model Coupon {
+  id        String     @id @default(cuid())
+  code      String     @unique
+  type      CouponType
+  amount    Decimal    @db.Decimal(10, 2)
+  maxUses   Int?       // Null means unlimited
+  usedCount Int        @default(0)
+  expiresAt DateTime?
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  orders    Order[]
+}

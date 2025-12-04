@@ -2,7 +2,24 @@
 
 import { prisma } from "@/app/lib/prisma";
 
+import { auth } from "@/app/lib/auth";
+import { headers } from "next/headers";
+
 export async function getDashboardStats() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (session?.user.role !== "ADMIN") {
+    return {
+      totalRevenue: 0,
+      totalOrders: 0,
+      totalProducts: 0,
+      totalCustomers: 0,
+      error: "Unauthorized",
+    };
+  }
+
   try {
     // 1. Total Revenue (from PAID or DELIVERED orders)
     const paidOrders = await prisma.order.findMany({

@@ -2,7 +2,13 @@
 
 import ProductCard from "@/app/components/product-card";
 
-export default function NewArrivals({ products }: { products: any[] }) {
+export default function NewArrivals({
+  products,
+  savedItemIds = [],
+}: {
+  products: any[];
+  savedItemIds?: string[];
+}) {
   if (products.length === 0) return null;
 
   return (
@@ -21,6 +27,7 @@ export default function NewArrivals({ products }: { products: any[] }) {
           <ProductCard
             key={product.id}
             product={{ ...product, price: Number(product.price) }}
+            isSaved={savedItemIds.includes(product.id)}
           />
         ))}
       </div>
