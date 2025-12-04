@@ -4,6 +4,8 @@ import NewArrivals from "@/app/components/store/new-arrivals";
 import HeroSection from "@/app/components/store/hero-section";
 import FeaturedCategories from "@/app/components/store/featured-categories";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const [newArrivals, savedItems] = await Promise.all([
     getNewArrivals(),

@@ -18,6 +18,7 @@ import { ShoppingBag, Heart } from "lucide-react";
 import { useCart } from "@/app/context/cart-context";
 import CartDrawer from "./store/cart-drawer";
 import { authClient } from "@/app/lib/auth-client";
+import SearchBar from "./store/search-bar";
 
 export default function StoreNavbar({ user }: { user?: any }) {
   const { setIsCartOpen, cartCount } = useCart();
@@ -30,7 +31,7 @@ export default function StoreNavbar({ user }: { user?: any }) {
             <p className="font-bold text-inherit text-xl">Zamalek Store</p>
           </Link>
         </NavbarBrand>
-        <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        <NavbarContent className="hidden md:flex gap-4" justify="start">
           <NavbarItem>
             <Link color="foreground" href="/">
               Home
@@ -46,6 +47,9 @@ export default function StoreNavbar({ user }: { user?: any }) {
               Jerseys
             </Link>
           </NavbarItem>
+        </NavbarContent>
+        <NavbarContent justify="center" className="flex-1 max-w-[500px] px-4">
+          <SearchBar />
         </NavbarContent>
         <NavbarContent justify="end">
           <NavbarItem>

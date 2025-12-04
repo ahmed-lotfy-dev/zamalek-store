@@ -3,6 +3,8 @@ import { getCategories } from "@/app/lib/actions/categories";
 import { getSavedItems } from "@/app/lib/actions/saved-items";
 import ProductListing from "@/app/components/store/product-listing";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductsPage({
   searchParams,
 }: {
