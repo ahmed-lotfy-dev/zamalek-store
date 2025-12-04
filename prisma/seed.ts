@@ -116,6 +116,7 @@ async function main() {
   const homeJersey = await prisma.product.create({
     data: {
       name: "Zamalek SC Home Jersey 24/25",
+      slug: "zamalek-sc-home-jersey-24-25",
       description:
         "The official home jersey of Zamalek SC. Features the iconic full white design with two bold red lines across the chest, representing the club's rich history and identity. Made with breathable fabric for maximum comfort.",
       price: 59.99,
@@ -132,6 +133,7 @@ async function main() {
   const awayJersey = await prisma.product.create({
     data: {
       name: "Zamalek SC Away Jersey 24/25",
+      slug: "zamalek-sc-away-jersey-24-25",
       description:
         "The official away jersey. A sleek black design with white accents, perfect for showing your support on the road.",
       price: 59.99,
@@ -147,6 +149,7 @@ async function main() {
   const legacyTee = await prisma.product.create({
     data: {
       name: "1911 Legacy T-Shirt",
+      slug: "1911-legacy-t-shirt",
       description:
         "Celebrate the founding year of the Royal Club. Premium cotton t-shirt with a vintage 1911 print.",
       price: 29.99,
@@ -160,6 +163,7 @@ async function main() {
   const wkTee = await prisma.product.create({
     data: {
       name: "White Knights Fan Tee",
+      slug: "white-knights-fan-tee",
       description:
         "For the true fans. 'White Knights' graphic print on a comfortable white tee.",
       price: 24.99,
@@ -173,6 +177,7 @@ async function main() {
   const scarf = await prisma.product.create({
     data: {
       name: "Classic Zamalek Scarf",
+      slug: "classic-zamalek-scarf",
       description:
         "Keep warm and show your colors. Classic bar scarf in white and red.",
       price: 19.99,

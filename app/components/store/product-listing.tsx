@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import ProductCard from "@/app/components/product-card";
 import Filters from "./filters";
 import EmptyState from "@/app/components/empty-state";
+import { Switch } from "@heroui/react";
 
 export default function ProductListing({
   products,
@@ -18,24 +19,48 @@ export default function ProductListing({
 }) {
   const [selectedCategories, setSelectedCategories] =
     useState<string[]>(initialCategoryIds);
+  const [hideOutOfStock, setHideOutOfStock] = useState(false);
 
   const filteredProducts = useMemo(() => {
-    if (selectedCategories.length === 0) return products;
-    return products.filter((product) =>
-      selectedCategories.includes(product.categoryId)
-    );
-  }, [products, selectedCategories]);
+    let result = products;
+
+    // Filter by Category
+    if (selectedCategories.length > 0) {
+      result = result.filter((product) =>
+        selectedCategories.includes(product.categoryId)
+      );
+    }
+
+    // Filter by Stock
+    if (hideOutOfStock) {
+      result = result.filter((product) => product.stock > 0);
+    }
+
+    return result;
+  }, [products, selectedCategories, hideOutOfStock]);
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       {/* Sidebar Filters */}
       <aside className="w-full lg:w-64 shrink-0">
-        <div className="sticky top-24">
+        <div className="sticky top-24 flex flex-col gap-6">
           <Filters
             categories={categories}
             selectedCategories={selectedCategories}
             setSelectedCategories={setSelectedCategories}
           />
+
+          <div className="flex items-center justify-between px-1">
+            <span className="text-small text-default-500">
+              Hide Out of Stock
+            </span>
+            <Switch
+              size="sm"
+              isSelected={hideOutOfStock}
+              onValueChange={setHideOutOfStock}
+              aria-label="Hide out of stock items"
+            />
+          </div>
         </div>
       </aside>
 

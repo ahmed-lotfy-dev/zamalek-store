@@ -17,10 +17,9 @@ export default function AdminShell({
   // Close sidebar on route change
   useEffect(() => {
     if (isSidebarOpen) {
-      // eslint-disable-next-line
       setIsSidebarOpen(false);
     }
-  }, [pathname, isSidebarOpen]);
+  }, [pathname]);
 
   return (
     <div className="flex min-h-screen relative w-full max-w-[100vw] overflow-x-hidden bg-background">

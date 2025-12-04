@@ -46,16 +46,26 @@ export default function ProductList({ products }: { products: Product[] }) {
                   {product.category?.name || "Uncategorized"}
                 </td>
                 <td className="p-4 text-right">
-                  <form action={deleteProduct.bind(null, product.id)}>
+                  <div className="flex justify-end gap-2">
                     <Button
-                      type="submit"
+                      as={Link}
+                      href={`/admin/products/${product.id}/edit`}
                       size="sm"
-                      color="danger"
                       variant="light"
                     >
-                      Delete
+                      Edit
                     </Button>
-                  </form>
+                    <form action={deleteProduct.bind(null, product.id)}>
+                      <Button
+                        type="submit"
+                        size="sm"
+                        color="danger"
+                        variant="light"
+                      >
+                        Delete
+                      </Button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             ))}

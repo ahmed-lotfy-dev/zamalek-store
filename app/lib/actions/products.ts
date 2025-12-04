@@ -11,6 +11,32 @@ export async function getProducts() {
   });
 }
 
+export async function getProduct(id: string) {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: { category: true },
+    });
+    return product;
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    return null;
+  }
+}
+
+export async function getProductBySlug(slug: string) {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { slug },
+      include: { category: true },
+    });
+    return product;
+  } catch (error) {
+    console.error("Error fetching product by slug:", error);
+    return null;
+  }
+}
+
 export async function getNewArrivals() {
   try {
     const products = await prisma.product.findMany({
@@ -46,9 +72,15 @@ export async function createProduct(formData: FormData) {
   const categoryId = formData.get("categoryId") as string;
   const imageUrl = formData.get("imageUrl") as string;
 
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+
   await prisma.product.create({
     data: {
       name,
+      slug,
       description,
       price,
       stock,
@@ -70,4 +102,45 @@ export async function deleteProduct(id: string) {
 
   await prisma.product.delete({ where: { id } });
   revalidatePath("/admin/products");
+}
+
+export async function updateProduct(id: string, formData: FormData) {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (session?.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  const name = formData.get("name") as string;
+  const description = formData.get("description") as string;
+  const price = parseFloat(formData.get("price") as string);
+  const stock = parseInt(formData.get("stock") as string);
+  const categoryId = formData.get("categoryId") as string;
+  const imageUrl = formData.get("imageUrl") as string;
+
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+
+  const data: any = {
+    name,
+    slug,
+    description,
+    price,
+    stock,
+    categoryId,
+  };
+
+  if (imageUrl) {
+    data.images = [imageUrl];
+  }
+
+  await prisma.product.update({
+    where: { id },
+    data,
+  });
+
+  revalidatePath("/admin/products");
+  redirect("/admin/products");
 }

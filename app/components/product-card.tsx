@@ -6,7 +6,9 @@ import Link from "next/link";
 type Product = {
   id: string;
   name: string;
+  slug: string;
   price: any;
+  stock: number;
   images: string[];
   category: { name: string } | null;
 };
@@ -23,12 +25,15 @@ export default function ProductCard({
   isSaved?: boolean;
 }) {
   const { addToCart } = useCart();
+  const isOutOfStock = product.stock <= 0;
 
   return (
     <Card
       shadow="sm"
       key={product.id}
-      className="group relative overflow-hidden"
+      className={`group relative overflow-hidden ${
+        isOutOfStock ? "opacity-75" : ""
+      }`}
     >
       <CardBody className="overflow-visible p-0">
         <div className="relative aspect-3/4 w-full overflow-hidden">
@@ -37,16 +42,25 @@ export default function ProductCard({
             radius="none"
             width="100%"
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className={`w-full h-full object-cover transition-transform duration-300 ${
+              isOutOfStock ? "grayscale" : "group-hover:scale-105"
+            }`}
             src={
               product.images[0] || "https://placehold.co/600x800?text=No+Image"
             }
           />
           {/* Link Overlay */}
           <Link
-            href={`/products/${product.id}`}
+            href={`/products/${product.slug}`}
             className="absolute inset-0 z-10"
           />
+
+          {/* Out of Stock Badge */}
+          {isOutOfStock && (
+            <div className="absolute top-2 left-2 z-20 bg-default-900/80 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+              Out of Stock
+            </div>
+          )}
 
           {/* Save Button */}
           <div className="absolute top-2 right-2 z-20">
@@ -54,16 +68,18 @@ export default function ProductCard({
           </div>
 
           {/* Add to Cart Overlay */}
-          <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0 z-20">
-            <Button
-              className="w-full font-medium shadow-lg"
-              color="primary"
-              radius="full"
-              onPress={() => addToCart(product)}
-            >
-              Add to Cart
-            </Button>
-          </div>
+          {!isOutOfStock && (
+            <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0 z-20">
+              <Button
+                className="w-full font-medium shadow-lg"
+                color="primary"
+                radius="full"
+                onPress={() => addToCart(product)}
+              >
+                Add to Cart
+              </Button>
+            </div>
+          )}
         </div>
       </CardBody>
       <CardFooter className="flex flex-col items-start gap-1 p-4">

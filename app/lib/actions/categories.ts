@@ -41,3 +41,20 @@ export async function deleteCategory(id: string) {
   await prisma.category.delete({ where: { id } });
   revalidatePath("/admin/categories");
 }
+
+export async function updateCategory(id: string, formData: FormData) {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (session?.user.role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+
+  const name = formData.get("name") as string;
+
+  await prisma.category.update({
+    where: { id },
+    data: { name },
+  });
+
+  revalidatePath("/admin/categories");
+}

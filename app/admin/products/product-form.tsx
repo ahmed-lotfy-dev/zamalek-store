@@ -1,6 +1,6 @@
 "use client";
 
-import { createProduct } from "@/app/lib/actions/products";
+import { createProduct, updateProduct } from "@/app/lib/actions/products";
 import { Button, Input, Textarea, Select, SelectItem } from "@heroui/react";
 
 type Category = {
@@ -8,20 +8,35 @@ type Category = {
   name: string;
 };
 
+type Product = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  categoryId: string;
+  images: string[];
+};
+
 export default function ProductForm({
   categories,
+  product,
 }: {
   categories: Category[];
+  product?: Product;
 }) {
+  const action = product ? updateProduct.bind(null, product.id) : createProduct;
+
   return (
     <form
-      action={createProduct}
+      action={action}
       className="flex flex-col gap-6 bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800"
     >
       <div className="flex flex-col gap-2">
         <Input
           label="Product Name"
           name="name"
+          defaultValue={product?.name}
           isRequired
           placeholder="e.g. Classic T-Shirt"
           variant="bordered"
@@ -32,6 +47,7 @@ export default function ProductForm({
         <Textarea
           label="Description"
           name="description"
+          defaultValue={product?.description}
           isRequired
           placeholder="Product details..."
           variant="bordered"
@@ -43,6 +59,7 @@ export default function ProductForm({
         <Input
           label="Image URL"
           name="imageUrl"
+          defaultValue={product?.images[0]}
           type="url"
           placeholder="https://example.com/image.jpg"
           variant="bordered"
@@ -54,6 +71,7 @@ export default function ProductForm({
           <Input
             label="Price ($)"
             name="price"
+            defaultValue={product?.price.toString()}
             type="number"
             step="0.01"
             isRequired
@@ -66,6 +84,7 @@ export default function ProductForm({
           <Input
             label="Stock"
             name="stock"
+            defaultValue={product?.stock.toString()}
             type="number"
             isRequired
             placeholder="0"
@@ -78,6 +97,7 @@ export default function ProductForm({
         <Select
           label="Category"
           name="categoryId"
+          defaultSelectedKeys={product ? [product.categoryId] : []}
           isRequired
           placeholder="Select a category"
           variant="bordered"
@@ -94,7 +114,7 @@ export default function ProductForm({
       </div>
 
       <Button type="submit" color="primary" className="mt-4">
-        Create Product
+        {product ? "Update Product" : "Create Product"}
       </Button>
     </form>
   );

@@ -7,42 +7,12 @@ import {
   CardFooter,
   Divider,
   Image,
-  Select,
-  SelectItem,
 } from "@heroui/react";
-import { updateOrderStatus } from "@/app/lib/actions/orders";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-const statusOptions = [
-  { label: "Pending", value: "PENDING" },
-  { label: "Paid", value: "PAID" },
-  { label: "Shipped", value: "SHIPPED" },
-  { label: "Delivered", value: "DELIVERED" },
-  { label: "Cancelled", value: "CANCELLED" },
-];
+import OrderStatusSelect from "../order-status-select";
 
 export default function OrderDetails({ order }: { order: any }) {
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const handleStatusChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const newStatus = e.target.value;
-    if (!newStatus) return;
-
-    setLoading(true);
-    try {
-      await updateOrderStatus(order.id, newStatus as any);
-      router.refresh();
-    } catch (error) {
-      console.error("Failed to update status", error);
-      alert("Failed to update status");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -56,17 +26,10 @@ export default function OrderDetails({ order }: { order: any }) {
             </p>
           </div>
           <div className="w-48">
-            <Select
-              label="Status"
-              placeholder="Select status"
-              defaultSelectedKeys={[order.status]}
-              onChange={handleStatusChange}
-              isDisabled={loading}
-            >
-              {statusOptions.map((status) => (
-                <SelectItem key={status.value}>{status.label}</SelectItem>
-              ))}
-            </Select>
+            <OrderStatusSelect
+              orderId={order.id}
+              currentStatus={order.status}
+            />
           </div>
         </CardHeader>
         <Divider />

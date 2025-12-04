@@ -1,4 +1,6 @@
 import { getDashboardStats } from "@/app/lib/actions/dashboard";
+import SalesChart from "./charts/sales-chart";
+import TopProductsChart from "./charts/top-products-chart";
 
 export default async function AdminDashboardPage() {
   const stats = await getDashboardStats();
@@ -33,6 +35,11 @@ export default async function AdminDashboardPage() {
           </h3>
           <p className="text-2xl font-bold mt-2">{stats.totalCustomers}</p>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <SalesChart data={stats.salesOverTime || []} />
+        <TopProductsChart data={stats.topProducts || []} />
       </div>
     </div>
   );

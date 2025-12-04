@@ -167,3 +167,63 @@ export async function deleteCoupon(id: string) {
     return { error: "Failed to delete coupon" };
   }
 }
+
+export async function updateCoupon(
+  id: string,
+  data: {
+    code: string;
+    type: "PERCENTAGE" | "FIXED";
+    amount: number;
+    maxUses?: number;
+    expiresAt?: Date;
+  }
+) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (session?.user.role !== "ADMIN") {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const code = data.code.toUpperCase();
+
+    if (data.maxUses !== undefined && data.maxUses < 0) {
+      return { error: "Max uses cannot be negative" };
+    }
+
+    if (data.type === "PERCENTAGE" && data.amount > 20) {
+      return { error: "Percentage discount cannot exceed 20%" };
+    }
+
+    // Check if code exists for OTHER coupons
+    const existing = await prisma.coupon.findFirst({
+      where: {
+        code,
+        NOT: { id },
+      },
+    });
+
+    if (existing) {
+      return { error: "Coupon code already exists" };
+    }
+
+    await prisma.coupon.update({
+      where: { id },
+      data: {
+        code,
+        type: data.type,
+        amount: data.amount,
+        maxUses: data.maxUses,
+        expiresAt: data.expiresAt,
+      },
+    });
+
+    revalidatePath("/admin/coupons");
+    return { success: true };
+  } catch (error) {
+    console.error("Update Coupon Error:", error);
+    return { error: "Failed to update coupon" };
+  }
+}

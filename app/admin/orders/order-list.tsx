@@ -15,6 +15,7 @@ import { EyeIcon } from "lucide-react";
 import Link from "next/link";
 
 import { getStatusColor } from "@/app/lib/utils";
+import OrderStatusSelect from "./order-status-select";
 
 export default function OrderList({ orders }: { orders: any[] }) {
   return (
@@ -41,14 +42,10 @@ export default function OrderList({ orders }: { orders: any[] }) {
             </TableCell>
             <TableCell>${Number(order.total).toFixed(2)}</TableCell>
             <TableCell>
-              <Chip
-                className="capitalize"
-                color={getStatusColor(order.status)}
-                size="sm"
-                variant="flat"
-              >
-                {order.status.toLowerCase()}
-              </Chip>
+              <OrderStatusSelect
+                orderId={order.id}
+                currentStatus={order.status}
+              />
             </TableCell>
             <TableCell>
               {new Date(order.createdAt).toLocaleDateString()}
