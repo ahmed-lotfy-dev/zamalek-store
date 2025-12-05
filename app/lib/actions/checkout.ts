@@ -11,7 +11,7 @@ const checkoutSchema = z.object({
   phone: z.string().min(1, "Phone is required"),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
-  paymentMethod: z.enum(["cod", "paymob", "stripe"]),
+  paymentMethod: z.enum(["cod", "paymob", "stripe", "kashier"]),
   items: z.array(
     z.object({
       id: z.string(),
@@ -23,6 +23,7 @@ const checkoutSchema = z.object({
 });
 
 import { paymob } from "@/app/lib/paymob";
+import { kashier } from "@/app/lib/kashier";
 import { stripe } from "@/app/lib/stripe";
 
 // ... existing imports
@@ -278,6 +279,33 @@ export async function createOrder(prevState: any, formData: FormData) {
           orderId: order.id,
           warning:
             "Order created but Stripe payment initiation failed. Please try paying from your orders page.",
+        };
+      }
+    }
+
+    // 6. Handle Kashier Payment
+    if (paymentMethod === "kashier") {
+      try {
+        const kashierOrder = await kashier.createOrder({
+          amount: Number(order.total),
+          currency: "EGP",
+          merchantOrderId: order.id,
+          customerEmail: email,
+          customerPhone: phone,
+          customerName: name,
+        });
+
+        return {
+          success: true,
+          url: kashierOrder.payment_url,
+        };
+      } catch (error) {
+        console.error("Kashier Integration Error:", error);
+        return {
+          success: true,
+          orderId: order.id,
+          warning:
+            "Order created but Kashier payment initiation failed. Please try paying from your orders page.",
         };
       }
     }

@@ -68,6 +68,36 @@ PAYMOB_HMAC_SECRET="your_hmac_secret_here"
 
 # ============================================
 
+# Kashier Payment Gateway
+
+# ============================================
+
+# Find these in your Kashier Dashboard: https://merchant.kashier.io
+
+# API Key
+
+# Location: Dashboard → Developers → API Keys
+
+KASHIER_API_KEY="your_kashier_api_key_here"
+
+# Merchant ID
+
+# Location: Dashboard → Settings → Merchant ID
+
+KASHIER_MERCHANT_ID="your_merchant_id_here"
+
+# Secret Key for webhook verification
+
+# Location: Dashboard → Developers → Secret Key
+
+KASHIER_SECRET_KEY="your_kashier_secret_key_here"
+
+# Mode: test or live
+
+KASHIER_MODE="test"
+
+# ============================================
+
 # Stripe Payment Gateway (Optional)
 
 # ============================================

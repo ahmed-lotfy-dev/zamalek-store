@@ -118,7 +118,7 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
         }
       } else if (result.success) {
         if (result.url) {
-          // Redirect to Paymob
+          // Redirect to payment gateway (Paymob, Kashier, or Stripe)
           window.location.href = result.url;
         } else {
           // COD or other non-redirect methods
@@ -234,6 +234,12 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
                   description="Pay securely with Credit Card"
                 >
                   Paymob (Online Payment)
+                </Radio>
+                <Radio
+                  value="kashier"
+                  description="Pay securely with Credit/Debit Card"
+                >
+                  Kashier (Card Payment)
                 </Radio>
                 <Radio
                   value="stripe"
