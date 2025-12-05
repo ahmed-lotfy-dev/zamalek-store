@@ -33,22 +33,35 @@ Kashier is a leading Egyptian payment gateway that provides secure online paymen
 
 ### 2. Get API Credentials
 
-Once logged in, get your credentials from the Kashier dashboard:
+Kashier uses **TWO different keys** for different purposes. You need BOTH:
 
-**Merchant ID:** (Format: `MID-xxxxx-xxx`)
+#### Payment API Key (for generating payment hashes)
 
-1. Go to: **Dashboard** → **Settings** → **Account Information**
-2. Find your **Merchant ID** (e.g., `MID-41194-643`)
-3. This is your `KASHIER_MERCHANT_ID`
-
-**API Key:** (IMPORTANT - This is used for hash generation)
-
-1. Go to: **Dashboard** → **Developers** → **API Keys**
-2. Look for **"API Key"** or **"Test API Key"**
-3. Copy the **FULL key** (it's a long alphanumeric string)
+1. Go to: **Dashboard** → **Developers** → **Payment API Keys**
+2. You'll see a default key or can generate a new one
+3. Copy the **Payment API Key** (format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
 4. This is your `KASHIER_API_KEY`
 
-> **⚠️ CRITICAL:** Make sure you copy the complete API key. If you get "Forbidden request" errors, double-check this key. It should be a long string (50+ characters).
+**Purpose:** Used to generate the payment hash when creating payment orders.
+
+#### Secret Key (for webhook verification)
+
+1. Go to: **Dashboard** → **Developers** → **Secret Keys**
+2. Click to reveal or copy the **Secret Key**
+3. This is your `KASHIER_SECRET_KEY`
+
+**Purpose:** Used to verify webhook signatures when Kashier sends payment notifications to your server.
+
+> **⚠️ CRITICAL:** These are TWO DIFFERENT keys! Do not confuse them:
+>
+> - `KASHIER_API_KEY` = Payment API Key (for creating orders)
+> - `KASHIER_SECRET_KEY` = Secret Key (for webhooks)
+
+#### Merchant ID
+
+1. Go to: **Dashboard** → **Settings** → **Account Information**
+2. Find your **Merchant ID** (format: `MID-xxxxx-xxx`, e.g., `MID-41194-643`)
+3. This is your `KASHIER_MERCHANT_ID`
 
 ### 3. Configure Environment Variables
 
@@ -56,12 +69,18 @@ Add to your `.env` file:
 
 ```bash
 # Kashier Payment Gateway
-KASHIER_API_KEY="your_complete_api_key_here"  # Long string from API Keys section
-KASHIER_MERCHANT_ID="MID-xxxxx-xxx"          # Your merchant ID
-KASHIER_MODE="test"                           # Use "test" for testing, "live" for production
+KASHIER_API_KEY="your_payment_api_key_here"          # From "Payment API Keys" section
+KASHIER_SECRET_KEY="your_secret_key_here"            # From "Secret Keys" section
+KASHIER_MERCHANT_ID="MID-xxxxx-xxx"                  # Your merchant ID
+KASHIER_MODE="test"                                   # Use "test" for testing, "live" for production
 ```
 
-**Note:** You don't need `KASHIER_SECRET_KEY` for the Hosted Payment Page integration. Only `API_KEY` and `MERCHANT_ID` are required.
+**Important Notes:**
+
+- All THREE environment variables are required
+- Payment API Key is used when generating payment URLs
+- Secret Key is used when verifying webhooks
+- Never commit these keys to version control
 
 ---
 
@@ -93,29 +112,7 @@ Customer redirected back to your site
 
 - **`app/lib/kashier.ts`** - Kashier API wrapper
 - **`app/lib/actions/checkout.ts`** - Checkout flow with Kashier option
-- **`app/api/kashier/callback/route.ts`** - Webhook handler
-
----
-
-## Webhook Configuration
-
-### Setting Up Webhooks
-
-1. **Log in to Kashier Dashboard**
-2. Go to: **Developers** → **Webhooks**
-3. Add webhook URL:
-   - **Production**: `https://yourdomain.com/api/kashier/callback`
-   - **Development** (with ngrok\*\*: `https://your-ngrok-url.ngrok.io/api/kashier/callback`
-
-### Webhook Security
-
-Kashier uses **MD5 hash** for webhook verification:
-
-```
-hash = MD5(merchantOrderId + amount + currency + transactionId + secret_key)
-```
-
-Your webhook handler automatically verifies this before processing payments.
+  Your webhook handler automatically verifies this before processing payments.
 
 ---
 
