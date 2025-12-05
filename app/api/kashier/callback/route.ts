@@ -4,16 +4,28 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    // Kashier sends webhooks as POST with URL-encoded data in the body
-    const formData = await req.formData();
+    // Kashier sends data as URL-encoded or in the URL params, not as FormData
+    const { searchParams } = new URL(req.url);
     const data: Record<string, string> = {};
 
-    formData.forEach((value, key) => {
-      data[key] = value.toString();
+    // Convert URL search params to object
+    searchParams.forEach((value, key) => {
+      data[key] = value;
     });
 
     console.log("📥 Kashier Webhook Received");
     console.log("Kashier Callback Data:", JSON.stringify(data, null, 2));
+
+    // If no data in URL params, try parsing body as JSON
+    if (Object.keys(data).length === 0) {
+      try {
+        const bodyData = await req.json();
+        Object.assign(data, bodyData);
+        console.log("Parsed from JSON body:", JSON.stringify(data, null, 2));
+      } catch (e) {
+        console.log("No JSON body, using URL params only");
+      }
+    }
 
     // 1. Security Check: Verify Signature
     const isValid = kashier.verifyCallback(data);
