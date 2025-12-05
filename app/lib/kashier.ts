@@ -159,7 +159,7 @@ export const kashier = {
 
       // Use signatureKeys order if provided, otherwise sort alphabetically
       const keysToUse = signatureKeys || Object.keys(dataFields).sort();
-      
+
       // Build query string in Kashier's format: key=value&key2=value2
       // According to Kashier docs: queryString += '&' + key + '=' + query[key]
       let queryString = "";
@@ -168,7 +168,7 @@ export const kashier = {
           queryString += `&${key}=${dataFields[key]}`;
         }
       }
-      
+
       // Remove leading '&'
       const finalUrl = queryString.substring(1);
 
@@ -191,4 +191,3 @@ export const kashier = {
     }
   },
 };
-```
