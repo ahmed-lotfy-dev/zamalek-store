@@ -135,13 +135,14 @@ export const kashier = {
   /**
    * Verify Kashier callback signature
    * Kashier concatenates values in the order specified by signatureKeys array
+   * Uses KASHIER_SECRET_KEY for webhook verification (not KASHIER_API_KEY)
    */
   verifyCallback: (
     query: Record<string, string>,
     signatureKeys?: string[]
   ): boolean => {
-    if (!process.env.KASHIER_API_KEY) {
-      console.error("KASHIER_API_KEY is not set");
+    if (!process.env.KASHIER_SECRET_KEY) {
+      console.error("KASHIER_SECRET_KEY is not set");
       return false;
     }
 
@@ -167,16 +168,44 @@ export const kashier = {
       console.log("Kashier Debug - Keys Order:", keysToUse);
       console.log("Kashier Debug - Concatenated Values:", concatenatedValues);
 
-      // Calculate signature using HMAC SHA256
-      const calculatedSignature = crypto
-        .createHmac("sha256", process.env.KASHIER_API_KEY)
+      // Try HMAC SHA256 first (with Secret Key)
+      const hmacSignature = crypto
+        .createHmac("sha256", process.env.KASHIER_SECRET_KEY)
         .update(concatenatedValues)
         .digest("hex");
 
-      console.log("Kashier Debug - Received Signature:", receivedSignature);
-      console.log("Kashier Debug - Calculated Signature:", calculatedSignature);
+      // Try plain SHA256 (without key)
+      const plainSignature = crypto
+        .createHash("sha256")
+        .update(concatenatedValues)
+        .digest("hex");
 
-      return calculatedSignature === receivedSignature;
+      // Try with Secret Key appended to concatenated values
+      const withKeyAppended = crypto
+        .createHash("sha256")
+        .update(concatenatedValues + process.env.KASHIER_SECRET_KEY)
+        .digest("hex");
+
+      console.log("Kashier Debug - Received Signature:", receivedSignature);
+      console.log("Kashier Debug - HMAC SHA256:", hmacSignature);
+      console.log("Kashier Debug - Plain SHA256:", plainSignature);
+      console.log("Kashier Debug - SHA256 with key appended:", withKeyAppended);
+
+      // Check all three methods
+      if (hmacSignature === receivedSignature) {
+        console.log("✅ Matched using HMAC SHA256");
+        return true;
+      }
+      if (plainSignature === receivedSignature) {
+        console.log("✅ Matched using plain SHA256");
+        return true;
+      }
+      if (withKeyAppended === receivedSignature) {
+        console.log("✅ Matched using SHA256 with key appended");
+        return true;
+      }
+
+      return false;
     } catch (error) {
       console.error("❌ Kashier signature verification error:", error);
       return false;
