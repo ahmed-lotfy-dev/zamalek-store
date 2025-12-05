@@ -136,6 +136,11 @@ export const paymob = {
       .update(concatenatedString)
       .digest("hex");
 
+    console.log("Paymob Debug - Received HMAC:", hmac);
+    console.log("Paymob Debug - Calculated HMAC:", calculatedHmac);
+    console.log("Paymob Debug - Concatenated String:", concatenatedString);
+    console.log("Paymob Debug - Data Object:", JSON.stringify(data, null, 2));
+
     return calculatedHmac === hmac;
   },
 };
