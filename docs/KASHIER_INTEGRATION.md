@@ -33,25 +33,22 @@ Kashier is a leading Egyptian payment gateway that provides secure online paymen
 
 ### 2. Get API Credentials
 
-Once logged in, get your credentials:
+Once logged in, get your credentials from the Kashier dashboard:
 
-**API Key:**
-
-1. Go to: **Dashboard** → **Developers** → **API Keys**
-2. Copy your **Test API Key**
-3. This is your `KASHIER_API_KEY`
-
-**Merchant ID:**
+**Merchant ID:** (Format: `MID-xxxxx-xxx`)
 
 1. Go to: **Dashboard** → **Settings** → **Account Information**
-2. Find your **Merchant ID**
+2. Find your **Merchant ID** (e.g., `MID-41194-643`)
 3. This is your `KASHIER_MERCHANT_ID`
 
-**Secret Key:**
+**API Key:** (IMPORTANT - This is used for hash generation)
 
-1. Go to: **Dashboard** → **Developers** → **Secret Key**
-2. Copy your **Secret Key**
-3. This is your `KASHIER_SECRET_KEY`
+1. Go to: **Dashboard** → **Developers** → **API Keys**
+2. Look for **"API Key"** or **"Test API Key"**
+3. Copy the **FULL key** (it's a long alphanumeric string)
+4. This is your `KASHIER_API_KEY`
+
+> **⚠️ CRITICAL:** Make sure you copy the complete API key. If you get "Forbidden request" errors, double-check this key. It should be a long string (50+ characters).
 
 ### 3. Configure Environment Variables
 
@@ -59,11 +56,12 @@ Add to your `.env` file:
 
 ```bash
 # Kashier Payment Gateway
-KASHIER_API_KEY="your_api_key_from_dashboard"
-KASHIER_MERCHANT_ID="your_merchant_id"
-KASHIER_SECRET_KEY="your_secret_key"
-KASHIER_MODE="test"  # Change to "live" for production
+KASHIER_API_KEY="your_complete_api_key_here"  # Long string from API Keys section
+KASHIER_MERCHANT_ID="MID-xxxxx-xxx"          # Your merchant ID
+KASHIER_MODE="test"                           # Use "test" for testing, "live" for production
 ```
+
+**Note:** You don't need `KASHIER_SECRET_KEY` for the Hosted Payment Page integration. Only `API_KEY` and `MERCHANT_ID` are required.
 
 ---
 
@@ -151,7 +149,20 @@ CVV: 123
 Cardholder: Test User
 ```
 
-### Testing Steps
+### Testing on Deployed Site (Recommended)
+
+**For webhooks to work, test on your deployed site:**
+
+1. **Deploy your code** to production (Vercel, Netlify, etc.)
+2. **Add Kashier credentials** to your production environment variables
+3. **Make a test payment** on your live site
+4. **Webhooks will work automatically** (no ngrok needed)
+
+**Why?** Kashier can't send webhooks to `localhost`. Your deployed site has a public URL that Kashier can reach.
+
+### Testing Locally (Requires ngrok)
+
+**Only if you need to test locally:**
 
 1. **Start your development server**:
 
@@ -159,20 +170,32 @@ Cardholder: Test User
    npm run dev
    ```
 
-2. **Navigate to checkout**: http://localhost:3000/checkout
+2. **In another terminal, start ngrok**:
 
-3. **Select "Kashier"** as payment method
+   ```bash
+   ngrok http 3000
+   ```
 
-4. **Fill checkout form** with test data
+3. **Copy the HTTPS URL** (e.g., `https://abc123.ngrok.io`)
 
-5. **Use test card** `4111111111111111`
+4. **Update your `.env`**:
 
-6. **Complete payment** on Kashier page
+   ```bash
+   NEXT_PUBLIC_APP_URL="https://abc123.ngrok.io"
+   ```
 
-7. **Verify**:
-   - Order status changed to "PAID"
-   - Payment record created in database
-   - Stock updated
+5. **Restart your dev server**
+
+6. **Navigate to**: `https://abc123.ngrok.io/checkout`
+
+7. **Complete payment** with test card `4111111111111111`
+
+8. **Check server logs** for webhook receipt:
+   ```
+   📥 Kashier Webhook Received
+   ✅ Kashier signature verified successfully
+   ✅ Order marked as PAID
+   ```
 
 ---
 
@@ -219,26 +242,88 @@ Cardholder: Test User
 
 ## Common Issues & Solutions
 
-### Issue 1: "Kashier credentials not configured"
+### Issue 1: "Forbidden request" Error
+
+**Symptoms:**
+Kashier payment page shows "Forbidden request" or "Something went wrong"
+
+**Cause:**
+Incorrect or incomplete `KASHIER_API_KEY`
+
+**Solution:**
+
+1. Go to Kashier Dashboard → Developers → API Keys
+2. Copy the **complete API Key** (should be 50+ characters)
+3. Make sure you copied the ENTIRE key (no spaces, no truncation)
+4. Update `.env`:
+   ```bash
+   KASHIER_API_KEY="paste_complete_key_here"
+   ```
+5. Restart your server
+6. Try payment again
+
+**How to verify:** Check your server logs for:
+
+```
+📝 Kashier Hash Generation:
+   Path: /?payment=MID-xxxxx-xxx.order_id.amount.EGP
+   Hash: [long hash string]
+```
+
+If the hash is generated, your API key is being used. If Kashier still shows "Forbidden", the key itself is wrong.
+
+---
+
+### Issue 2: "Kashier credentials not configured"
 
 **Symptoms:**
 
 ```
-❌ Kashier credentials not configured. Please set KASHIER_API_KEY and KASHIER_MERCHANT_ID in your .env file.
+❌ Kashier credentials not configured
 ```
 
 **Solution:**
 
 1. Verify `.env` file exists in project root
-2. Check all three Kashier variables are set:
+2. Check both required variables are set:
    - `KASHIER_API_KEY`
    - `KASHIER_MERCHANT_ID`
-   - `KASHIER_SECRET_KEY`
 3. Restart development server
 
 ---
 
-### Issue 2: "Invalid Signature"
+### Issue 3: Payment succeeds but order not marked as PAID
+
+**Symptoms:**
+
+- Payment completes on Kashier
+- User redirected to success page
+- Order status still "PENDING"
+- No payment record in database
+
+**Cause:**
+Webhook not received (testing on `localhost`)
+
+**Solution:**
+Either:
+
+1. **Test on deployed site** (recommended - webhooks work automatically)
+2. **Use ngrok** for local testing (see "Testing Locally" section above)
+
+**How to verify webhook was received:**
+Check server logs for:
+
+```
+📥 Kashier Webhook Received
+✅ Kashier signature verified successfully
+✅ Order marked as PAID
+```
+
+If you don't see these logs, the webhook didn't reach your server.
+
+---
+
+### Issue 4: "Invalid Signature" in webhook
 
 **Symptoms:**
 
@@ -246,28 +331,14 @@ Cardholder: Test User
 ❌ Invalid Kashier callback signature
 ```
 
-**Causes & Solutions:**
+**Cause:**
+API key mismatch between payment generation and webhook verification
 
-- **Wrong Secret Key**: Verify you copied the correct secret key from dashboard
-- **Extra spaces**: Check for trailing spaces in `.env` values
-- **Test vs Live**: Ensure using test credentials in test mode
+**Solution:**
 
----
-
-### Issue 3: Payment succeeds but order not updated
-
-**Symptoms:**
-
-- Payment shows successful on Kashier
-- Order status still "PENDING"
-- No payment record in database
-
-**Debug Steps:**
-
-1. Check webhook URL configured in Kashier dashboard
-2. If using ngrok, ensure it's still running
-3. Check server logs for webhook receipt
-4. Verify signature verification passes
+1. Ensure the same `KASHIER_API_KEY` is used in both environments
+2. If testing locally with ngrok, make sure `.env` is loaded
+3. Restart server after changing API key
 
 ---
 
