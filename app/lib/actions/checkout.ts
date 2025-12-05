@@ -197,11 +197,11 @@ export async function createOrder(prevState: any, formData: FormData) {
           phone_number: phone.startsWith("+20")
             ? phone
             : `+20${phone.replace(/^0/, "")}`,
-          apartment: "NA",
-          floor: "NA",
+          apartment: "1", // Dummy value
+          floor: "1", // Dummy value
           street: "Cairo", // Hardcoded to pass validation
-          building: "NA",
-          shipping_method: "NA",
+          building: "1", // Dummy value
+          shipping_method: "PKG", // Dummy value
           postal_code: "11511", // Valid Cairo postal code
           city: "Cairo", // Hardcoded to pass validation
           country: "EG",
