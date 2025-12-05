@@ -342,6 +342,130 @@ API key mismatch between payment generation and webhook verification
 
 ---
 
+### Issue 5: Webhook Error - "Content-Type was not one of multipart/form-data"
+
+**Symptoms:**
+
+```
+Kashier Webhook Error: TypeError: Content-Type was not one of "multipart/form-data" or "application/x-www-form-urlencoded".
+```
+
+**Cause:**
+Kashier sends webhook data as **URL parameters**, not as FormData or JSON body.
+
+**Solution:**
+This is already fixed in the latest code. The webhook handler now:
+
+1. Reads data from URL query parameters (e.g., `?merchantOrderId=xxx&amount=59.99`)
+2. Falls back to JSON body if no URL params
+3. Properly processes Kashier's webhook format
+
+**If you see this error:**
+
+1. Make sure you have the latest code from the repository
+2. The fix is in `app/api/kashier/callback/route.ts`
+3. Restart your server after updating
+
+---
+
+### Issue 6: Orders Not Marked as PAID (Webhook Not Received)
+
+**Symptoms:**
+
+- Payment completes successfully on Kashier
+- User redirected to success page
+- Order remains in "PENDING" status
+- No webhook logs in server console
+
+**Root Cause:**
+`NEXT_PUBLIC_APP_URL` not set correctly in production environment.
+
+**Step-by-Step Fix:**
+
+1. **Check Current Setting:**
+
+   - Look at your production environment variables
+   - Check what `NEXT_PUBLIC_APP_URL` is set to
+   - If it's `http://localhost:3000` or not set, that's the problem
+
+2. **Set Correct URL:**
+
+   ```bash
+   NEXT_PUBLIC_APP_URL="https://your-actual-domain.com"
+   ```
+
+   Replace with your actual deployed domain (e.g., `https://mystore.vercel.app`)
+
+3. **Restart Your Application:**
+
+   - If using PM2: `pm2 restart all`
+   - If using Vercel/Netlify: Redeploy or restart
+
+4. **Verify the Fix:**
+
+   - Make a new test payment
+   - Check server logs for:
+     ```
+     📥 Kashier Webhook Received
+     ✅ Kashier signature verified successfully
+     ✅ Order marked as PAID
+     ```
+
+5. **Test Webhook Endpoint:**
+   - Visit: `https://your-domain.com/api/kashier/test`
+   - Should return: `{"status": "ok", "message": "Kashier webhook endpoint is reachable"}`
+   - If this fails, your server has connectivity issues
+
+**How to Debug:**
+
+1. **Check Payment URL:**
+   When you make a payment, look at the Kashier payment page URL. It should contain:
+
+   ```
+   serverWebhook=https://your-domain.com/api/kashier/callback
+   ```
+
+   NOT:
+
+   ```
+   serverWebhook=http://localhost:3000/api/kashier/callback
+   ```
+
+2. **Check Server Logs:**
+   Look for these log messages:
+
+   ```
+   📝 Kashier Hash Generation:
+      Path: /?payment=MID-xxxxx-xxx.order_id.amount.EGP
+      Hash: [hash]
+   ✅ Kashier payment URL generated successfully
+   ```
+
+   After payment, you should see:
+
+   ```
+   📥 Kashier Webhook Received
+   Kashier Callback Data: {...}
+   ✅ Kashier signature verified successfully
+   📦 Processing transaction xxx for order yyy
+   ✅ Order yyy marked as PAID
+   ```
+
+3. **If No Webhook Logs:**
+   - Webhook is not reaching your server
+   - Check `NEXT_PUBLIC_APP_URL` is set correctly
+   - Verify your server is publicly accessible
+   - Check firewall settings
+
+**Common Mistakes:**
+
+- ❌ Setting `NEXT_PUBLIC_APP_URL` in local `.env` but not in production
+- ❌ Using `http://` instead of `https://` for production
+- ❌ Forgetting to restart server after changing environment variables
+- ❌ Testing on localhost without ngrok
+
+---
+
 ### Issue 4: Redirect loop or no redirect
 
 **Symptoms:**
