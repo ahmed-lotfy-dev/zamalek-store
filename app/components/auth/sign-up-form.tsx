@@ -23,20 +23,26 @@ export default function SignUpForm() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await authClient.signUp.email({
-      email,
-      password,
-      name,
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/admin");
+    try {
+      await authClient.signUp.email({
+        email,
+        password,
+        name,
+        fetchOptions: {
+          onSuccess: () => {
+            router.push("/admin");
+          },
+          onError: (ctx: any) => {
+            alert(ctx.error.message);
+            setLoading(false);
+          },
         },
-        onError: (ctx: any) => {
-          alert(ctx.error.message);
-          setLoading(false);
-        },
-      },
-    });
+      });
+    } catch (error) {
+      console.error("Sign up error:", error);
+      alert("Failed to sign up. Please check your connection.");
+      setLoading(false);
+    }
   };
 
   return (

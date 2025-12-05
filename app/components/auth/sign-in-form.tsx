@@ -24,21 +24,27 @@ export default function SignInForm() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await authClient.signIn.email({
-      email,
-      password,
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/admin");
+    try {
+      await authClient.signIn.email({
+        email,
+        password,
+        fetchOptions: {
+          onSuccess: () => {
+            router.push("/admin");
+          },
+          onError: (ctx: any) => {
+            const message =
+              ctx.error.message || "An error occurred during sign in";
+            toast.error(message);
+            setLoading(false);
+          },
         },
-        onError: (ctx: any) => {
-          const message =
-            ctx.error.message || "An error occurred during sign in";
-          toast.error(message);
-          setLoading(false);
-        },
-      },
-    });
+      });
+    } catch (error) {
+      console.error("Sign in error:", error);
+      toast.error("Failed to sign in. Please check your connection.");
+      setLoading(false);
+    }
   };
 
   return (
