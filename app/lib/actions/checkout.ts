@@ -181,14 +181,22 @@ export async function createOrder(prevState: any, formData: FormData) {
           token,
           Number(order.total),
           "EGP",
-          order.id
+          order.id,
+          items.map((item: any) => ({
+            name: `Product ${item.id}`, // Ideally fetch product name
+            price: item.price,
+            description: "Product Description",
+            quantity: item.quantity,
+          }))
         );
 
         const billingData = {
           first_name: name.split(" ")[0] || "User",
           last_name: name.split(" ").slice(1).join(" ") || "User",
           email: email,
-          phone_number: phone,
+          phone_number: phone.startsWith("+20")
+            ? phone
+            : `+20${phone.replace(/^0/, "")}`,
           apartment: "NA",
           floor: "NA",
           street: address || "NA",

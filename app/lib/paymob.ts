@@ -26,7 +26,8 @@ export const paymob = {
     token: string,
     amount: number,
     currency: string,
-    merchantOrderId: string
+    merchantOrderId: string,
+    items: any[] = []
   ) => {
     try {
       // Paymob expects amount in cents
@@ -41,6 +42,12 @@ export const paymob = {
           amount_cents: amountCents,
           currency: currency,
           merchant_order_id: merchantOrderId,
+          items: items.map((item) => ({
+            name: item.name,
+            amount_cents: Math.round(item.price * 100),
+            description: item.description || "Product",
+            quantity: item.quantity,
+          })),
         }),
       });
 

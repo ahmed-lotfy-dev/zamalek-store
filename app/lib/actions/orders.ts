@@ -7,30 +7,43 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/app/lib/auth";
 import { headers } from "next/headers";
 
-export async function getOrders() {
+export async function getOrders(page = 1, limit = 10) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
   if (session?.user.role !== "ADMIN") {
-    return [];
+    return {
+      orders: [],
+      metadata: { totalCount: 0, totalPages: 0, currentPage: 1, limit },
+    };
   }
 
   try {
-    const orders = await prisma.order.findMany({
-      include: {
-        user: true,
-        orderItems: {
-          include: {
-            product: true,
+    const skip = (page - 1) * limit;
+
+    const [orders, totalCount] = await prisma.$transaction([
+      prisma.order.findMany({
+        skip,
+        take: limit,
+        include: {
+          user: true,
+          orderItems: {
+            include: {
+              product: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-    return orders.map((order: any) => ({
+        orderBy: {
+          createdAt: "desc",
+        },
+      }),
+      prisma.order.count(),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    const formattedOrders = orders.map((order: any) => ({
       ...order,
       total: Number(order.total),
       discount: Number(order.discount),
@@ -43,9 +56,22 @@ export async function getOrders() {
         },
       })),
     }));
+
+    return {
+      orders: formattedOrders,
+      metadata: {
+        totalCount,
+        totalPages,
+        currentPage: page,
+        limit,
+      },
+    };
   } catch (error) {
     console.error("Error fetching orders:", error);
-    return [];
+    return {
+      orders: [],
+      metadata: { totalCount: 0, totalPages: 0, currentPage: 1, limit },
+    };
   }
 }
 

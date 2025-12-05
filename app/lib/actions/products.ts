@@ -11,6 +11,40 @@ export async function getProducts() {
   });
 }
 
+export async function getPaginatedProducts(page = 1, limit = 10) {
+  try {
+    const skip = (page - 1) * limit;
+
+    const [products, totalCount] = await prisma.$transaction([
+      prisma.product.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: { category: true },
+      }),
+      prisma.product.count(),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return {
+      products,
+      metadata: {
+        totalCount,
+        totalPages,
+        currentPage: page,
+        limit,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching paginated products:", error);
+    return {
+      products: [],
+      metadata: { totalCount: 0, totalPages: 0, currentPage: 1, limit },
+    };
+  }
+}
+
 export async function getProduct(id: string) {
   try {
     const product = await prisma.product.findUnique({

@@ -11,6 +11,39 @@ export async function getCategories() {
   });
 }
 
+export async function getPaginatedCategories(page = 1, limit = 10) {
+  try {
+    const skip = (page - 1) * limit;
+
+    const [categories, totalCount] = await prisma.$transaction([
+      prisma.category.findMany({
+        skip,
+        take: limit,
+        orderBy: { name: "asc" },
+      }),
+      prisma.category.count(),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return {
+      categories,
+      metadata: {
+        totalCount,
+        totalPages,
+        currentPage: page,
+        limit,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching paginated categories:", error);
+    return {
+      categories: [],
+      metadata: { totalCount: 0, totalPages: 0, currentPage: 1, limit },
+    };
+  }
+}
+
 import { auth } from "@/app/lib/auth";
 import { headers } from "next/headers";
 
