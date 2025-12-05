@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader, Button } from "@heroui/react";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { verifyStripePayment } from "@/app/lib/actions/checkout";
 import { useCart } from "@/app/context/cart-context";
 
@@ -15,11 +15,16 @@ export default function CheckoutSuccessPage() {
     "loading"
   );
   const { clearCart } = useCart();
+  const hasCleared = useRef(false);
 
   useEffect(() => {
+    // Prevent running multiple times
+    if (hasCleared.current) return;
+
     if (!sessionId) {
       // No session_id means Kashier, Paymob, or COD payment
       // Clear cart immediately for these payment methods
+      hasCleared.current = true;
       setStatus("success");
       clearCart();
       return;
@@ -30,6 +35,7 @@ export default function CheckoutSuccessPage() {
       try {
         const result = await verifyStripePayment(sessionId);
         if (result.success) {
+          hasCleared.current = true;
           setStatus("success");
           clearCart();
         } else {
