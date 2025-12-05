@@ -134,7 +134,7 @@ export const kashier = {
 
   /**
    * Verify Kashier callback signature
-   * All parameters except 'signature' and 'mode' should be included
+   * Kashier concatenates values of specific keys in order, then hashes with API key
    */
   verifyCallback: (query: Record<string, string>): boolean => {
     if (!process.env.KASHIER_API_KEY) {
@@ -149,27 +149,27 @@ export const kashier = {
         return false;
       }
 
-      // Build query string (exclude 'signature' and 'mode')
-      let queryString = "";
-      const sortedKeys = Object.keys(query).sort();
+      // Remove signature from query to get the data fields
+      const dataFields = { ...query };
+      delete dataFields.signature;
 
-      for (const key of sortedKeys) {
-        if (key === "signature" || key === "mode") continue;
-        queryString += `&${key}=${query[key]}`;
-      }
+      // Sort keys alphabetically and concatenate values
+      const sortedKeys = Object.keys(dataFields).sort();
+      const concatenatedValues = sortedKeys
+        .map((key) => dataFields[key])
+        .join("");
 
-      // Remove leading '&'
-      const finalUrl = queryString.substring(1);
+      console.log("Kashier Debug - Sorted Keys:", sortedKeys);
+      console.log("Kashier Debug - Concatenated Values:", concatenatedValues);
 
-      // Calculate signature
+      // Calculate signature using HMAC SHA256
       const calculatedSignature = crypto
         .createHmac("sha256", process.env.KASHIER_API_KEY)
-        .update(finalUrl)
+        .update(concatenatedValues)
         .digest("hex");
 
       console.log("Kashier Debug - Received Signature:", receivedSignature);
       console.log("Kashier Debug - Calculated Signature:", calculatedSignature);
-      console.log("Kashier Debug - Query String:", finalUrl);
 
       return calculatedSignature === receivedSignature;
     } catch (error) {

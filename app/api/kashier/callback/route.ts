@@ -6,7 +6,7 @@ export async function POST(req: Request) {
   try {
     // Kashier sends data as URL-encoded or in the URL params, not as FormData
     const { searchParams } = new URL(req.url);
-    const data: Record<string, string> = {};
+    let data: Record<string, any> = {};
 
     // Convert URL search params to object
     searchParams.forEach((value, key) => {
@@ -20,15 +20,53 @@ export async function POST(req: Request) {
     if (Object.keys(data).length === 0) {
       try {
         const bodyData = await req.json();
-        Object.assign(data, bodyData);
+        data = bodyData;
         console.log("Parsed from JSON body:", JSON.stringify(data, null, 2));
       } catch (e) {
         console.log("No JSON body, using URL params only");
       }
     }
 
-    // 1. Security Check: Verify Signature
-    const isValid = kashier.verifyCallback(data);
+    // Kashier sends data in nested structure: { event: "pay", data: {...}, hash: "..." }
+    const webhookData = data.data || data;
+    const signature = data.hash || data.signature;
+
+    if (!signature) {
+      console.error("❌ No signature in callback");
+      return new NextResponse("No Signature", { status: 403 });
+    }
+
+    // Build signature verification object from the signatureKeys
+    const signatureKeys = webhookData.signatureKeys || [
+      "amount",
+      "channel",
+      "creationDate",
+      "currency",
+      "kashierOrderId",
+      "merchantOrderId",
+      "method",
+      "orderReference",
+      "status",
+      "transactionId",
+      "transactionResponseCode",
+    ];
+
+    // Create verification data object with only the signature keys
+    const verificationData: Record<string, string> = {};
+    signatureKeys.forEach((key: string) => {
+      if (webhookData[key] !== undefined) {
+        verificationData[key] = String(webhookData[key]);
+      }
+    });
+    verificationData.signature = signature;
+
+    console.log(
+      "Verification data:",
+      JSON.stringify(verificationData, null, 2)
+    );
+
+    // Verify signature
+    const isValid = kashier.verifyCallback(verificationData);
     if (!isValid) {
       console.error("❌ Invalid Kashier callback signature");
       return new NextResponse("Invalid Signature", { status: 403 });
@@ -36,11 +74,11 @@ export async function POST(req: Request) {
 
     console.log("✅ Kashier signature verified successfully");
 
-    const merchantOrderId = data.merchantOrderId || data.orderId;
-    const transactionId = data.transactionId;
-    const amount = parseFloat(data.amount || "0");
-    const currency = data.currency || "EGP";
-    const paymentStatus = data.paymentStatus;
+    const merchantOrderId = webhookData.merchantOrderId;
+    const transactionId = webhookData.transactionId;
+    const amount = parseFloat(webhookData.amount || "0");
+    const currency = webhookData.currency || "EGP";
+    const paymentStatus = webhookData.status;
 
     console.log(
       `📦 Processing transaction ${transactionId} for order ${merchantOrderId}`
