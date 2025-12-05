@@ -124,9 +124,15 @@ export const paymob = {
 
     const concatenatedString = keys
       .map((key) => {
-        const value = key
+        let value = key
           .split(".")
           .reduce((obj, k) => (obj ? obj[k] : undefined), data);
+
+        // Special handling for 'order' which can be an object
+        if (key === "order" && typeof value === "object" && value !== null) {
+          value = value.id;
+        }
+
         return value !== undefined ? value.toString() : "";
       })
       .join("");
