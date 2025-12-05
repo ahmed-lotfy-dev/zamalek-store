@@ -2,8 +2,80 @@ import crypto from "crypto";
 
 const PAYMOB_API_URL = "https://accept.paymob.com/api";
 
+// TypeScript interfaces for Paymob API responses
+interface PaymobAuthResponse {
+  token: string;
+  profile?: any;
+  detail?: string; // Error detail when response is not ok
+}
+
+interface PaymobOrderResponse {
+  id: string;
+  created_at: string;
+  delivery_needed: boolean;
+  merchant: any;
+  collector: any;
+  amount_cents: number;
+  shipping_data: any;
+  currency: string;
+  is_payment_locked: boolean;
+  merchant_order_id: string;
+  items: any[];
+  detail?: string; // Error detail when response is not ok
+}
+
+interface PaymobPaymentKeyResponse {
+  token: string;
+  detail?: string; // Error detail when response is not ok
+}
+
+interface PaymobBillingData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  apartment: string;
+  floor: string;
+  street: string;
+  building: string;
+  shipping_method: string;
+  postal_code: string;
+  city: string;
+  country: string;
+  state: string;
+}
+
+// Validate environment variables on module load
+function validatePaymobEnv(): void {
+  const required = [
+    "PAYMOB_API_KEY",
+    "PAYMOB_INTEGRATION_ID",
+    "PAYMOB_IFRAME_ID",
+    "PAYMOB_HMAC_SECRET",
+  ];
+
+  const missing = required.filter((key) => !process.env[key]);
+
+  if (missing.length > 0) {
+    console.warn(
+      `⚠️  Missing Paymob environment variables: ${missing.join(", ")}\n` +
+        `   Paymob integration will not work until these are configured.\n` +
+        `   See .env.example for required variables.`
+    );
+  }
+}
+
+// Run validation when module loads
+validatePaymobEnv();
+
 export const paymob = {
-  authenticate: async () => {
+  authenticate: async (): Promise<string> => {
+    if (!process.env.PAYMOB_API_KEY) {
+      throw new Error(
+        "PAYMOB_API_KEY is not configured. Please set it in your .env file."
+      );
+    }
+
     try {
       const response = await fetch(`${PAYMOB_API_URL}/auth/tokens`, {
         method: "POST",
@@ -13,11 +85,26 @@ export const paymob = {
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "Authentication failed");
+      const data: PaymobAuthResponse = await response.json();
+
+      if (!response.ok) {
+        console.error(
+          "❌ Paymob Authentication Failed:",
+          JSON.stringify(data, null, 2)
+        );
+        throw new Error(
+          `Paymob authentication failed: ${data.detail || response.statusText}`
+        );
+      }
+
+      if (!data.token) {
+        throw new Error("Paymob authentication response missing token");
+      }
+
+      console.log("✅ Paymob authentication successful");
       return data.token;
     } catch (error) {
-      console.error("Paymob Authentication Error:", error);
+      console.error("❌ Paymob Authentication Error:", error);
       throw error;
     }
   },
@@ -28,35 +115,59 @@ export const paymob = {
     currency: string,
     merchantOrderId: string,
     items: any[] = []
-  ) => {
+  ): Promise<PaymobOrderResponse> => {
     try {
       // Paymob expects amount in cents
       const amountCents = Math.round(amount * 100);
 
+      const payload = {
+        auth_token: token,
+        delivery_needed: "false",
+        amount_cents: amountCents,
+        currency: currency,
+        merchant_order_id: merchantOrderId,
+        items: items.map((item) => ({
+          name: item.name,
+          amount_cents: Math.round(item.price * 100),
+          description: item.description || "Product",
+          quantity: item.quantity,
+        })),
+      };
+
+      console.log(
+        "📦 Paymob Register Order Payload:",
+        JSON.stringify(payload, null, 2)
+      );
+
       const response = await fetch(`${PAYMOB_API_URL}/ecommerce/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          auth_token: token,
-          delivery_needed: "false",
-          amount_cents: amountCents,
-          currency: currency,
-          merchant_order_id: merchantOrderId,
-          items: items.map((item) => ({
-            name: item.name,
-            amount_cents: Math.round(item.price * 100),
-            description: item.description || "Product",
-            quantity: item.quantity,
-          })),
-        }),
+        body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.detail || "Order registration failed");
+      const data: PaymobOrderResponse = await response.json();
+
+      if (!response.ok) {
+        console.error(
+          "❌ Paymob Order Registration Failed:",
+          JSON.stringify(data, null, 2)
+        );
+        throw new Error(
+          `Paymob order registration failed: ${
+            data.detail || response.statusText
+          }`
+        );
+      }
+
+      if (!data.id) {
+        throw new Error("Paymob order registration response missing order ID");
+      }
+
+      console.log(`✅ Paymob order registered successfully (ID: ${data.id})`);
+
       return data;
     } catch (error) {
-      console.error("Paymob Order Registration Error:", error);
+      console.error("❌ Paymob Order Registration Error:", error);
       throw error;
     }
   },
@@ -64,10 +175,16 @@ export const paymob = {
   getPaymentKey: async (
     token: string,
     orderId: string,
-    billingData: any,
+    billingData: PaymobBillingData,
     amount: number,
     currency: string = "EGP"
-  ) => {
+  ): Promise<string> => {
+    if (!process.env.PAYMOB_INTEGRATION_ID) {
+      throw new Error(
+        "PAYMOB_INTEGRATION_ID is not configured. Please set it in your .env file."
+      );
+    }
+
     try {
       const amountCents = Math.round(amount * 100);
 
@@ -81,6 +198,11 @@ export const paymob = {
         integration_id: Number(process.env.PAYMOB_INTEGRATION_ID),
       };
 
+      console.log(
+        "🔑 Paymob Payment Key Request:",
+        JSON.stringify(payload, null, 2)
+      );
+
       const response = await fetch(
         `${PAYMOB_API_URL}/acceptance/payment_keys`,
         {
@@ -90,12 +212,28 @@ export const paymob = {
         }
       );
 
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.detail || "Payment key request failed");
+      const data: PaymobPaymentKeyResponse = await response.json();
+
+      if (!response.ok) {
+        console.error(
+          "❌ Paymob Payment Key Failed:",
+          JSON.stringify(data, null, 2)
+        );
+        throw new Error(
+          `Paymob payment key request failed: ${
+            data.detail || response.statusText
+          }`
+        );
+      }
+
+      if (!data.token) {
+        throw new Error("Paymob payment key response missing token");
+      }
+
+      console.log("✅ Paymob payment key generated successfully");
       return data.token;
     } catch (error) {
-      console.error("Paymob Payment Key Error:", error);
+      console.error("❌ Paymob Payment Key Error:", error);
       throw error;
     }
   },

@@ -8,16 +8,21 @@ export async function POST(req: Request) {
     const { searchParams } = new URL(req.url);
     const hmac = searchParams.get("hmac");
 
+    console.log("📥 Paymob Webhook Received");
+
     if (!hmac) {
+      console.error("❌ Missing HMAC in webhook request");
       return new NextResponse("Missing HMAC", { status: 400 });
     }
 
     // 1. Security Check: Verify HMAC
     const isValid = paymob.verifyHmac(data.obj, hmac);
     if (!isValid) {
-      console.error("Invalid Paymob HMAC Signature");
+      console.error("❌ Invalid Paymob HMAC Signature");
       return new NextResponse("Invalid Signature", { status: 403 });
     }
+
+    console.log("✅ HMAC verified successfully");
 
     const transactionId = data.obj.id.toString();
     const merchantOrderId = data.obj.order.merchant_order_id;
@@ -25,17 +30,28 @@ export async function POST(req: Request) {
     const amount = data.obj.amount_cents / 100;
     const currency = data.obj.currency;
 
+    console.log(
+      `📦 Processing transaction ${transactionId} for order ${merchantOrderId}`
+    );
+    console.log(`💰 Amount: ${amount} ${currency}, Success: ${success}`);
+
     // 2. Idempotency Check
     const existingPayment = await prisma.payment.findUnique({
       where: { transactionId },
     });
 
     if (existingPayment) {
+      console.log(
+        `⚠️  Transaction ${transactionId} already processed (idempotency check)`
+      );
       return new NextResponse("Already Processed", { status: 200 });
     }
 
     // 3. Process Payment
     if (success) {
+      console.log(
+        `✅ Payment successful - updating order ${merchantOrderId} to PAID`
+      );
       await prisma.$transaction([
         prisma.payment.create({
           data: {
@@ -55,7 +71,28 @@ export async function POST(req: Request) {
           },
         }),
       ]);
+      console.log(`✅ Order ${merchantOrderId} marked as PAID`);
     } else {
+      // Extract error information from Paymob response
+      const errorMessage =
+        data.obj.data?.message || data.obj.data_message || "Unknown error";
+      const errorCode = data.obj.data?.txn_response_code || "N/A";
+
+      console.error("❌ Payment failed:");
+      console.error(`   Transaction ID: ${transactionId}`);
+      console.error(`   Order ID: ${merchantOrderId}`);
+      console.error(`   Error Message: ${errorMessage}`);
+      console.error(`   Error Code: ${errorCode}`);
+      console.error(`   Amount: ${amount} ${currency}`);
+
+      // Log the entire data object for debugging
+      if (data.obj.data) {
+        console.error(
+          `   Full Error Data:`,
+          JSON.stringify(data.obj.data, null, 2)
+        );
+      }
+
       // Log failed payment attempt
       await prisma.payment.create({
         data: {
@@ -67,6 +104,8 @@ export async function POST(req: Request) {
           provider: "PAYMOB",
         },
       });
+
+      console.log(`📝 Failed payment logged for order ${merchantOrderId}`);
     }
 
     return new NextResponse("Received", { status: 200 });

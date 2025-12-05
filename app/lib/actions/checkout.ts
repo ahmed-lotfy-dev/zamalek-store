@@ -11,7 +11,7 @@ const checkoutSchema = z.object({
   phone: z.string().min(1, "Phone is required"),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
-  paymentMethod: z.enum(["cod", "paymob"]),
+  paymentMethod: z.enum(["cod", "paymob", "stripe"]),
   items: z.array(
     z.object({
       id: z.string(),
@@ -23,6 +23,7 @@ const checkoutSchema = z.object({
 });
 
 import { paymob } from "@/app/lib/paymob";
+import { stripe } from "@/app/lib/stripe";
 
 // ... existing imports
 
@@ -182,30 +183,28 @@ export async function createOrder(prevState: any, formData: FormData) {
           Number(order.total),
           "EGP",
           order.id,
-          items.map((item: any) => ({
-            name: `Product ${item.id}`, // Ideally fetch product name
-            price: item.price,
-            description: "Product Description",
-            quantity: item.quantity,
-          }))
+          [] // Send empty items to match working reference
         );
 
         const billingData = {
           first_name: name.split(" ")[0] || "User",
           last_name: name.split(" ").slice(1).join(" ") || "User",
           email: email,
-          phone_number: phone.startsWith("+20")
-            ? phone
-            : `+20${phone.replace(/^0/, "")}`,
-          apartment: "1", // Dummy value
-          floor: "1", // Dummy value
-          street: "Cairo", // Hardcoded to pass validation
-          building: "1", // Dummy value
-          shipping_method: "PKG", // Dummy value
-          postal_code: "11511", // Valid Cairo postal code
-          city: "Cairo", // Hardcoded to pass validation
+          phone_number: ((p) => {
+            const clean = p.replace(/[^\d]/g, ""); // Remove non-digits
+            if (clean.startsWith("0")) return `2${clean}`;
+            if (clean.startsWith("20")) return clean;
+            return `20${clean}`;
+          })(phone),
+          apartment: "1",
+          floor: "1",
+          street: "Cairo",
+          building: "1",
+          shipping_method: "PKG",
+          postal_code: "11511",
+          city: "Cairo",
           country: "EG",
-          state: "Cairo", // Paymob often requires a valid state
+          state: "Cairo",
         };
 
         const paymentKey = await paymob.getPaymentKey(
@@ -234,9 +233,80 @@ export async function createOrder(prevState: any, formData: FormData) {
       }
     }
 
+    // 5. Handle Stripe Payment
+    if (paymentMethod === "stripe") {
+      try {
+        const stripeSession = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          line_items: items.map((item: any) => ({
+            price_data: {
+              currency: "egp",
+              product_data: {
+                name: `Product ${item.id}`, // Ideally fetch product name
+              },
+              unit_amount: Math.round(item.price * 100),
+            },
+            quantity: item.quantity,
+          })),
+          mode: "payment",
+          success_url: `${
+            process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+          }/checkout/success?session_id={CHECKOUT_SESSION_ID}&order_id=${
+            order.id
+          }`,
+          cancel_url: `${
+            process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+          }/checkout?canceled=true`,
+          metadata: {
+            orderId: order.id,
+            userId: session.user.id,
+          },
+        });
+
+        if (!stripeSession.url) {
+          throw new Error("Failed to create Stripe session URL");
+        }
+
+        return {
+          success: true,
+          url: stripeSession.url,
+        };
+      } catch (error) {
+        console.error("Stripe Integration Error:", error);
+        return {
+          success: true,
+          orderId: order.id,
+          warning:
+            "Order created but Stripe payment initiation failed. Please try paying from your orders page.",
+        };
+      }
+    }
+
     return { success: true, orderId: order.id };
   } catch (error: any) {
     console.error("Checkout Error:", error);
     return { error: error.message || "Failed to create order" };
+  }
+}
+
+export async function verifyStripePayment(sessionId: string) {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status === "paid") {
+      // Update order status to PAID
+      if (session.metadata?.orderId) {
+        await prisma.order.update({
+          where: { id: session.metadata.orderId },
+          data: { isPaid: true, status: "PAID" },
+        });
+      }
+      return { success: true };
+    } else {
+      return { success: false, error: "Payment not completed" };
+    }
+  } catch (error) {
+    console.error("Stripe Verification Error:", error);
+    return { success: false, error: "Failed to verify payment" };
   }
 }

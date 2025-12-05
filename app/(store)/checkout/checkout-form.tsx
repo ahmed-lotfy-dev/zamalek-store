@@ -235,6 +235,12 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
                 >
                   Paymob (Online Payment)
                 </Radio>
+                <Radio
+                  value="stripe"
+                  description="Pay securely with Credit Card (Stripe)"
+                >
+                  Credit Card (Stripe)
+                </Radio>
               </RadioGroup>
             </CardBody>
           </Card>
