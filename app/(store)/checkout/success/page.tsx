@@ -18,10 +18,14 @@ export default function CheckoutSuccessPage() {
 
   useEffect(() => {
     if (!sessionId) {
-      setStatus("success"); // Assume success if no session_id (e.g. COD)
+      // No session_id means Kashier, Paymob, or COD payment
+      // Clear cart immediately for these payment methods
+      setStatus("success");
+      clearCart();
       return;
     }
 
+    // For Stripe payments, verify first then clear cart
     const verify = async () => {
       try {
         const result = await verifyStripePayment(sessionId);

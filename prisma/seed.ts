@@ -7,6 +7,7 @@ async function main() {
 
   // Cleanup existing data
   await prisma.orderItem.deleteMany();
+  await prisma.payment.deleteMany(); // Delete payments first
   await prisma.order.deleteMany();
   await prisma.review.deleteMany();
   await prisma.product.deleteMany();
