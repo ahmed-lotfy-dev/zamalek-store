@@ -18,7 +18,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-6 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-16">
           {/* Hero Section */}
           <HeroSection />

@@ -1,4 +1,5 @@
 import StoreNavbar from "@/app/components/store-navbar";
+import StoreFooter from "@/app/components/store-footer";
 import { auth } from "@/app/lib/auth";
 import { headers } from "next/headers";
 
@@ -12,9 +13,10 @@ export default async function StoreLayout({
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <StoreNavbar user={session?.user} />
-      {children}
+      <div className="flex-1">{children}</div>
+      <StoreFooter />
     </div>
   );
 }

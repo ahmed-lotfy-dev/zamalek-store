@@ -33,7 +33,7 @@ export default async function ProductsPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-6 py-12 sm:px-6 lg:px-8">
         <ProductListing
           key={initialCategoryIds.join("-")}
           products={products.map((p: any) => ({

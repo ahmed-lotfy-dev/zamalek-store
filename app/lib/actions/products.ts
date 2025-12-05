@@ -28,7 +28,7 @@ export async function getProductBySlug(slug: string) {
   try {
     const product = await prisma.product.findUnique({
       where: { slug },
-      include: { category: true },
+      include: { category: true, variants: true },
     });
     return product;
   } catch (error) {
@@ -85,6 +85,31 @@ export async function getNewArrivals() {
   }
 }
 
+export async function getRelatedProducts(
+  categoryId: string,
+  currentProductId: string
+) {
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        categoryId,
+        id: { not: currentProductId },
+      },
+      take: 4,
+      include: {
+        category: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return products;
+  } catch (error) {
+    console.error("Error fetching related products:", error);
+    return [];
+  }
+}
+
 import { auth } from "@/app/lib/auth";
 import { headers } from "next/headers";
 
@@ -102,6 +127,16 @@ export async function createProduct(formData: FormData) {
   const categoryId = formData.get("categoryId") as string;
   const imageUrl = formData.get("imageUrl") as string;
 
+  const variantsJson = formData.get("variants") as string;
+  let variants: any[] = [];
+  if (variantsJson) {
+    try {
+      variants = JSON.parse(variantsJson);
+    } catch (e) {
+      console.error("Error parsing variants:", e);
+    }
+  }
+
   const slug = name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -116,6 +151,13 @@ export async function createProduct(formData: FormData) {
       stock,
       categoryId,
       images: imageUrl ? [imageUrl] : [],
+      variants: {
+        create: variants.map((v) => ({
+          color: v.color,
+          size: v.size,
+          stock: v.stock,
+        })),
+      },
     },
   });
 
@@ -148,6 +190,16 @@ export async function updateProduct(id: string, formData: FormData) {
   const categoryId = formData.get("categoryId") as string;
   const imageUrl = formData.get("imageUrl") as string;
 
+  const variantsJson = formData.get("variants") as string;
+  let variants: any[] = [];
+  if (variantsJson) {
+    try {
+      variants = JSON.parse(variantsJson);
+    } catch (e) {
+      console.error("Error parsing variants:", e);
+    }
+  }
+
   const slug = name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -160,6 +212,14 @@ export async function updateProduct(id: string, formData: FormData) {
     price,
     stock,
     categoryId,
+    variants: {
+      deleteMany: {},
+      create: variants.map((v) => ({
+        color: v.color,
+        size: v.size,
+        stock: v.stock,
+      })),
+    },
   };
 
   if (imageUrl) {

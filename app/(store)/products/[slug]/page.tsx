@@ -1,6 +1,10 @@
-import { getProductBySlug } from "@/app/lib/actions/products";
+import {
+  getProductBySlug,
+  getRelatedProducts,
+} from "@/app/lib/actions/products";
 import { getSavedItems } from "@/app/lib/actions/saved-items";
 import ProductDetails from "@/app/components/store/product-details";
+import RelatedProducts from "@/app/components/store/related-products";
 import { notFound } from "next/navigation";
 
 export default async function ProductPage({
@@ -16,6 +20,11 @@ export default async function ProductPage({
     notFound();
   }
 
+  const relatedProducts = await getRelatedProducts(
+    product.categoryId,
+    product.id
+  );
+
   const isSaved = savedItems.some((item) => item.productId === product.id);
 
   return (
@@ -28,6 +37,7 @@ export default async function ProductPage({
           }}
           isSaved={isSaved}
         />
+        <RelatedProducts products={relatedProducts} />
       </main>
     </div>
   );

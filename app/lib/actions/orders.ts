@@ -33,6 +33,7 @@ export async function getOrders() {
     return orders.map((order: any) => ({
       ...order,
       total: Number(order.total),
+      discount: Number(order.discount),
       orderItems: order.orderItems.map((item: any) => ({
         ...item,
         price: Number(item.price),
@@ -74,6 +75,7 @@ export async function getOrder(id: string) {
     return {
       ...order,
       total: Number(order.total),
+      discount: Number(order.discount),
       orderItems: order.orderItems.map((item: any) => ({
         ...item,
         price: Number(item.price),

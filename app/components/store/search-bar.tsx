@@ -67,7 +67,7 @@ export default function SearchBar() {
     <div className="relative w-full max-w-md" ref={containerRef}>
       <Input
         classNames={{
-          base: "max-w-full sm:max-w-[20rem] h-10",
+          base: "w-full sm:w-[20rem] h-10",
           mainWrapper: "h-full",
           input: "text-small",
           inputWrapper:
@@ -105,7 +105,7 @@ export default function SearchBar() {
               {results.map((product) => (
                 <ListboxItem key={product.slug} textValue={product.name}>
                   <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-default-200">
+                    <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-default-200">
                       <Image
                         src={
                           product.images[0] ||

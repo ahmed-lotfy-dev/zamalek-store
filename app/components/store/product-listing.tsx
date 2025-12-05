@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import ProductCard from "@/app/components/product-card";
 import Filters from "./filters";
+import SortSelect from "./sort-select";
+import SearchBar from "./search-bar";
 import EmptyState from "@/app/components/empty-state";
 import { Switch } from "@heroui/react";
 
@@ -20,6 +22,19 @@ export default function ProductListing({
   const [selectedCategories, setSelectedCategories] =
     useState<string[]>(initialCategoryIds);
   const [hideOutOfStock, setHideOutOfStock] = useState(false);
+  const [sortOption, setSortOption] = useState("newest");
+
+  // Calculate min and max price from all products
+  const { minPrice, maxPrice } = useMemo(() => {
+    if (products.length === 0) return { minPrice: 0, maxPrice: 100 };
+    const prices = products.map((p) => Number(p.price));
+    return {
+      minPrice: Math.floor(Math.min(...prices)),
+      maxPrice: Math.ceil(Math.max(...prices)),
+    };
+  }, [products]);
+
+  const [priceRange, setPriceRange] = useState<number[]>([minPrice, maxPrice]);
 
   const filteredProducts = useMemo(() => {
     let result = products;
@@ -36,8 +51,29 @@ export default function ProductListing({
       result = result.filter((product) => product.stock > 0);
     }
 
+    // Filter by Price
+    result = result.filter((product) => {
+      const price = Number(product.price);
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
+
+    // Sort
+    result.sort((a, b) => {
+      switch (sortOption) {
+        case "price_asc":
+          return Number(a.price) - Number(b.price);
+        case "price_desc":
+          return Number(b.price) - Number(a.price);
+        case "newest":
+        default:
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+      }
+    });
+
     return result;
-  }, [products, selectedCategories, hideOutOfStock]);
+  }, [products, selectedCategories, hideOutOfStock, priceRange, sortOption]);
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -48,6 +84,10 @@ export default function ProductListing({
             categories={categories}
             selectedCategories={selectedCategories}
             setSelectedCategories={setSelectedCategories}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
           />
 
           <div className="flex items-center justify-between px-1">
@@ -67,11 +107,20 @@ export default function ProductListing({
       {/* Product Grid */}
       <div className="flex-1">
         <div className="flex flex-col gap-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Shop All</h2>
-            <span className="text-default-500">
-              {filteredProducts.length} Products
-            </span>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-2xl font-bold">Shop All</h2>
+              <span className="text-default-500">
+                {filteredProducts.length} Products
+              </span>
+            </div>
+            <div className="flex gap-4 items-center w-full sm:w-auto">
+              <SearchBar />
+              <SortSelect
+                sortOption={sortOption}
+                setSortOption={setSortOption}
+              />
+            </div>
           </div>
 
           {filteredProducts.length === 0 ? (
