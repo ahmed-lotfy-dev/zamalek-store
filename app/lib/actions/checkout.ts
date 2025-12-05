@@ -185,17 +185,17 @@ export async function createOrder(prevState: any, formData: FormData) {
         );
 
         const billingData = {
-          first_name: name.split(" ")[0],
+          first_name: name.split(" ")[0] || "User",
           last_name: name.split(" ").slice(1).join(" ") || "User",
           email: email,
           phone_number: phone,
           apartment: "NA",
           floor: "NA",
-          street: address,
+          street: address || "NA",
           building: "NA",
           shipping_method: "NA",
           postal_code: "NA",
-          city: city,
+          city: city || "Cairo",
           country: "EG",
           state: "NA",
         };
