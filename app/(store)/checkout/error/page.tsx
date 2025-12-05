@@ -3,8 +3,14 @@
 import { Card, CardBody, CardHeader, Button } from "@heroui/react";
 import { XCircle } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function CheckoutErrorPage() {
+function ErrorContent() {
+  const searchParams = useSearchParams();
+  const message = searchParams.get("message");
+  const code = searchParams.get("code");
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -16,9 +22,12 @@ export default function CheckoutErrorPage() {
         </CardHeader>
         <CardBody className="flex flex-col gap-6 p-8 text-center">
           <p className="text-default-500">
-            We couldn't process your payment. Please try again or use a
-            different payment method.
+            {message ||
+              "We couldn't process your payment. Please try again or use a different payment method."}
           </p>
+          {code && (
+            <p className="text-small text-default-400">Error Code: {code}</p>
+          )}
           <div className="flex flex-col gap-3">
             <Button
               as={Link}
@@ -40,5 +49,13 @@ export default function CheckoutErrorPage() {
         </CardBody>
       </Card>
     </div>
+  );
+}
+
+export default function CheckoutErrorPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ErrorContent />
+    </Suspense>
   );
 }

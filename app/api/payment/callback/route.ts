@@ -93,6 +93,14 @@ export async function GET(req: Request) {
   if (success) {
     return NextResponse.redirect(new URL("/checkout/success", baseUrl));
   } else {
-    return NextResponse.redirect(new URL("/checkout/error", baseUrl));
+    // Forward error details to the error page
+    const errorUrl = new URL("/checkout/error", baseUrl);
+    const message = searchParams.get("data.message");
+    const responseCode = searchParams.get("txn_response_code");
+
+    if (message) errorUrl.searchParams.set("message", message);
+    if (responseCode) errorUrl.searchParams.set("code", responseCode);
+
+    return NextResponse.redirect(errorUrl);
   }
 }
