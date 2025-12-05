@@ -202,10 +202,10 @@ export async function createOrder(prevState: any, formData: FormData) {
           street: address || "NA",
           building: "NA",
           shipping_method: "NA",
-          postal_code: "NA",
+          postal_code: "11511", // Valid Cairo postal code
           city: city || "Cairo",
           country: "EG",
-          state: "NA",
+          state: "Cairo", // Paymob often requires a valid state
         };
 
         const paymentKey = await paymob.getPaymentKey(
