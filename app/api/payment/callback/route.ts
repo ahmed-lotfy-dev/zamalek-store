@@ -82,9 +82,17 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const success = searchParams.get("success") === "true";
 
+  // Determine the base URL
+  // If running behind a proxy, req.url might be localhost.
+  // We try to use the Host header if available.
+  const host = req.headers.get("host");
+  const protocol = req.headers.get("x-forwarded-proto") || "https";
+
+  const baseUrl = host ? `${protocol}://${host}` : new URL(req.url).origin;
+
   if (success) {
-    return NextResponse.redirect(new URL("/checkout/success", req.url));
+    return NextResponse.redirect(new URL("/checkout/success", baseUrl));
   } else {
-    return NextResponse.redirect(new URL("/checkout/error", req.url));
+    return NextResponse.redirect(new URL("/checkout/error", baseUrl));
   }
 }
