@@ -22,6 +22,10 @@ const checkoutSchema = z.object({
   couponCode: z.string().optional(),
 });
 
+import { paymob } from "@/app/lib/paymob";
+
+// ... existing imports
+
 export async function createOrder(prevState: any, formData: FormData) {
   try {
     // 1. Get User Session
@@ -41,21 +45,32 @@ export async function createOrder(prevState: any, formData: FormData) {
       address: formData.get("address"),
       city: formData.get("city"),
       paymentMethod: formData.get("paymentMethod"),
-      items: JSON.parse(formData.get("items") as string),
-      couponCode: formData.get("couponCode"),
+      items: formData.get("items")
+        ? JSON.parse(formData.get("items") as string)
+        : [],
+      couponCode: formData.get("couponCode") || undefined,
     };
 
     const validatedData = checkoutSchema.safeParse(rawData);
 
     if (!validatedData.success) {
+      console.error("Validation Error:", validatedData.error.flatten());
       return {
         error: "Invalid form data",
         details: validatedData.error.flatten(),
       };
     }
 
-    const { items, paymentMethod, address, city, phone, couponCode } =
-      validatedData.data;
+    const {
+      items,
+      paymentMethod,
+      address,
+      city,
+      phone,
+      couponCode,
+      name,
+      email,
+    } = validatedData.data;
 
     // 3. Transaction: Check Stock -> Create Order -> Update Stock
     const order = await prisma.$transaction(async (tx: any) => {
@@ -128,7 +143,7 @@ export async function createOrder(prevState: any, formData: FormData) {
           userId: session.user.id,
           status: "PENDING",
           total: total,
-          isPaid: false, // COD is unpaid initially
+          isPaid: false,
           phone: phone,
           address: `${address}, ${city}`,
           couponId: couponId,
@@ -157,6 +172,59 @@ export async function createOrder(prevState: any, formData: FormData) {
 
       return newOrder;
     });
+
+    // 4. Handle Paymob Payment
+    if (paymentMethod === "paymob") {
+      try {
+        const token = await paymob.authenticate();
+        const paymobOrder = await paymob.registerOrder(
+          token,
+          Number(order.total),
+          "EGP",
+          order.id
+        );
+
+        const billingData = {
+          first_name: name.split(" ")[0],
+          last_name: name.split(" ").slice(1).join(" ") || "User",
+          email: email,
+          phone_number: phone,
+          apartment: "NA",
+          floor: "NA",
+          street: address,
+          building: "NA",
+          shipping_method: "NA",
+          postal_code: "NA",
+          city: city,
+          country: "EG",
+          state: "NA",
+        };
+
+        const paymentKey = await paymob.getPaymentKey(
+          token,
+          paymobOrder.id,
+          billingData,
+          Number(order.total)
+        );
+
+        const redirectUrl = `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentKey}`;
+
+        return {
+          success: true,
+          url: redirectUrl,
+        };
+      } catch (error) {
+        console.error("Paymob Integration Error:", error);
+        // If payment initiation fails, we might want to cancel the order or let it stay pending
+        // For now, we return an error but the order is created
+        return {
+          success: true, // Order created successfully
+          orderId: order.id,
+          warning:
+            "Order created but payment initiation failed. Please try paying from your orders page.",
+        };
+      }
+    }
 
     return { success: true, orderId: order.id };
   } catch (error: any) {

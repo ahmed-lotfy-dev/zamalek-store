@@ -1,3 +1,74 @@
+# Database Design - Zamalek Store
+
+## 1. Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    User ||--o{ Order : places
+    User ||--o{ Address : has
+    User ||--o{ Review : writes
+    User {
+        string id
+        string email
+        string password_hash
+        string name
+        enum role "USER, ADMIN"
+    }
+
+    Product ||--o{ OrderItem : "included in"
+    Product }|--|| Category : "belongs to"
+    Product ||--o{ Review : "receives"
+    Product {
+        string id
+        string name
+        string description
+        decimal price
+        int stock
+        string[] images
+        boolean isArchived
+        boolean isFeatured
+    }
+
+    Category ||--o{ Product : contains
+    Category {
+        string id
+        string name
+        string billboardId
+    }
+
+    Order ||--|{ OrderItem : contains
+    Order ||--|| User : "placed by"
+    Order ||--|| Payment : "has"
+    Order {
+        string id
+        string userId
+        decimal total
+        enum status "PENDING, PAID, SHIPPED, DELIVERED, CANCELLED"
+        datetime createdAt
+    }
+
+    OrderItem {
+        string id
+        string orderId
+        string productId
+        int quantity
+        decimal price
+    }
+
+    Payment {
+        string id
+        string orderId
+        string provider "PAYMOB"
+        string transactionId
+        enum status "PENDING, SUCCESS, FAILED"
+    }
+```
+
+## 2. Recommended Prisma Schema
+
+This schema is designed to work with PostgreSQL.
+
+```prisma
 generator client {
   provider = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -5,12 +76,12 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
   USER
   ADMIN
-  VIEWER
 }
 
 enum OrderStatus {
@@ -23,65 +94,25 @@ enum OrderStatus {
 
 model User {
   id            String    @id @default(cuid())
-  name          String
+  name          String?
   email         String    @unique
-  emailVerified Boolean
+  emailVerified DateTime?
   image         String?
+  password      String?
   role          Role      @default(USER)
-  createdAt     DateTime
-  updatedAt     DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  sessions      Session[]
-  accounts      Account[]
   orders        Order[]
   addresses     Address[]
   reviews       Review[]
-  savedItems    SavedItem[]
-}
-
-model Session {
-  id        String   @id @default(cuid())
-  userId    String
-  token     String
-  expiresAt DateTime
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime
-  updatedAt DateTime
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Account {
-  id           String    @id @default(cuid())
-  userId       String
-  accountId    String
-  providerId   String
-  accessToken  String?
-  refreshToken String?
-  accessTokenExpiresAt DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope        String?
-  password     String?
-  createdAt    DateTime
-  updatedAt    DateTime
-
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Verification {
-  id         String    @id @default(cuid())
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
+  accounts      Account[] // For NextAuth
+  sessions      Session[] // For NextAuth
 }
 
 model Product {
   id          String      @id @default(cuid())
   name        String
-  slug        String      @unique
   description String
   price       Decimal     @db.Decimal(10, 2)
   stock       Int         @default(0)
@@ -95,21 +126,6 @@ model Product {
   category    Category    @relation(fields: [categoryId], references: [id])
   orderItems  OrderItem[]
   reviews     Review[]
-  savedItems  SavedItem[]
-  variants    ProductVariant[]
-}
-
-model ProductVariant {
-  id        String   @id @default(cuid())
-  productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  color     String
-  size      String
-  stock     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([productId, color, size])
 }
 
 model Category {
@@ -134,10 +150,6 @@ model Order {
 
   orderItems OrderItem[]
   payment    Payment?
-  
-  couponId   String?
-  coupon     Coupon?     @relation(fields: [couponId], references: [id])
-  discount   Decimal     @default(0) @db.Decimal(10, 2)
 }
 
 model OrderItem {
@@ -155,9 +167,8 @@ model Payment {
   orderId       String   @unique
   order         Order    @relation(fields: [orderId], references: [id])
   provider      String   @default("PAYMOB")
-  transactionId String   @unique // Critical for idempotency
+  transactionId String? // ID from Paymob
   amount        Decimal  @db.Decimal(10, 2)
-  currency      String   @default("EGP")
   status        String   // e.g., "SUCCESS", "PENDING", "FAILED"
   createdAt     DateTime @default(now())
 }
@@ -185,34 +196,39 @@ model Review {
   createdAt DateTime @default(now())
 }
 
+// NextAuth Models
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
 
-model SavedItem {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, productId])
+  @@unique([provider, providerAccountId])
 }
 
-enum CouponType {
-  PERCENTAGE
-  FIXED
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Coupon {
-  id        String     @id @default(cuid())
-  code      String     @unique
-  type      CouponType
-  amount    Decimal    @db.Decimal(10, 2)
-  maxUses   Int?       // Null means unlimited
-  usedCount Int        @default(0)
-  expiresAt DateTime?
-  isActive  Boolean    @default(true)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-  orders    Order[]
+  @@unique([identifier, token])
 }
+```

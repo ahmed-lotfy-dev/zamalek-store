@@ -117,9 +117,15 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
           console.error("Validation details:", result.details);
         }
       } else if (result.success) {
-        toast.success("Order placed successfully!");
-        clearCart();
-        router.push("/checkout/success");
+        if (result.url) {
+          // Redirect to Paymob
+          window.location.href = result.url;
+        } else {
+          // COD or other non-redirect methods
+          toast.success("Order placed successfully!");
+          clearCart();
+          router.push("/checkout/success");
+        }
       }
     } catch (error) {
       console.error("Submission error:", error);
@@ -225,8 +231,7 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
                 </Radio>
                 <Radio
                   value="paymob"
-                  description="Credit Card / Wallet (Coming Soon)"
-                  isDisabled
+                  description="Pay securely with Credit Card"
                 >
                   Paymob (Online Payment)
                 </Radio>
