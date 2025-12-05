@@ -65,8 +65,8 @@ export async function POST(req: Request) {
       JSON.stringify(verificationData, null, 2)
     );
 
-    // Verify signature
-    const isValid = kashier.verifyCallback(verificationData);
+    // Verify signature - pass the signatureKeys array to maintain order
+    const isValid = kashier.verifyCallback(verificationData, signatureKeys);
     if (!isValid) {
       console.error("❌ Invalid Kashier callback signature");
       return new NextResponse("Invalid Signature", { status: 403 });

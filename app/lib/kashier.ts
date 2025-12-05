@@ -134,9 +134,12 @@ export const kashier = {
 
   /**
    * Verify Kashier callback signature
-   * Kashier concatenates values of specific keys in order, then hashes with API key
+   * Kashier concatenates values in the order specified by signatureKeys array
    */
-  verifyCallback: (query: Record<string, string>): boolean => {
+  verifyCallback: (
+    query: Record<string, string>,
+    signatureKeys?: string[]
+  ): boolean => {
     if (!process.env.KASHIER_API_KEY) {
       console.error("KASHIER_API_KEY is not set");
       return false;
@@ -153,13 +156,15 @@ export const kashier = {
       const dataFields = { ...query };
       delete dataFields.signature;
 
-      // Sort keys alphabetically and concatenate values
-      const sortedKeys = Object.keys(dataFields).sort();
-      const concatenatedValues = sortedKeys
-        .map((key) => dataFields[key])
+      // Use signatureKeys order if provided, otherwise sort alphabetically
+      const keysToUse = signatureKeys || Object.keys(dataFields).sort();
+
+      // Concatenate values in the specified order
+      const concatenatedValues = keysToUse
+        .map((key) => dataFields[key] || "")
         .join("");
 
-      console.log("Kashier Debug - Sorted Keys:", sortedKeys);
+      console.log("Kashier Debug - Keys Order:", keysToUse);
       console.log("Kashier Debug - Concatenated Values:", concatenatedValues);
 
       // Calculate signature using HMAC SHA256
