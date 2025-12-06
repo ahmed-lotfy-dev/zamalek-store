@@ -1,8 +1,12 @@
-# Paymob Iframe Code
+# Paymob Integration
+
+This guide covers both Card Payment (iframe) and Mobile Wallet payments with Paymob.
+
+## 1. Card Payment Setup (Iframe)
 
 Copy and paste these sections into the corresponding fields in the Paymob "Add Iframe" popup.
 
-## HTML Content
+### HTML Content
 
 ```html
 <div class="iframeOut">
@@ -302,4 +306,58 @@ footer img {
 ```javascript
 // No specific JS required, but field cannot be empty.
 console.log("Paymob Iframe Loaded");
+```
+
+## 2. Mobile Wallet Payment Setup
+
+For mobile wallet payments, you'll need a separate integration in Paymob dashboard.
+
+### Dashboard Setup for Wallets
+
+1. **Create New Wallet Integration**:
+   - Go to **Developers** → **Payment Integrations**
+   - Click **Add** → Select **Mobile Wallets**
+   - Choose which wallets you want: Vodafone Cash, Etisalat Cash, Orange Money, Bank Wallets, etc.
+
+2. **Configure Accepting URL**:
+   - This will be the same as your card integration: `https://yourdomain.com/api/payment/callback`
+
+3. **Copy Wallet Integration ID**:
+   - Add to your `.env` as `PAYMOB_WALLET_INTEGRATION_ID`
+
+### Environment Variables
+
+Add this to your `.env`:
+
+```bash
+# Paymob Card Payment (existing)
+PAYMOB_INTEGRATION_ID="4553196"  # Card payments
+
+# Paymob Wallet Payment (new)
+PAYMOB_WALLET_INTEGRATION_ID="4553197"  # Wallet payments
+```
+
+### Supported Wallets in Egypt
+
+- **Vodafone Cash**: Vodafone mobile numbers
+- **Etisalat Cash**: Etisalat mobile numbers
+- **Orange Money**: Orange mobile numbers
+- **Bank Wallets**: Various bank mobile apps
+- **Aman Wallet**: National digital wallet
+
+### Implementation Code
+
+The wallet payments use a different flow - instead of redirecting to an iframe, the user:
+1. Enters their mobile number
+2. Receives an SMS/in-app notification
+3. Completes payment in their wallet app
+4. Gets redirected back to your site
+
+```typescript
+// Example wallet payment request
+const walletData = {
+  "subscriber_number": "01234567890",  // Egyptian format
+  "type": "VodafoneCash",  // VodafoneCash, EtisalatCash, etc.
+  "pin": null  // Some wallets require PIN, others use OTP
+};
 ```

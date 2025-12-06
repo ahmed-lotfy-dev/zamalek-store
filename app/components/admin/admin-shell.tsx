@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@heroui/button";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -35,10 +34,10 @@ export default function AdminShell({
   const router = useRouter();
 
   // Close menu on route change
+  // Close menu on route change
   useEffect(() => {
-    if (isMenuOpen) {
-      setIsMenuOpen(false);
-    }
+    const timer = setTimeout(() => setIsMenuOpen(false), 0);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   const handleSignOut = async () => {

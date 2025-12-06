@@ -22,7 +22,7 @@ export default async function CheckoutPage() {
         take: 1,
       },
       addresses: {
-        take: 1,
+        orderBy: { createdAt: "desc" },
       },
     },
   });
@@ -61,5 +61,10 @@ export default async function CheckoutPage() {
     city: initialCity,
   };
 
-  return <CheckoutForm initialData={initialData} />;
+  return (
+    <CheckoutForm
+      initialData={initialData}
+      savedAddresses={user?.addresses || []}
+    />
+  );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Image, Button, Chip, Input } from "@heroui/react";
+import { Image, Button, Chip } from "@heroui/react";
 import { useCart } from "@/app/context/cart-context";
 import SaveButton from "./save-button";
 import { ShoppingCart, Minus, Plus } from "lucide-react";

@@ -21,34 +21,75 @@ export default function CheckoutSuccessPage() {
     // Prevent running multiple times
     if (hasCleared.current) return;
 
-    if (!sessionId) {
-      // No session_id means Kashier, Paymob, or COD payment
-      // Clear cart immediately for these payment methods
-      hasCleared.current = true;
-      setStatus("success");
-      clearCart();
+    // 1. Handle Stripe (session_id)
+    if (sessionId) {
+      const verifyStripe = async () => {
+        try {
+          const result = await verifyStripePayment(sessionId);
+          if (result.success) {
+            hasCleared.current = true;
+            setStatus("success");
+            clearCart();
+          } else {
+            setStatus("error");
+          }
+        } catch (error) {
+          console.error("Stripe verification failed", error);
+          setStatus("error");
+        }
+      };
+      verifyStripe();
       return;
     }
 
-    // For Stripe payments, verify first then clear cart
-    const verify = async () => {
-      try {
-        const result = await verifyStripePayment(sessionId);
-        if (result.success) {
-          hasCleared.current = true;
-          setStatus("success");
-          clearCart();
-        } else {
+    // 2. Handle Kashier (paymentStatus + merchantOrderId)
+    const paymentStatus = searchParams.get("paymentStatus");
+    const merchantOrderId = searchParams.get("merchantOrderId");
+
+    if (paymentStatus && merchantOrderId) {
+      const verifyKashier = async () => {
+        try {
+          // Convert searchParams to object
+          const params: Record<string, string> = {};
+          searchParams.forEach((value, key) => {
+            params[key] = value;
+          });
+
+          // Get raw query string to preserve order for signature verification
+          // We can use window.location.search on the client
+          const rawQueryString = window.location.search.substring(1); // Remove '?'
+
+          // Import dynamically to avoid server-side import issues in client component if not handled by Next.js
+          // But verifyKashierPayment is a server action, so it's fine
+          const { verifyKashierPayment } = await import(
+            "@/app/lib/actions/checkout"
+          );
+
+          const result = await verifyKashierPayment(params, rawQueryString);
+
+          if (result.success) {
+            hasCleared.current = true;
+            setStatus("success");
+            clearCart();
+          } else {
+            console.error("Kashier verification failed:", result.error);
+            setStatus("error");
+          }
+        } catch (error) {
+          console.error("Kashier verification error", error);
           setStatus("error");
         }
-      } catch (error) {
-        console.error("Verification failed", error);
-        setStatus("error");
-      }
-    };
+      };
+      verifyKashier();
+      return;
+    }
 
-    verify();
-  }, [sessionId, clearCart]);
+    // 3. Handle COD or others (no specific params)
+    // Clear cart immediately
+    hasCleared.current = true;
+    setStatus("success");
+    clearCart();
+  }, [sessionId, searchParams, clearCart]);
 
   if (status === "loading") {
     return (

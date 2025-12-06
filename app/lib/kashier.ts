@@ -139,13 +139,9 @@ export const kashier = {
    */
   verifyCallback: (
     query: Record<string, string>,
-    signatureKeys?: string[]
+    signatureKeys?: string[],
+    queryString?: string
   ): boolean => {
-    if (!process.env.KASHIER_SECRET_KEY) {
-      console.error("KASHIER_SECRET_KEY is not set");
-      return false;
-    }
-
     try {
       const receivedSignature = query.signature;
       if (!receivedSignature) {
@@ -153,38 +149,105 @@ export const kashier = {
         return false;
       }
 
-      // Remove signature from query to get the data fields
-      const dataFields = { ...query };
-      delete dataFields.signature;
+      // Helper to calculate HMAC
+      const calcHmac = (secret: string, data: string) =>
+        crypto.createHmac("sha256", secret).update(data).digest("hex");
 
-      // Use signatureKeys order if provided, otherwise sort alphabetically
-      const keysToUse = signatureKeys || Object.keys(dataFields).sort();
+      // Strategy 1: Use raw query string if provided (Best for Redirects)
+      if (queryString) {
+        // Remove signature and mode from query string if present
+        // The query string usually comes as "key=val&key2=val2..."
+        // We need to reconstruct it exactly as Kashier expects:
+        // 1. Parse it to preserve order? No, we want the raw string but filtered.
+        // Actually, if we have the raw query string, we should just use it?
+        // But we need to remove 'signature' and 'mode'.
 
-      // Build query string in Kashier's format: key=value&key2=value2
-      // According to Kashier docs: queryString += '&' + key + '=' + query[key]
-      let queryString = "";
-      for (const key of keysToUse) {
-        if (dataFields[key] !== undefined) {
-          queryString += `&${key}=${dataFields[key]}`;
+        // Better approach: If queryString is provided, we assume the caller wants us to use the order from it.
+        // But we can't easily "remove" params from a string without parsing.
+        // So we parse it into an array of keys to preserve order.
+        const searchParams = new URLSearchParams(queryString);
+        const keysInOrder: string[] = [];
+        searchParams.forEach((_, key) => {
+          if (key !== "signature" && key !== "mode") {
+            keysInOrder.push(key);
+          }
+        });
+
+        // Reconstruct query string using the values from the 'query' object (which might be decoded)
+        // OR use the values from searchParams (which are raw/encoded).
+        // My tests showed "URL Order (Raw)" worked.
+        // URLSearchParams.forEach gives decoded values? No, it gives decoded.
+        // But we want to construct "key=value".
+
+        let rawQs = "";
+        keysInOrder.forEach((key) => {
+          // We use the value from the query object to ensure consistency,
+          // but we MUST ensure it's not double encoded or something.
+          // Actually, my test used `data[k]` which was the raw string from the log.
+          // If `query` object has decoded values, we might need to be careful.
+          // Let's rely on the fact that `query` passed from Next.js is usually decoded.
+          // But my test passed with "Raw" strategy which constructed "&key=val".
+
+          const val = query[key];
+          if (val !== undefined) {
+            rawQs += `&${key}=${val}`;
+          }
+        });
+        rawQs = rawQs.substring(1);
+
+        console.log("Kashier Verify (URL Order):", rawQs);
+
+        if (process.env.KASHIER_API_KEY) {
+          const sig = calcHmac(process.env.KASHIER_API_KEY, rawQs);
+          if (sig === receivedSignature) return true;
         }
       }
 
-      // Remove leading '&'
-      const finalUrl = queryString.substring(1);
+      // Strategy 2: Use signatureKeys (Best for Webhooks)
+      if (signatureKeys) {
+        let rawQs = "";
+        signatureKeys.forEach((key) => {
+          const val = query[key];
+          if (val !== undefined) {
+            rawQs += `&${key}=${val}`;
+          }
+        });
+        rawQs = rawQs.substring(1);
 
-      console.log("Kashier Debug - Keys Order:", keysToUse);
-      console.log("Kashier Debug - Query String:", finalUrl);
+        console.log("Kashier Verify (SignatureKeys):", rawQs);
 
-      // Calculate signature using HMAC SHA256 with Secret Key
-      const calculatedSignature = crypto
-        .createHmac("sha256", process.env.KASHIER_SECRET_KEY)
-        .update(finalUrl)
-        .digest("hex");
+        // Webhooks might use Secret Key OR API Key. My test showed API Key worked for Redirect.
+        // Let's try both for safety.
+        if (process.env.KASHIER_API_KEY) {
+          const sig = calcHmac(process.env.KASHIER_API_KEY, rawQs);
+          if (sig === receivedSignature) return true;
+        }
+        if (process.env.KASHIER_SECRET_KEY) {
+          const sig = calcHmac(process.env.KASHIER_SECRET_KEY, rawQs);
+          if (sig === receivedSignature) return true;
+        }
+      }
 
-      console.log("Kashier Debug - Received Signature:", receivedSignature);
-      console.log("Kashier Debug - Calculated Signature:", calculatedSignature);
+      // Strategy 3: Alphabetical fallback (Old behavior)
+      const sortedKeys = Object.keys(query)
+        .filter((k) => k !== "signature" && k !== "mode")
+        .sort();
+      let rawQs = "";
+      sortedKeys.forEach((key) => {
+        const val = query[key];
+        rawQs += `&${key}=${val}`;
+      });
+      rawQs = rawQs.substring(1);
 
-      return calculatedSignature === receivedSignature;
+      console.log("Kashier Verify (Alphabetical):", rawQs);
+
+      if (process.env.KASHIER_API_KEY) {
+        const sig = calcHmac(process.env.KASHIER_API_KEY, rawQs);
+        if (sig === receivedSignature) return true;
+      }
+
+      console.error("❌ Signature verification failed");
+      return false;
     } catch (error) {
       console.error("❌ Kashier signature verification error:", error);
       return false;

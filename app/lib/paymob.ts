@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { createHmac } from "crypto";
 
 const PAYMOB_API_URL = "https://accept.paymob.com/api";
 
@@ -50,7 +50,9 @@ function validatePaymobEnv(): void {
   const required = [
     "PAYMOB_API_KEY",
     "PAYMOB_INTEGRATION_ID",
-    "PAYMOB_IFRAME_ID",
+    "PAYMOB_WALLET_INTEGRATION_ID",
+    "PAYMOB_IFRAME_ID", // fallback
+    "PAYMOB_CARD_IFRAME_ID",
     "PAYMOB_HMAC_SECRET",
   ];
 
@@ -238,12 +240,121 @@ export const paymob = {
     }
   },
 
+  getWalletPaymentKey: async (
+    token: string,
+    orderId: string,
+    mobileNumber: string,
+    walletType: string,
+    amount: number
+  ): Promise<string> => {
+    if (!process.env.PAYMOB_WALLET_INTEGRATION_ID) {
+      throw new Error(
+        "PAYMOB_WALLET_INTEGRATION_ID is not configured. Please set it in your .env file."
+      );
+    }
+
+    try {
+      const amountCents = Math.round(amount * 100);
+
+      // Map wallet types to Paymob's expected format
+      const walletTypeMapping: { [key: string]: string } = {
+        VodafoneCash: "vodafone-cash",
+        EtisalatCash: "etisalat-cash",
+        OrangeMoney: "orange-money",
+        BankWallet: "bank-wallet",
+        AmanWallet: "aman-wallet",
+      };
+
+      // Ensure mobile number is in correct format for wallet payments
+      const cleanNumber = mobileNumber.replace(/[^\d]/g, "");
+      const formattedMobile = cleanNumber.startsWith("20")
+        ? cleanNumber
+        : `20${cleanNumber}`;
+
+      const payload = {
+        auth_token: token,
+        amount_cents: amountCents,
+        expiration: 3600, // 1 hour
+        order_id: orderId,
+        integration_id: Number(process.env.PAYMOB_WALLET_INTEGRATION_ID),
+        billing_data: {
+          first_name: "Wallet",
+          last_name: "Payment",
+          email: `wallet_${formattedMobile}@example.com`,
+          phone_number: formattedMobile,
+          apartment: "1",
+          floor: "1",
+          street: "Cairo",
+          building: "1",
+          shipping_method: "PKG",
+          postal_code: "11511",
+          city: "Cairo",
+          country: "EG",
+          state: "Cairo",
+        },
+        currency: "EGP",
+        // Mobile wallet payment data
+        source_data: {
+          identifier: formattedMobile,
+          type: "wallet",
+          subtype: walletTypeMapping[walletType] || walletType.toLowerCase().replace(/\s+/g, '-'),
+        },
+      };
+
+      console.log(
+        "💰 Paymob Wallet Payment Key Request:",
+        JSON.stringify(payload, null, 2)
+      );
+
+      const response = await fetch(
+        `${PAYMOB_API_URL}/acceptance/payment_keys`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data: PaymobPaymentKeyResponse = await response.json();
+
+      console.log(
+        "💰 Paymob Wallet Payment Response Status:",
+        response.status,
+        data
+      );
+
+      if (!response.ok) {
+        console.error(
+          "❌ Paymob Wallet Payment Key Failed:",
+          JSON.stringify(data, null, 2)
+        );
+        console.error("💰 Request payload that failed:", JSON.stringify(payload, null, 2));
+        throw new Error(
+          `Paymob wallet payment key request failed: ${
+            data.detail || response.statusText
+          }`
+        );
+      }
+
+      if (!data.token) {
+        throw new Error("Paymob wallet payment key response missing token");
+      }
+
+      console.log("✅ Paymob wallet payment key generated successfully");
+      return data.token;
+    } catch (error) {
+      console.error("❌ Paymob Wallet Payment Key Error:", error);
+      throw error;
+    }
+  },
+
   verifyHmac: (data: any, hmac: string) => {
     if (!process.env.PAYMOB_HMAC_SECRET) {
       console.error("PAYMOB_HMAC_SECRET is not set");
       return false;
     }
 
+    // HMAC keys for both card and wallet transactions
     const keys = [
       "amount_cents",
       "created_at",
@@ -282,8 +393,7 @@ export const paymob = {
       })
       .join("");
 
-    const calculatedHmac = crypto
-      .createHmac("sha512", process.env.PAYMOB_HMAC_SECRET)
+    const calculatedHmac = createHmac("sha512", process.env.PAYMOB_HMAC_SECRET!)
       .update(concatenatedString)
       .digest("hex");
 

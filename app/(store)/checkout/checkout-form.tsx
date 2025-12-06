@@ -6,6 +6,7 @@ import { Input } from "@heroui/input";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Divider } from "@heroui/divider";
 import { RadioGroup, Radio } from "@heroui/radio";
+import { Select, SelectItem } from "@heroui/select";
 import { Image } from "@heroui/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -21,9 +22,13 @@ interface CheckoutFormProps {
     address: string;
     city: string;
   };
+  savedAddresses?: any[];
 }
 
-export default function CheckoutForm({ initialData }: CheckoutFormProps) {
+export default function CheckoutForm({
+  initialData,
+  savedAddresses = [],
+}: CheckoutFormProps) {
   const { items, cartTotal, clearCart } = useCart();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +51,18 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
     address: initialData.address,
     city: initialData.city,
     paymentMethod: "cod",
+    walletType: "",
+    walletNumber: "",
   });
+
+  // Wallet options for Egypt
+  const walletOptions = [
+    { value: "VodafoneCash", label: "Vodafone Cash" },
+    { value: "EtisalatCash", label: "Etisalat Cash" },
+    { value: "OrangeMoney", label: "Orange Money" },
+    { value: "BankWallet", label: "Bank Wallet" },
+    { value: "AmanWallet", label: "Aman Wallet" },
+  ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -108,6 +124,17 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
       formDataToSend.append("couponCode", appliedCoupon.code);
     }
 
+    // Add wallet data if wallet payment is selected
+    if (formData.paymentMethod === "paymob_wallet") {
+      if (!formData.walletType || !formData.walletNumber) {
+        toast.error("Please select a wallet type and enter your mobile number");
+        setIsLoading(false);
+        return;
+      }
+      formDataToSend.append("walletType", formData.walletType);
+      formDataToSend.append("walletNumber", formData.walletNumber);
+    }
+
     try {
       const result = await createOrder(null, formDataToSend);
 
@@ -157,11 +184,40 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
             <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
               <h2 className="text-xl font-bold">Shipping Information</h2>
               <p className="text-small text-default-500 mt-1">
-                Please review your details below. If any information is missing
-                (like phone or address), please add it now.
+                Select a saved address or enter a new one.
               </p>
             </CardHeader>
             <CardBody className="overflow-visible py-2">
+              {savedAddresses.length > 0 && (
+                <div className="mb-6">
+                  <Select
+                    label="Saved Addresses"
+                    placeholder="Select an address"
+                    className="max-w-xs"
+                    onChange={(e) => {
+                      const address = savedAddresses.find(
+                        (a) => a.id === e.target.value
+                      );
+                      if (address) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          address: address.street,
+                          city: address.city,
+                          // We might want to add zip/state/country to formData if needed
+                        }));
+                      }
+                    }}
+                  >
+                    {savedAddresses.map((addr) => (
+                      <SelectItem key={addr.id}>
+                        {addr.street}, {addr.city}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                  <Divider className="my-4" />
+                </div>
+              )}
+
               <form
                 id="checkout-form"
                 onSubmit={handleSubmit}
@@ -233,7 +289,13 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
                   value="paymob"
                   description="Pay securely with Credit Card"
                 >
-                  Paymob (Online Payment)
+                  Paymob (Credit Card)
+                </Radio>
+                <Radio
+                  value="paymob_wallet"
+                  description="Pay with Mobile Wallet (Vodafone, Etisalat, Orange)"
+                >
+                  Paymob (Mobile Wallet)
                 </Radio>
                 <Radio
                   value="kashier"
@@ -248,6 +310,58 @@ export default function CheckoutForm({ initialData }: CheckoutFormProps) {
                   Credit Card (Stripe)
                 </Radio>
               </RadioGroup>
+
+              {/* Wallet Selection Fields - Show when Paymob Wallet is selected */}
+              {formData.paymentMethod === "paymob_wallet" && (
+                <div className="mt-4 space-y-4 p-4 border border-primary-200 rounded-lg bg-primary-50">
+                  <h3 className="text-lg font-semibold text-primary-700">
+                    Wallet Payment Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Select
+                      label="Select Your Mobile Network"
+                      placeholder="Choose wallet type"
+                      selectedKeys={
+                        formData.walletType ? [formData.walletType] : []
+                      }
+                      onSelectionChange={(keys) => {
+                        const selected = Array.from(keys)[0] as string;
+                        setFormData((prev) => ({
+                          ...prev,
+                          walletType: selected,
+                        }));
+                      }}
+                      isRequired
+                      variant="bordered"
+                    >
+                      {walletOptions.map((wallet) => (
+                        <SelectItem key={wallet.value}>
+                          {wallet.label}
+                        </SelectItem>
+                      ))}
+                    </Select>
+                    <Input
+                      label="Mobile Number"
+                      placeholder="01234567890"
+                      type="tel"
+                      value={formData.walletNumber}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          walletNumber: e.target.value,
+                        }))
+                      }
+                      isRequired
+                      variant="bordered"
+                      description="Enter your mobile number (10-14 digits)"
+                    />
+                  </div>
+                  <p className="text-sm text-default-600">
+                    * You will receive an SMS/in-app notification to complete
+                    the payment
+                  </p>
+                </div>
+              )}
             </CardBody>
           </Card>
         </div>

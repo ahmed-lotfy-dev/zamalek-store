@@ -5,6 +5,8 @@ import {
 import { getSavedItems } from "@/app/lib/actions/saved-items";
 import ProductDetails from "@/app/components/store/product-details";
 import RelatedProducts from "@/app/components/store/related-products";
+import ReviewForm from "@/app/components/store/reviews/review-form";
+import ReviewList from "@/app/components/store/reviews/review-list";
 import { notFound } from "next/navigation";
 
 export default async function ProductPage({
@@ -37,6 +39,20 @@ export default async function ProductPage({
           }}
           isSaved={isSaved}
         />
+
+        <div className="mt-16 grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-4">
+            <h3 className="text-2xl font-bold mb-6">Write a Review</h3>
+            <div className="bg-default-50 p-6 rounded-lg border border-divider">
+              <ReviewForm productId={product.id} />
+            </div>
+          </div>
+          <div className="lg:col-span-8">
+            <h3 className="text-2xl font-bold mb-6">Customer Reviews</h3>
+            <ReviewList productId={product.id} />
+          </div>
+        </div>
+
         <RelatedProducts products={relatedProducts} />
       </main>
     </div>

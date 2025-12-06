@@ -11,7 +11,15 @@ const checkoutSchema = z.object({
   phone: z.string().min(1, "Phone is required"),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
-  paymentMethod: z.enum(["cod", "paymob", "stripe", "kashier"]),
+  paymentMethod: z.enum([
+    "cod",
+    "paymob",
+    "paymob_wallet",
+    "stripe",
+    "kashier",
+  ]),
+  walletType: z.string().optional(), // VodafoneCash, EtisalatCash, etc.
+  walletNumber: z.string().optional(), // Mobile number for wallet payments
   items: z.array(
     z.object({
       id: z.string(),
@@ -47,6 +55,8 @@ export async function createOrder(prevState: any, formData: FormData) {
       address: formData.get("address"),
       city: formData.get("city"),
       paymentMethod: formData.get("paymentMethod"),
+      walletType: formData.get("walletType") || undefined,
+      walletNumber: formData.get("walletNumber") || undefined,
       items: formData.get("items")
         ? JSON.parse(formData.get("items") as string)
         : [],
@@ -72,6 +82,8 @@ export async function createOrder(prevState: any, formData: FormData) {
       couponCode,
       name,
       email,
+      walletType,
+      walletNumber,
     } = validatedData.data;
 
     // 3. Transaction: Check Stock -> Create Order -> Update Stock
@@ -215,7 +227,9 @@ export async function createOrder(prevState: any, formData: FormData) {
           Number(order.total)
         );
 
-        const redirectUrl = `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentKey}`;
+        const redirectUrl = `https://accept.paymob.com/api/acceptance/iframes/${
+          process.env.PAYMOB_CARD_IFRAME_ID || process.env.PAYMOB_IFRAME_ID
+        }?payment_token=${paymentKey}`;
 
         return {
           success: true,
@@ -234,7 +248,64 @@ export async function createOrder(prevState: any, formData: FormData) {
       }
     }
 
-    // 5. Handle Stripe Payment
+    // 5. Handle Paymob Wallet Payment
+    if (paymentMethod === "paymob_wallet") {
+      try {
+        if (!walletType || !walletNumber) {
+          return { error: "Wallet type and mobile number are required" };
+        }
+
+        // Format the mobile number for Paymob (Egyptian format)
+        const formattedNumber = walletNumber.replace(/[^\d]/g, "");
+        const mobileNumber = formattedNumber.startsWith("0")
+          ? `2${formattedNumber}`
+          : formattedNumber.startsWith("20")
+          ? formattedNumber
+          : `20${formattedNumber}`;
+
+        const token = await paymob.authenticate();
+        const paymobOrder = await paymob.registerOrder(
+          token,
+          Number(order.total),
+          "EGP",
+          order.id,
+          []
+        );
+
+        const walletPaymentKey = await paymob.getWalletPaymentKey(
+          token,
+          paymobOrder.id,
+          mobileNumber,
+          walletType,
+          Number(order.total)
+        );
+
+        // Wallet payments process without redirect - Paymob sends SMS/in-app notification
+        // User completes payment in their wallet app, then Paymob sends callback
+        console.log(
+          `Wallet payment initiated for ${walletType} - ${mobileNumber}`
+        );
+        console.log(
+          `Payment key generated: ${walletPaymentKey.substring(0, 20)}...`
+        );
+
+        return {
+          success: true,
+          message: `Payment initiated with ${walletType}. Please check your mobile app for payment confirmation.`,
+          orderId: order.id,
+        };
+      } catch (error) {
+        console.error("Paymob Wallet Integration Error:", error);
+        return {
+          success: true, // Order created successfully
+          orderId: order.id,
+          warning:
+            "Order created but wallet payment initiation failed. Please use card payments or try again.",
+        };
+      }
+    }
+
+    // 6. Handle Stripe Payment
     if (paymentMethod === "stripe") {
       try {
         const stripeSession = await stripe.checkout.sessions.create({
@@ -310,6 +381,17 @@ export async function createOrder(prevState: any, formData: FormData) {
       }
     }
 
+    // If COD or other non-redirect methods (if any), clear cart
+    if (paymentMethod === "cod") {
+      await prisma.cartItem.deleteMany({
+        where: {
+          cart: {
+            userId: session.user.id,
+          },
+        },
+      });
+    }
+
     return { success: true, orderId: order.id };
   } catch (error: any) {
     console.error("Checkout Error:", error);
@@ -324,10 +406,21 @@ export async function verifyStripePayment(sessionId: string) {
     if (session.payment_status === "paid") {
       // Update order status to PAID
       if (session.metadata?.orderId) {
-        await prisma.order.update({
+        const order = await prisma.order.update({
           where: { id: session.metadata.orderId },
           data: { isPaid: true, status: "PAID" },
         });
+
+        // Clear cart for this user
+        if (order.userId) {
+          await prisma.cartItem.deleteMany({
+            where: {
+              cart: {
+                userId: order.userId,
+              },
+            },
+          });
+        }
       }
       return { success: true };
     } else {
@@ -336,5 +429,97 @@ export async function verifyStripePayment(sessionId: string) {
   } catch (error) {
     console.error("Stripe Verification Error:", error);
     return { success: false, error: "Failed to verify payment" };
+  }
+}
+
+export async function verifyKashierPayment(
+  searchParams: Record<string, string>,
+  rawQueryString?: string
+) {
+  try {
+    console.log(
+      "🔍 Verifying Kashier Payment (Redirect):",
+      JSON.stringify(searchParams, null, 2)
+    );
+
+    const { merchantOrderId, paymentStatus, signature } = searchParams;
+
+    if (!merchantOrderId || !paymentStatus || !signature) {
+      console.error("❌ Missing required parameters for Kashier verification");
+      return { success: false, error: "Missing required parameters" };
+    }
+
+    if (paymentStatus !== "SUCCESS") {
+      console.error("❌ Payment status is not SUCCESS:", paymentStatus);
+      return { success: false, error: "Payment was not successful" };
+    }
+
+    // Check if order is already paid
+    const order = await prisma.order.findUnique({
+      where: { id: merchantOrderId },
+    });
+
+    if (!order) {
+      console.error("❌ Order not found:", merchantOrderId);
+      return { success: false, error: "Order not found" };
+    }
+
+    if (order.status === "PAID") {
+      console.log("✅ Order already paid:", merchantOrderId);
+      return { success: true, message: "Order already paid" };
+    }
+
+    // Verify signature using the raw query string if available
+    // This preserves the parameter order which is critical for Kashier verification
+    const isValid = kashier.verifyCallback(
+      searchParams,
+      undefined,
+      rawQueryString
+    );
+
+    if (!isValid) {
+      console.error("❌ Kashier redirect signature verification failed");
+      return { success: false, error: "Invalid signature" };
+    }
+
+    console.log("✅ Signature verified! Updating order to PAID");
+
+    // Update order status
+    await prisma.$transaction([
+      prisma.payment.create({
+        data: {
+          orderId: merchantOrderId,
+          transactionId: searchParams.transactionId || `TX-${Date.now()}`,
+          amount: parseFloat(searchParams.amount || "0"),
+          currency: searchParams.currency || "EGP",
+          status: "SUCCESS",
+          provider: "KASHIER",
+        },
+      }),
+      prisma.order.update({
+        where: { id: merchantOrderId },
+        data: {
+          status: "PAID",
+          isPaid: true,
+        },
+      }),
+    ]);
+
+    // Clear cart for this user
+    if (order.userId) {
+      await prisma.cartItem.deleteMany({
+        where: {
+          cart: {
+            userId: order.userId,
+          },
+        },
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Kashier verification error:", error);
+
+    return { success: false, error: "Verification failed" };
   }
 }

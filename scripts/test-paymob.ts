@@ -7,9 +7,10 @@
  */
 
 // Load environment variables from .env file
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
+import { createHmac } from "crypto";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -161,8 +162,48 @@ async function testPaymobIntegration() {
     process.exit(1);
   }
 
-  // Step 5: Test HMAC Verification
-  log("Step 5: Testing HMAC Verification...\n", colors.yellow);
+  // Step 5: Test Mobile Wallet Payment Key Generation
+  log("Step 5: Testing Mobile Wallet Payment Key Generation...\n", colors.yellow);
+
+  const testWalletData = {
+    walletType: "VodafoneCash",
+    mobileNumber: "201234567890", // Test Vodafone number
+    amount: 100.0,
+  };
+
+  let walletPaymentKey: string;
+  try {
+    const walletKey = await paymob.getWalletPaymentKey(
+      authToken,
+      paymobOrderId,
+      testWalletData.mobileNumber,
+      testWalletData.walletType,
+      testWalletData.amount
+    );
+    walletPaymentKey = walletKey;
+    success(`Mobile wallet payment key generated successfully`);
+    info(`Wallet Type: ${testWalletData.walletType}`);
+    info(`Mobile Number: ${testWalletData.mobileNumber}`);
+    info(`Payment Key: ${walletPaymentKey.substring(0, 30)}...\n`);
+
+    // Generate the redirect URL for wallet payment
+    const walletRedirectUrl = `https://accept.paymob.com/api/acceptance/redirect?payment_token=${walletPaymentKey}`;
+    info(`Wallet Redirect URL would be:\n${walletRedirectUrl}\n`);
+  } catch (err: any) {
+    error(`Mobile wallet payment key generation failed: ${err.message}`);
+
+    // Provide helpful troubleshooting info
+    warning("💡 Mobile Wallet Troubleshooting:");
+    warning("   1. Check if PAYMOB_WALLET_INTEGRATION_ID is set in .env");
+    warning("   2. Verify wallet integration is enabled in Paymob dashboard");
+    warning("   3. Ensure the wallet type mapping matches Paymob's expectations\n");
+
+    // Continue with other tests
+    log("Continuing with HMAC verification...\n", colors.yellow);
+  }
+
+  // Step 6: Test HMAC Verification
+  log("Step 6: Testing HMAC Verification...\n", colors.yellow);
 
   // Sample webhook data (structure similar to what Paymob sends)
   const sampleWebhookData = {
@@ -232,9 +273,7 @@ async function testPaymobIntegration() {
       })
       .join("");
 
-    const crypto = require("crypto");
-    const expectedHmac = crypto
-      .createHmac("sha512", process.env.PAYMOB_HMAC_SECRET!)
+    const expectedHmac = createHmac("sha512", process.env.PAYMOB_HMAC_SECRET!)
       .update(concatenatedString)
       .digest("hex");
 

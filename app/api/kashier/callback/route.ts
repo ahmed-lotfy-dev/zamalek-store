@@ -66,7 +66,15 @@ export async function POST(req: Request) {
     );
 
     // Verify signature - pass the signatureKeys array to maintain order
-    const isValid = kashier.verifyCallback(verificationData, signatureKeys);
+    // Also pass the raw query string for redirect verification (which relies on URL order)
+    const urlObj = new URL(req.url);
+    const rawQueryString = urlObj.search.substring(1); // Remove '?'
+
+    const isValid = kashier.verifyCallback(
+      verificationData,
+      signatureKeys,
+      rawQueryString
+    );
     if (!isValid) {
       console.error("❌ Invalid Kashier callback signature");
       return new NextResponse("Invalid Signature", { status: 403 });
