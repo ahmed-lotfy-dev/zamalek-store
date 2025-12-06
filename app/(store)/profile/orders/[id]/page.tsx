@@ -9,6 +9,7 @@ import { ArrowLeft, MapPin, Phone, CreditCard } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { getStatusColor } from "@/app/lib/utils";
+import OrderStatusListener from "@/app/components/store/order-status-listener";
 
 export default async function OrderDetailsPage({
   params,
@@ -24,6 +25,7 @@ export default async function OrderDetailsPage({
 
   return (
     <div className="space-y-6">
+      <OrderStatusListener orderId={order.id} />
       <div className="flex items-center gap-4">
         <Button
           as={Link}

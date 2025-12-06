@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 
 import { auth } from "@/app/lib/auth";
 import { headers } from "next/headers";
+import { addEmailJob } from "@/app/lib/queue";
+import { connection } from "@/app/lib/redis";
 
 export async function getOrders(page = 1, limit = 10) {
   const session = await auth.api.getSession({
@@ -127,10 +129,27 @@ export async function updateOrderStatus(id: string, status: OrderStatus) {
   }
 
   try {
-    await prisma.order.update({
+    const updatedOrder = await prisma.order.update({
       where: { id },
       data: { status },
+      include: { user: true },
     });
+
+    // Send Email Notification
+    if (updatedOrder.user.email) {
+      await addEmailJob("STATUS_CHANGED", {
+        email: updatedOrder.user.email,
+        orderId: id,
+        status: status,
+      });
+    }
+
+    // Publish WebSocket Event
+    await connection.publish(
+      "order-updates",
+      JSON.stringify({ orderId: id, status })
+    );
+
     revalidatePath("/admin/orders");
     revalidatePath(`/admin/orders/${id}`);
     return { success: true };

@@ -33,6 +33,7 @@ const checkoutSchema = z.object({
 import { paymob } from "@/app/lib/paymob";
 import { kashier } from "@/app/lib/kashier";
 import { stripe } from "@/app/lib/stripe";
+import { addEmailJob } from "@/app/lib/queue";
 
 // ... existing imports
 
@@ -183,6 +184,13 @@ export async function createOrder(prevState: any, formData: FormData) {
           },
         });
       }
+
+      // Add email job to queue
+      await addEmailJob("ORDER_PLACED", {
+        email: email,
+        orderId: newOrder.id,
+        total: total,
+      });
 
       return newOrder;
     });
