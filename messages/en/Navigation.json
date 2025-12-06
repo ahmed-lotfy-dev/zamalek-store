@@ -1,0 +1,15 @@
+{
+  "home": "Home",
+  "shop": "Shop",
+  "jerseys": "Jerseys",
+  "products": "Products",
+  "cart": "Cart",
+  "login": "Login",
+  "dashboard": "Dashboard",
+  "adminDashboard": "Admin Dashboard",
+  "signIn": "Sign In",
+  "logOut": "Log Out",
+  "myProfile": "My Profile",
+  "myOrders": "My Orders",
+  "signedInAs": "Signed in as"
+}

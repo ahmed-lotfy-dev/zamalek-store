@@ -9,7 +9,6 @@ import {
   NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
-  Link,
   Button,
   Badge,
   Dropdown,
@@ -22,17 +21,22 @@ import { ShoppingBag, Heart } from "lucide-react";
 import { useCart } from "@/app/context/cart-context";
 import CartDrawer from "./store/cart-drawer";
 import { authClient } from "@/app/lib/auth-client";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/routing";
+import { Link } from "@/i18n/routing";
+import LanguageSwitcher from "./LanguageSwitcher";
+import ThemeSwitcher from "./ThemeSwitcher";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function StoreNavbar({ user }: { user?: any }) {
   const { setIsCartOpen, cartCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const pathname = usePathname();
-
+  const t = useTranslations("Navigation");
+  const tHome = useTranslations("HomePage");
+  const locale = useLocale();
   const menuItems = [
-    { name: "Home", href: "/" },
-    { name: "Shop", href: "/products" },
-    { name: "Jerseys", href: "/products?category=jerseys" },
+    { name: t("home"), href: "/" },
+    { name: t("shop"), href: "/products" },
   ];
 
   return (
@@ -51,36 +55,37 @@ export default function StoreNavbar({ user }: { user?: any }) {
 
         <NavbarContent className="md:hidden pr-3" justify="center">
           <NavbarBrand>
-            <Link href="/" color="foreground">
-              <p className="font-bold text-inherit text-xl">Zamalek Store</p>
+            <Link href="/" className="text-foreground">
+              <p className="font-bold text-inherit text-xl">{tHome("title")}</p>
             </Link>
           </NavbarBrand>
         </NavbarContent>
 
         <NavbarContent className="hidden md:flex gap-4" justify="start">
           <NavbarBrand className="mr-4">
-            <Link href="/" color="foreground">
-              <p className="font-bold text-inherit text-xl">Zamalek Store</p>
+            <Link href="/" className="text-foreground">
+              <p className="font-bold text-inherit text-xl">{tHome("title")}</p>
             </Link>
           </NavbarBrand>
           <NavbarItem>
-            <Link color="foreground" href="/">
-              Home
+            <Link className="text-foreground" href="/">
+              {t("home")}
             </Link>
           </NavbarItem>
           <NavbarItem>
-            <Link color="foreground" href="/products">
-              Shop
-            </Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Link color="foreground" href="/products?category=jerseys">
-              Jerseys
+            <Link className="text-foreground" href="/products">
+              {t("shop")}
             </Link>
           </NavbarItem>
         </NavbarContent>
 
         <NavbarContent justify="end">
+          <NavbarItem>
+            <ThemeSwitcher />
+          </NavbarItem>
+          <NavbarItem>
+            <LanguageSwitcher />
+          </NavbarItem>
           <NavbarItem>
             <Button
               isIconOnly
@@ -111,7 +116,7 @@ export default function StoreNavbar({ user }: { user?: any }) {
           {user?.role === "ADMIN" && (
             <NavbarItem className="hidden md:flex">
               <Button as={Link} color="primary" href="/admin" variant="flat">
-                Admin Dashboard
+                {t("adminDashboard")}
               </Button>
             </NavbarItem>
           )}
@@ -131,18 +136,18 @@ export default function StoreNavbar({ user }: { user?: any }) {
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Profile Actions" variant="flat">
                   <DropdownItem key="profile" className="h-14 gap-2">
-                    <p className="font-semibold">Signed in as</p>
+                    <p className="font-semibold">{t("signedInAs")}</p>
                     <p className="font-semibold">{user.email}</p>
                   </DropdownItem>
-                  <DropdownItem key="dashboard" href="/profile">
-                    My Profile
+                  <DropdownItem key="dashboard" href="/profile" as={Link}>
+                    {t("myProfile")}
                   </DropdownItem>
-                  <DropdownItem key="orders" href="/profile/orders">
-                    My Orders
+                  <DropdownItem key="orders" href="/profile/orders" as={Link}>
+                    {t("myOrders")}
                   </DropdownItem>
                   {user.role === "ADMIN" ? (
-                    <DropdownItem key="admin" href="/admin">
-                      Admin Dashboard
+                    <DropdownItem key="admin" href="/admin" as={Link}>
+                      {t("adminDashboard")}
                     </DropdownItem>
                   ) : (
                     <DropdownItem key="hidden-admin" className="hidden" />
@@ -155,7 +160,7 @@ export default function StoreNavbar({ user }: { user?: any }) {
                       window.location.href = "/";
                     }}
                   >
-                    Log Out
+                    {t("logOut")}
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
@@ -163,21 +168,19 @@ export default function StoreNavbar({ user }: { user?: any }) {
           ) : (
             <NavbarItem>
               <Button as={Link} color="primary" href="/sign-in" variant="flat">
-                Sign In
+                {t("signIn")}
               </Button>
             </NavbarItem>
           )}
         </NavbarContent>
 
-        <NavbarMenu>
+        <NavbarMenu className="pt-6 gap-4">
           {menuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
               <Link
-                className="w-full"
-                color="foreground"
+                className="w-full text-foreground text-lg font-medium py-2 block"
                 href={item.href}
-                size="lg"
-                onPress={() => setIsMenuOpen(false)}
+                onClick={() => setIsMenuOpen(false)}
               >
                 {item.name}
               </Link>
@@ -186,13 +189,11 @@ export default function StoreNavbar({ user }: { user?: any }) {
           {user?.role === "ADMIN" && (
             <NavbarMenuItem>
               <Link
-                className="w-full"
-                color="primary"
+                className="w-full text-primary text-lg font-medium py-2 block"
                 href="/admin"
-                size="lg"
-                onPress={() => setIsMenuOpen(false)}
+                onClick={() => setIsMenuOpen(false)}
               >
-                Admin Dashboard
+                {t("adminDashboard")}
               </Link>
             </NavbarMenuItem>
           )}

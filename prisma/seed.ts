@@ -1,313 +1,159 @@
-import {prisma} from "../app/lib/prisma";
+import { prisma } from "../app/lib/prisma";
 import { auth } from "../app/lib/auth";
 import { Role } from "@prisma/client";
+import {
+  categoriesData,
+  productsData,
+  usersData,
+  commentsData,
+  subscribersData,
+} from "./seed-data";
 
 async function main() {
   console.log("Start seeding...");
 
-  // Cleanup existing data
-  await prisma.orderItem.deleteMany();
-  await prisma.payment.deleteMany(); // Delete payments first
-  await prisma.order.deleteMany();
+  // 1. Cleanup
+  console.log("Cleaning up database...");
+  await prisma.subscription.deleteMany();
+  await prisma.cartItem.deleteMany();
+  await prisma.cart.deleteMany();
+  await prisma.savedItem.deleteMany();
   await prisma.review.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.coupon.deleteMany();
+  await prisma.productVariant.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
+  // We don't delete users to avoid breaking auth, but we'll ensure admin/test users exist
 
-  // Create Categories
-  const jerseys = await prisma.category.create({
-    data: { name: "Jerseys" },
-  });
+  // 2. Create Categories
+  console.log("Creating categories...");
+  const categories: Record<string, string> = {};
+  for (const cat of categoriesData) {
+    const created = await prisma.category.create({ data: cat });
+    categories[cat.nameEn] = created.id;
+  }
 
-  const tshirts = await prisma.category.create({
-    data: { name: "T-Shirts" },
-  });
+  // 3. Create Products
+  console.log("Creating products...");
+  const createdProducts = [];
+  for (const p of productsData) {
+    const { categoryNameEn, ...productData } = p;
+    const product = await prisma.product.create({
+      data: {
+        ...productData,
+        categoryId: categories[categoryNameEn],
+      },
+    });
+    createdProducts.push(product);
 
-  const accessories = await prisma.category.create({
-    data: { name: "Accessories" },
-  });
+    // Create Variants
+    const sizes = ["S", "M", "L", "XL"];
+    const colors = ["White", "Red", "Black"];
 
-  // Create Admin User
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-
-  if (adminEmail && adminPassword) {
-    try {
-      const { user: createdUser } = await auth.api.signUpEmail({
-        body: {
-          email: adminEmail,
-          password: adminPassword,
-          name: "Admin User",
-          role: "ADMIN",
-        },
-        headers: new Headers(),
-      });
-
-      if (createdUser) {
-        await prisma.user.update({
-          where: { id: createdUser.id },
-          data: { role: Role.ADMIN },
-        });
-        console.log(`Created admin user: ${adminEmail} with role ADMIN`);
-      }
-    } catch (error: any) {
-      if (error.body?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
-        console.log("Admin user already exists. Updating role to ADMIN...");
-        const existingUser = await prisma.user.findUnique({
-          where: { email: adminEmail },
-        });
-        if (existingUser) {
-          await prisma.user.update({
-            where: { id: existingUser.id },
-            data: { role: Role.ADMIN },
+    let totalStock = 0;
+    for (const size of sizes) {
+      for (const color of colors) {
+        // Random stock between 0 and 20
+        const stock = Math.floor(Math.random() * 21);
+        if (stock > 0) {
+          totalStock += stock;
+          await prisma.productVariant.create({
+            data: {
+              productId: product.id,
+              size,
+              color,
+              stock,
+            },
           });
-          console.log(
-            `Updated existing admin user: ${adminEmail} to role ADMIN`
-          );
         }
-      } else {
-        console.error("Error creating admin user:", error);
       }
     }
 
-    // Create Test User (Viewer)
-    const testEmail = "testuser@gmail.com";
-    const testPassword = "00000000";
-
-    // Delete existing test user to ensure fresh state
-    const existingTestUser = await prisma.user.findUnique({
-      where: { email: testEmail },
+    // Update product stock with total variant stock
+    await prisma.product.update({
+      where: { id: product.id },
+      data: { stock: totalStock },
     });
-    if (existingTestUser) {
-      await prisma.user.delete({
-        where: { id: existingTestUser.id },
-      });
-      console.log(`Deleted existing test user: ${testEmail}`);
-    }
+  }
 
-    try {
-      const { user: createdTestUser } = await auth.api.signUpEmail({
-        body: {
-          email: testEmail,
-          password: testPassword,
-          name: "Test User",
+  // 4. Create Users & Reviews
+  console.log("Creating users and reviews...");
+  const createdUsers = [];
+  for (const u of usersData) {
+    // Check if exists first
+    let user = await prisma.user.findUnique({ where: { email: u.email } });
+    if (!user) {
+      // Create with dummy password logic if needed, or just DB entry
+      // Using auth.api.signUpEmail is better if we want them login-able,
+      // but for seeding data purely for display, direct DB create is faster/easier if auth allows.
+      // We'll try direct DB create for speed, assuming they don't need to login immediately.
+      user = await prisma.user.create({
+        data: {
+          name: u.name,
+          email: u.email,
+          emailVerified: true,
           role: "USER",
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
-        headers: new Headers(),
       });
-
-      if (createdTestUser) {
-        await prisma.user.update({
-          where: { id: createdTestUser.id },
-          data: { role: Role.VIEWER },
-        });
-        console.log(`Created test user: ${testEmail} with role VIEWER`);
-      }
-    } catch (error: any) {
-      console.error("Error creating test user:", error);
     }
-  } else {
-    console.warn(
-      "ADMIN_EMAIL or ADMIN_PASSWORD not set, skipping admin user creation."
-    );
+    createdUsers.push(user);
   }
 
-  // Create Products
-  // Create Products
-  // 1. Home Jersey
-  const homeJersey = await prisma.product.create({
-    data: {
-      name: "Zamalek SC Home Jersey 24/25",
-      slug: "zamalek-sc-home-jersey-24-25",
-      description:
-        "The official home jersey of Zamalek SC. Features the iconic full white design with two bold red lines across the chest, representing the club's rich history and identity. Made with breathable fabric for maximum comfort.",
-      price: 59.99,
-      stock: 100,
-      categoryId: jerseys.id,
-      images: [
-        "https://placehold.co/600x800/white/red?text=Zamalek+Home+Jersey",
-      ],
-      isFeatured: true,
-    },
-  });
+  // Add reviews
+  for (const product of createdProducts) {
+    // Add 2-4 reviews per product
+    const reviewCount = Math.floor(Math.random() * 3) + 2;
+    for (let i = 0; i < reviewCount; i++) {
+      const randomUser =
+        createdUsers[Math.floor(Math.random() * createdUsers.length)];
+      const randomComment =
+        commentsData[Math.floor(Math.random() * commentsData.length)];
+      const rating = Math.floor(Math.random() * 2) + 4; // 4 or 5 stars mostly
 
-  // 2. Away Jersey
-  const awayJersey = await prisma.product.create({
-    data: {
-      name: "Zamalek SC Away Jersey 24/25",
-      slug: "zamalek-sc-away-jersey-24-25",
-      description:
-        "The official away jersey. A sleek black design with white accents, perfect for showing your support on the road.",
-      price: 59.99,
-      stock: 80,
-      categoryId: jerseys.id,
-      images: [
-        "https://placehold.co/600x800/black/white?text=Zamalek+Away+Jersey",
-      ],
-    },
-  });
-
-  // 3. 1911 Legacy T-Shirt
-  const legacyTee = await prisma.product.create({
-    data: {
-      name: "1911 Legacy T-Shirt",
-      slug: "1911-legacy-t-shirt",
-      description:
-        "Celebrate the founding year of the Royal Club. Premium cotton t-shirt with a vintage 1911 print.",
-      price: 29.99,
-      stock: 150,
-      categoryId: tshirts.id,
-      images: ["https://placehold.co/600x800/white/black?text=1911+Legacy"],
-    },
-  });
-
-  // 4. White Knights T-Shirt
-  const wkTee = await prisma.product.create({
-    data: {
-      name: "White Knights Fan Tee",
-      slug: "white-knights-fan-tee",
-      description:
-        "For the true fans. 'White Knights' graphic print on a comfortable white tee.",
-      price: 24.99,
-      stock: 200,
-      categoryId: tshirts.id,
-      images: ["https://placehold.co/600x800/white/red?text=White+Knights"],
-    },
-  });
-
-  // 5. Zamalek Scarf
-  const scarf = await prisma.product.create({
-    data: {
-      name: "Classic Zamalek Scarf",
-      slug: "classic-zamalek-scarf",
-      description:
-        "Keep warm and show your colors. Classic bar scarf in white and red.",
-      price: 19.99,
-      stock: 50,
-      categoryId: accessories.id,
-      images: ["https://placehold.co/600x400/red/white?text=Zamalek+Scarf"],
-    },
-  });
-
-  // Create Orders
-  const user = await prisma.user.findUnique({
-    where: { email: adminEmail },
-  });
-
-  if (user) {
-    // Order 1: PENDING
-    await prisma.order.create({
-      data: {
-        userId: user.id,
-        status: "PENDING",
-        total: 89.98,
-        address: "123 Zamalek St, Cairo, Egypt",
-        phone: "+201234567890",
-        orderItems: {
-          create: [
-            {
-              productId: homeJersey.id,
-              quantity: 1,
-              price: 59.99,
-            },
-            {
-              productId: legacyTee.id,
-              quantity: 1,
-              price: 29.99,
-            },
-          ],
+      await prisma.review.create({
+        data: {
+          userId: randomUser.id,
+          productId: product.id,
+          rating,
+          comment: randomComment,
         },
-      },
-    });
-
-    // Order 2: PAID
-    await prisma.order.create({
-      data: {
-        userId: user.id,
-        status: "PAID",
-        total: 59.99,
-        isPaid: true,
-        address: "456 Mohandessin, Giza, Egypt",
-        phone: "+201098765432",
-        orderItems: {
-          create: [
-            {
-              productId: awayJersey.id,
-              quantity: 1,
-              price: 59.99,
-            },
-          ],
-        },
-      },
-    });
-
-    // Order 3: SHIPPED
-    await prisma.order.create({
-      data: {
-        userId: user.id,
-        status: "SHIPPED",
-        total: 49.98,
-        isPaid: true,
-        address: "789 Dokki, Giza, Egypt",
-        phone: "+201122334455",
-        orderItems: {
-          create: [
-            {
-              productId: wkTee.id,
-              quantity: 2,
-              price: 24.99,
-            },
-          ],
-        },
-      },
-    });
-
-    // Order 4: DELIVERED
-    await prisma.order.create({
-      data: {
-        userId: user.id,
-        status: "DELIVERED",
-        total: 19.99,
-        isPaid: true,
-        address: "321 Maadi, Cairo, Egypt",
-        phone: "+201555666777",
-        orderItems: {
-          create: [
-            {
-              productId: scarf.id,
-              quantity: 1,
-              price: 19.99,
-            },
-          ],
-        },
-      },
-    });
-
-    // Order 5: CANCELLED
-    await prisma.order.create({
-      data: {
-        userId: user.id,
-        status: "CANCELLED",
-        total: 119.98,
-        address: "654 Heliopolis, Cairo, Egypt",
-        phone: "+201000111222",
-        orderItems: {
-          create: [
-            {
-              productId: homeJersey.id,
-              quantity: 2,
-              price: 59.99,
-            },
-          ],
-        },
-      },
-    });
-
-    console.log("Created 5 sample orders with different statuses.");
-  } else {
-    console.warn("Admin user not found, skipping order creation.");
+      });
+    }
   }
 
-  console.log("Seeding finished.");
+  // 5. Create Coupons
+  console.log("Creating coupons...");
+  await prisma.coupon.create({
+    data: {
+      code: "WELCOME10",
+      type: "PERCENTAGE",
+      amount: 10,
+      isActive: true,
+    },
+  });
+  await prisma.coupon.create({
+    data: {
+      code: "ZAMALEK20",
+      type: "PERCENTAGE",
+      amount: 20,
+      isActive: true,
+    },
+  });
+
+  // 6. Create Subscriptions
+  console.log("Creating subscriptions...");
+  for (const email of subscribersData) {
+    await prisma.subscription.create({
+      data: { email },
+    });
+  }
+
+  console.log("Seeding finished successfully.");
 }
 
 main()

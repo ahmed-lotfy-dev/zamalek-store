@@ -3,9 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Input, Listbox, ListboxItem, Spinner } from "@heroui/react";
 import { Search } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { searchProducts } from "@/app/lib/actions/products";
 import Image from "next/image";
+import { useTranslations, useLocale } from "next-intl";
+import { useFormat } from "@/app/hooks/use-format";
 
 type SearchResult = {
   id: string;
@@ -13,18 +15,32 @@ type SearchResult = {
   slug: string;
   price: any;
   images: string[];
-  category: { name: string };
+  category: { name: string; nameEn?: string | null };
 };
 
-export default function SearchBar() {
-  const [query, setQuery] = useState("");
+export default function SearchBar({
+  initialQuery = "",
+  onSearch,
+}: {
+  initialQuery?: string;
+  onSearch?: (query: string) => void;
+}) {
+  const t = useTranslations("Product");
+  const locale = useLocale();
+  const { formatCurrency } = useFormat();
+  const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Debounce Search
+  // Sync with initialQuery if it changes externally
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
+
+  // Debounce Search for Dropdown
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (query.length >= 2) {
@@ -60,7 +76,14 @@ export default function SearchBar() {
   const handleSelect = (slug: string) => {
     router.push(`/products/${slug}`);
     setIsOpen(false);
-    setQuery("");
+    // Don't clear query here, let user see what they searched
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && onSearch) {
+      onSearch(query);
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -73,7 +96,7 @@ export default function SearchBar() {
           inputWrapper:
             "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
         }}
-        placeholder="Search products..."
+        placeholder={t("searchPlaceholder")}
         size="sm"
         startContent={<Search size={18} />}
         value={query}
@@ -81,10 +104,12 @@ export default function SearchBar() {
           setQuery(val);
           if (val.length < 2) setIsOpen(false);
         }}
+        onKeyDown={handleKeyDown}
         isClearable
         onClear={() => {
           setQuery("");
           setIsOpen(false);
+          if (onSearch) onSearch("");
         }}
       />
 
@@ -96,7 +121,7 @@ export default function SearchBar() {
             </div>
           ) : (
             <Listbox
-              aria-label="Search Results"
+              aria-label={t("searchResults")}
               onAction={(key) => handleSelect(key as string)}
               classNames={{
                 base: "max-h-[300px] overflow-y-auto",
@@ -121,10 +146,14 @@ export default function SearchBar() {
                         {product.name}
                       </span>
                       <div className="flex items-center gap-2 text-tiny text-default-500">
-                        <span>{product.category.name}</span>
+                        <span>
+                          {locale === "en"
+                            ? product.category.nameEn || product.category.name
+                            : product.category.name}
+                        </span>
                         <span>•</span>
                         <span className="text-primary font-semibold">
-                          ${Number(product.price).toFixed(2)}
+                          {formatCurrency(Number(product.price))}
                         </span>
                       </div>
                     </div>

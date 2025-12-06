@@ -5,6 +5,7 @@ import {
   getProductReviews,
   getProductRatingSummary,
 } from "@/app/lib/actions/reviews";
+import { getTranslations } from "next-intl/server";
 
 interface ReviewListProps {
   productId: string;
@@ -15,6 +16,7 @@ export default async function ReviewList({ productId }: ReviewListProps) {
   const { averageRating, totalReviews } = await getProductRatingSummary(
     productId
   );
+  const t = await getTranslations("Reviews");
 
   return (
     <div className="space-y-8">
@@ -38,7 +40,7 @@ export default async function ReviewList({ productId }: ReviewListProps) {
               ))}
             </div>
             <div className="text-sm text-default-500">
-              {totalReviews} {totalReviews === 1 ? "Review" : "Reviews"}
+              {totalReviews} {totalReviews === 1 ? t("review") : t("reviews")}
             </div>
           </div>
 
@@ -74,7 +76,7 @@ export default async function ReviewList({ productId }: ReviewListProps) {
       <div className="space-y-6">
         {reviews.length === 0 ? (
           <div className="text-center py-8 text-default-500">
-            No reviews yet. Be the first to review this product!
+            {t("noReviews")}
           </div>
         ) : (
           reviews.map((review) => (

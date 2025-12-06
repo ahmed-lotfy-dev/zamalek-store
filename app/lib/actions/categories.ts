@@ -11,6 +11,18 @@ export async function getCategories() {
   });
 }
 
+export async function getCategoriesWithImages() {
+  return await prisma.category.findMany({
+    orderBy: { name: "asc" },
+    include: {
+      products: {
+        take: 1,
+        select: { images: true },
+      },
+    },
+  });
+}
+
 export async function getPaginatedCategories(page = 1, limit = 10) {
   try {
     const skip = (page - 1) * limit;

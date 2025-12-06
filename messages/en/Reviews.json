@@ -1,0 +1,12 @@
+{
+  "rating": "Rating",
+  "yourReview": "Your Review",
+  "placeholder": "Share your thoughts about this product...",
+  "submit": "Submit Review",
+  "selectRating": "Please select a rating",
+  "success": "Review submitted successfully!",
+  "error": "Failed to submit review",
+  "review": "Review",
+  "reviews": "Reviews",
+  "noReviews": "No reviews yet. Be the first to review this product!"
+}

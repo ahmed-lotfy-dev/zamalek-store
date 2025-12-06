@@ -2,7 +2,7 @@
 
 import ProductCard from "@/app/components/product-card";
 import { Button } from "@heroui/react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Heart } from "lucide-react";
 
 interface SavedItemsListProps {

@@ -1,83 +1,111 @@
 "use client";
 
-import { Card, CardFooter, Image, Button, Link } from "@heroui/react";
+import { Card, CardHeader, Image, Button } from "@heroui/react";
+import { Link } from "@/i18n/routing";
+import { useTranslations, useLocale } from "next-intl";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
-const categories = [
-  {
-    id: "jerseys",
-    name: "Official Kits",
-    image:
-      "https://images.unsplash.com/photo-1522770179533-24471fcdba45?w=800&auto=format&fit=crop&q=60",
-    href: "/products?category=jerseys",
-  },
-  {
-    id: "t-shirts",
-    name: "Casual Wear",
-    image:
-      "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&auto=format&fit=crop&q=60",
-    href: "/products?category=t-shirts",
-  },
-  {
-    id: "accessories",
-    name: "Accessories",
-    image:
-      "https://images.unsplash.com/photo-1559563458-527698bf5295?w=800&auto=format&fit=crop&q=60",
-    href: "/products?category=accessories",
-  },
-];
+export default function FeaturedCategories({
+  categories,
+}: {
+  categories: any[];
+}) {
+  const t = useTranslations("Categories");
+  const locale = useLocale();
 
-export default function FeaturedCategories() {
+  // Map categories by English name for easy access
+  const categoryMap = new Map(categories.map((c) => [c.nameEn, c]));
+
+  const jerseys = categoryMap.get("Jerseys");
+  const tShirts = categoryMap.get("T-Shirts");
+  const accessories = categoryMap.get("Accessories");
+
+  const orderedCategories = [
+    {
+      data: jerseys,
+      displayName: t("jerseys"),
+      size: "large",
+    },
+    {
+      data: tShirts,
+      displayName: t("tShirts"),
+      size: "normal",
+    },
+    {
+      data: accessories,
+      displayName: t("accessories"),
+      size: "normal",
+    },
+  ]
+    .filter((item) => item.data) // Filter out missing categories
+    .map((item) => ({
+      id: item.data.id,
+      name: item.displayName,
+      image:
+        item.data.products[0]?.images[0] ||
+        "https://placehold.co/600x400?text=No+Image",
+      href: `/products?category=${item.data.nameEn.toLowerCase().trim()}`,
+      size: item.size,
+    }));
+
   return (
-    <section>
-      <div className="flex justify-between items-end mb-6">
+    <section className="py-12">
+      <div className="flex justify-between items-end mb-8">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            Shop by Category
+          <h2 className="text-3xl font-bold tracking-tight mb-2">
+            {t("shopByCategory")}
           </h2>
-          <p className="text-default-500 mt-1">
-            Find exactly what you&apos;re looking for.
-          </p>
+          <p className="text-default-500">{t("findExactly")}</p>
         </div>
         <Button
           as={Link}
           href="/products"
           variant="light"
           color="primary"
+          endContent={<ArrowRight size={16} />}
           className="font-medium"
         >
-          View All Categories
+          {t("viewAll")}
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {categories.map((category) => (
-          <Card
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[350px]">
+        {orderedCategories.map((category, index) => (
+          <motion.div
             key={category.id}
-            isPressable
-            as={Link}
-            href={category.href}
-            className="h-[300px] w-full group"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.15, duration: 0.6 }}
+            className={category.size === "large" ? "md:col-span-2" : ""}
           >
-            <Image
-              removeWrapper
-              alt={category.name}
-              className="z-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-              src={category.image}
-            />
-            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors z-10" />
-            <CardFooter className="absolute bottom-0 z-20 justify-between border-t-1 border-zinc-100/50 bg-white/10 shadow-small mb-4 mx-4 w-[calc(100%-32px)] rounded-large overflow-hidden py-2 before:rounded-xl before:bg-white/10">
-              <p className="text-white font-bold text-lg">{category.name}</p>
-              <Button
-                className="text-tiny text-white bg-black/20"
-                variant="flat"
-                color="default"
-                radius="lg"
-                size="sm"
-              >
-                Shop Now
-              </Button>
-            </CardFooter>
-          </Card>
+            <Card
+              isPressable
+              as={Link}
+              href={category.href}
+              className="w-full h-full group border-none overflow-hidden shadow-none"
+            >
+              <Image
+                removeWrapper
+                alt={category.name}
+                className="z-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                src={category.image}
+              />
+              {/* Sophisticated Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-90 z-10" />
+
+              <CardHeader className="absolute bottom-0 z-20 flex-col items-start! p-8 w-full">
+                <h3 className="text-white font-bold text-3xl mb-2 tracking-tight drop-shadow-md">
+                  {category.name}
+                </h3>
+                <div className="flex items-center gap-2 text-white/90 text-sm font-medium transform translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                  <span>Shop Collection</span>
+                  <ArrowRight size={16} />
+                </div>
+              </CardHeader>
+            </Card>
+          </motion.div>
         ))}
       </div>
     </section>

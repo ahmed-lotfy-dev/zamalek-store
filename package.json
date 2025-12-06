@@ -26,7 +26,9 @@
     "lucide-react": "^0.555.0",
     "mailtrap": "^4.3.2",
     "next": "16.0.6",
+    "next-intl": "^4.5.8",
     "next-themes": "^0.4.6",
+    "nodemailer": "^6.10.1",
     "pg": "^8.16.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
@@ -38,6 +40,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^20.19.25",
+    "@types/nodemailer": "^6.4.21",
     "@types/pg": "^8.15.6",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

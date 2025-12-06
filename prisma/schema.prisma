@@ -103,8 +103,10 @@ model Verification {
 model Product {
   id          String      @id @default(cuid())
   name        String
+  nameEn      String?     // Optional English Name
   slug        String      @unique
   description String
+  descriptionEn String?   // Optional English Description
   price       Decimal     @db.Decimal(10, 2)
   stock       Int         @default(0)
   images      String[]
@@ -138,6 +140,7 @@ model ProductVariant {
 model Category {
   id        String    @id @default(cuid())
   name      String
+  nameEn    String?   // Optional English Name
   products  Product[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -238,4 +241,12 @@ model Coupon {
   updatedAt DateTime   @updatedAt
 
   orders    Order[]
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

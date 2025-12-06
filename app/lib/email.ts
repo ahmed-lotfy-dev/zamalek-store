@@ -1,9 +1,4 @@
-import { MailtrapClient } from "mailtrap";
-
-const TOKEN = process.env.MAILTRAP_TOKEN || "";
-const SENDER_EMAIL = process.env.MAILTRAP_SENDER_EMAIL || "hello@example.com";
-
-const client = new MailtrapClient({ token: TOKEN });
+import nodemailer from "nodemailer";
 
 export async function sendEmail(
   to: string,
@@ -11,15 +6,39 @@ export async function sendEmail(
   text: string,
   html?: string
 ) {
-  if (!TOKEN) {
-    console.warn("MAILTRAP_TOKEN is not set. Email sending skipped.");
+  const SMTP_HOST = process.env.MAILTRAP_HOST || "sandbox.smtp.mailtrap.io";
+  const SMTP_PORT = parseInt(process.env.MAILTRAP_PORT || "2525");
+  const SMTP_USER = process.env.MAILTRAP_USER;
+  const SMTP_PASS = process.env.MAILTRAP_PASS;
+  const SENDER_EMAIL = process.env.MAILTRAP_SENDER_EMAIL || "hello@example.com";
+
+  console.log("Debug Env Vars:", {
+    HOST: SMTP_HOST,
+    PORT: SMTP_PORT,
+    USER_SET: !!SMTP_USER,
+    PASS_SET: !!SMTP_PASS,
+  });
+
+  if (!SMTP_USER || !SMTP_PASS) {
+    console.warn(
+      "MAILTRAP_USER or MAILTRAP_PASS is not set. Email sending skipped."
+    );
     return;
   }
 
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS,
+    },
+  });
+
   try {
-    await client.send({
-      from: { name: "E-Commerce Store", email: SENDER_EMAIL },
-      to: [{ email: to }],
+    await transporter.sendMail({
+      from: `"E-Commerce Store" <${SENDER_EMAIL}>`,
+      to,
       subject,
       text,
       html,

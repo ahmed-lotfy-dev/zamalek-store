@@ -10,8 +10,9 @@ import {
   CardBody,
   CardFooter,
 } from "@heroui/react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function SignUpForm() {
   const [name, setName] = useState("");
@@ -19,6 +20,7 @@ export default function SignUpForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const t = useTranslations("Auth");
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +42,7 @@ export default function SignUpForm() {
       });
     } catch (error) {
       console.error("Sign up error:", error);
-      alert("Failed to sign up. Please check your connection.");
+      alert(t("signUpConnectionError"));
       setLoading(false);
     }
   };
@@ -48,37 +50,37 @@ export default function SignUpForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="flex flex-col gap-1 items-center justify-center pb-0">
-        <h1 className="text-2xl font-bold">Create Account</h1>
-        <p className="text-small text-default-500">Join Zamalek Store today</p>
+        <h1 className="text-2xl font-bold">{t("signUpTitle")}</h1>
+        <p className="text-small text-default-500">{t("signUpSubtitle")}</p>
       </CardHeader>
       <CardBody>
         <form onSubmit={handleSignUp} className="flex flex-col gap-4">
           <Input
-            label="Name"
+            label={t("name")}
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="John Doe"
+            placeholder={t("namePlaceholder")}
             variant="bordered"
             isRequired
           />
 
           <Input
-            label="Email"
+            label={t("email")}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="john@example.com"
+            placeholder={t("emailPlaceholder")}
             variant="bordered"
             isRequired
           />
 
           <Input
-            label="Password"
+            label={t("password")}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
+            placeholder={t("passwordPlaceholder")}
             variant="bordered"
             isRequired
           />
@@ -89,18 +91,18 @@ export default function SignUpForm() {
             color="primary"
             className="w-full font-medium mt-2"
           >
-            Sign Up
+            {t("signUpButton")}
           </Button>
         </form>
       </CardBody>
       <CardFooter className="justify-center pt-0">
         <div className="text-center text-small">
-          Already have an account?{" "}
+          {t("hasAccount")}{" "}
           <Link
             href="/sign-in"
             className="font-medium underline hover:text-primary"
           >
-            Sign In
+            {t("signInButton")}
           </Link>
         </div>
       </CardFooter>

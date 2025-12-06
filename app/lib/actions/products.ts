@@ -11,18 +11,80 @@ export async function getProducts() {
   });
 }
 
-export async function getPaginatedProducts(page = 1, limit = 10) {
+export async function getPaginatedProducts(
+  page = 1,
+  limit = 10,
+  filters?: {
+    categoryIds?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    search?: string;
+    sort?: string;
+    hideOutOfStock?: boolean;
+  }
+) {
   try {
     const skip = (page - 1) * limit;
 
+    const where: any = {};
+
+    // Filter by Category
+    if (filters?.categoryIds && filters.categoryIds.length > 0) {
+      where.categoryId = { in: filters.categoryIds };
+    }
+
+    // Filter by Price
+    if (filters?.minPrice !== undefined || filters?.maxPrice !== undefined) {
+      where.price = {};
+      if (filters.minPrice !== undefined) {
+        where.price.gte = filters.minPrice;
+      }
+      if (filters.maxPrice !== undefined) {
+        where.price.lte = filters.maxPrice;
+      }
+    }
+
+    // Filter by Search
+    if (filters?.search) {
+      where.OR = [
+        { name: { contains: filters.search, mode: "insensitive" } },
+        { description: { contains: filters.search, mode: "insensitive" } },
+        { nameEn: { contains: filters.search, mode: "insensitive" } },
+        { descriptionEn: { contains: filters.search, mode: "insensitive" } },
+      ];
+    }
+
+    // Filter by Stock
+    if (filters?.hideOutOfStock) {
+      where.stock = { gt: 0 };
+    }
+
+    // Sort
+    let orderBy: any = { createdAt: "desc" };
+    if (filters?.sort) {
+      switch (filters.sort) {
+        case "price_asc":
+          orderBy = { price: "asc" };
+          break;
+        case "price_desc":
+          orderBy = { price: "desc" };
+          break;
+        case "newest":
+        default:
+          orderBy = { createdAt: "desc" };
+          break;
+      }
+    }
+
     const [products, totalCount] = await prisma.$transaction([
       prisma.product.findMany({
+        where,
         skip,
         take: limit,
-        orderBy: { createdAt: "desc" },
+        orderBy,
         include: { category: true },
       }),
-      prisma.product.count(),
+      prisma.product.count({ where }),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
@@ -90,7 +152,7 @@ export async function searchProducts(query: string) {
         price: true,
         images: true,
         category: {
-          select: { name: true },
+          select: { name: true, nameEn: true },
         },
       },
     });
@@ -155,7 +217,9 @@ export async function createProduct(formData: FormData) {
   }
 
   const name = formData.get("name") as string;
+  const nameEn = formData.get("nameEn") as string;
   const description = formData.get("description") as string;
+  const descriptionEn = formData.get("descriptionEn") as string;
   const price = parseFloat(formData.get("price") as string);
   const stock = parseInt(formData.get("stock") as string);
   const categoryId = formData.get("categoryId") as string;
@@ -171,16 +235,23 @@ export async function createProduct(formData: FormData) {
     }
   }
 
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
+  const slug = nameEn
+    ? nameEn
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "")
+    : name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "");
 
   await prisma.product.create({
     data: {
       name,
+      nameEn,
       slug,
       description,
+      descriptionEn,
       price,
       stock,
       categoryId,
@@ -218,7 +289,9 @@ export async function updateProduct(id: string, formData: FormData) {
   }
 
   const name = formData.get("name") as string;
+  const nameEn = formData.get("nameEn") as string;
   const description = formData.get("description") as string;
+  const descriptionEn = formData.get("descriptionEn") as string;
   const price = parseFloat(formData.get("price") as string);
   const stock = parseInt(formData.get("stock") as string);
   const categoryId = formData.get("categoryId") as string;
@@ -234,15 +307,22 @@ export async function updateProduct(id: string, formData: FormData) {
     }
   }
 
-  const slug = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
+  const slug = nameEn
+    ? nameEn
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "")
+    : name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "");
 
   const data: any = {
     name,
+    nameEn,
     slug,
     description,
+    descriptionEn,
     price,
     stock,
     categoryId,

@@ -4,10 +4,13 @@ import { useCart } from "@/app/context/cart-context";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { Image } from "@heroui/image";
-import { Divider } from "@heroui/divider";
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
-import { Link } from "@heroui/link";
+import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { useFormat } from "@/app/hooks/use-format";
+
+import { useLocale } from "next-intl";
 
 export default function CartDrawer() {
   const {
@@ -18,14 +21,10 @@ export default function CartDrawer() {
     isCartOpen,
     setIsCartOpen,
   } = useCart();
-
-  // Format currency
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
-  };
+  const t = useTranslations("Cart");
+  const { formatCurrency, formatNumber } = useFormat();
+  const locale = useLocale();
+  const isRtl = locale === "ar";
 
   return (
     <AnimatePresence>
@@ -42,18 +41,20 @@ export default function CartDrawer() {
 
           {/* Drawer */}
           <motion.div
-            initial={{ x: "100%" }}
+            initial={{ x: isRtl ? "-100%" : "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: "100%" }}
+            exit={{ x: isRtl ? "-100%" : "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-background shadow-xl flex flex-col"
+            className={`fixed inset-y-0 ${
+              isRtl ? "left-0" : "right-0"
+            } z-50 w-full max-w-md bg-background shadow-xl flex flex-col`}
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-divider">
               <div className="flex items-center gap-2">
                 <ShoppingBag className="w-5 h-5" />
                 <h2 className="text-lg font-semibold">
-                  Shopping Cart ({items.length})
+                  {t("title")} ({formatNumber(items.length)})
                 </h2>
               </div>
               <Button
@@ -70,13 +71,13 @@ export default function CartDrawer() {
               {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-default-500 space-y-4">
                   <ShoppingBag className="w-16 h-16 opacity-20" />
-                  <p>Your cart is empty</p>
+                  <p>{t("empty")}</p>
                   <Button
                     color="primary"
                     variant="flat"
                     onPress={() => setIsCartOpen(false)}
                   >
-                    Start Shopping
+                    {t("startShopping")}
                   </Button>
                 </div>
               ) : (
@@ -111,7 +112,7 @@ export default function CartDrawer() {
                         </div>
                         <div className="flex justify-between items-end mt-2">
                           <p className="font-semibold text-primary">
-                            {formatPrice(item.price)}
+                            {formatCurrency(item.price)}
                           </p>
                           <div className="flex items-center gap-2 bg-default-100 rounded-lg p-1">
                             <Button
@@ -126,7 +127,7 @@ export default function CartDrawer() {
                               <Minus className="w-3 h-3" />
                             </Button>
                             <span className="text-xs font-medium w-4 text-center">
-                              {item.quantity}
+                              {formatNumber(item.quantity)}
                             </span>
                             <Button
                               isIconOnly
@@ -152,9 +153,9 @@ export default function CartDrawer() {
             {items.length > 0 && (
               <div className="p-4 border-t border-divider bg-content1">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-default-500">Subtotal</span>
+                  <span className="text-default-500">{t("subtotal")}</span>
                   <span className="text-xl font-bold">
-                    {formatPrice(cartTotal)}
+                    {formatCurrency(cartTotal)}
                   </span>
                 </div>
                 <Button
@@ -166,7 +167,7 @@ export default function CartDrawer() {
                   endContent={<ShoppingBag className="w-4 h-4" />}
                   onPress={() => setIsCartOpen(false)}
                 >
-                  Checkout
+                  {t("checkout")}
                 </Button>
               </div>
             )}

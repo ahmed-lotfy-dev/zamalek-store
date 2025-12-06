@@ -1,12 +1,7 @@
 "use client";
 
 import { Select, SelectItem } from "@heroui/react";
-
-export const sortOptions = [
-  { key: "newest", label: "Newest" },
-  { key: "price_asc", label: "Price: Low to High" },
-  { key: "price_desc", label: "Price: High to Low" },
-];
+import { useTranslations } from "next-intl";
 
 export default function SortSelect({
   sortOption,
@@ -15,10 +10,18 @@ export default function SortSelect({
   sortOption: string;
   setSortOption: (option: string) => void;
 }) {
+  const t = useTranslations("Product");
+
+  const sortOptions = [
+    { key: "newest", label: t("newest") },
+    { key: "price_asc", label: t("priceLowHigh") },
+    { key: "price_desc", label: t("priceHighLow") },
+  ];
+
   return (
     <Select
-      label="Sort by"
-      className="max-w-xs outline-none"
+      label={t("sortBy")}
+      className="w-full sm:w-auto sm:min-w-[200px] outline-none"
       defaultSelectedKeys={[sortOption]}
       onChange={(e) => setSortOption(e.target.value)}
       size="sm"

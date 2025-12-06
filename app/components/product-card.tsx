@@ -1,21 +1,25 @@
 "use client";
 
 import { Card, CardBody, CardFooter, Image, Button } from "@heroui/react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useLocale } from "next-intl";
 
 type Product = {
   id: string;
   name: string;
+  nameEn?: string | null;
   slug: string;
   price: any;
   stock: number;
   images: string[];
-  category: { name: string } | null;
+  category: { name: string; nameEn?: string | null } | null;
 };
 
 import { useCart } from "@/app/context/cart-context";
 
 import SaveButton from "./store/save-button";
+
+import { useFormat } from "@/app/hooks/use-format";
 
 export default function ProductCard({
   product,
@@ -25,7 +29,16 @@ export default function ProductCard({
   isSaved?: boolean;
 }) {
   const { addToCart } = useCart();
+  const locale = useLocale();
+  const { formatCurrency } = useFormat();
   const isOutOfStock = product.stock <= 0;
+
+  const displayName =
+    locale === "en" ? product.nameEn || product.name : product.name;
+  const displayCategory =
+    locale === "en"
+      ? product.category?.nameEn || product.category?.name
+      : product.category?.name;
 
   return (
     <Card
@@ -41,7 +54,7 @@ export default function ProductCard({
             shadow="none"
             radius="none"
             width="100%"
-            alt={product.name}
+            alt={displayName}
             className={`w-full h-full object-cover transition-transform duration-300 ${
               isOutOfStock ? "grayscale" : "group-hover:scale-105"
             }`}
@@ -86,14 +99,14 @@ export default function ProductCard({
         <div className="flex justify-between items-start w-full">
           <div className="flex flex-col gap-1">
             <p className="text-tiny text-default-500 uppercase font-bold">
-              {product.category?.name}
+              {displayCategory}
             </p>
             <h3 className="font-medium text-large text-default-900 line-clamp-1">
-              {product.name}
+              {displayName}
             </h3>
           </div>
           <p className="text-large font-bold text-primary">
-            ${Number(product.price).toFixed(2)}
+            {formatCurrency(Number(product.price))}
           </p>
         </div>
       </CardFooter>

@@ -1,11 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import createMiddleware from "next-intl/middleware";
+import { routing } from "./i18n/routing";
+
+const intlMiddleware = createMiddleware(routing);
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only protect /admin routes
-  if (pathname.startsWith("/admin")) {
+  // 1. Run i18n middleware
+  const response = intlMiddleware(request);
+
+  // 2. Check for admin route protection
+  // Matches /admin, /en/admin, /ar/admin
+  const isAdminRoute = pathname.match(/^\/(?:en|ar)?\/?admin/);
+
+  if (isAdminRoute) {
     // Check for session token
     // better-auth uses "better-auth.session_token" by default
     // We can also check for the secure version if in production
@@ -14,7 +24,9 @@ export async function proxy(request: NextRequest) {
       request.cookies.get("__Secure-better-auth.session_token");
 
     if (!sessionToken) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+      // Redirect to sign-in, preserving locale if present
+      const locale = pathname.match(/^\/(en|ar)/)?.[1] || "ar";
+      return NextResponse.redirect(new URL(`/${locale}/sign-in`, request.url));
     }
 
     // Note: We can't easily check the Role here without a database call,
@@ -22,9 +34,9 @@ export async function proxy(request: NextRequest) {
     // We will handle strict Role checks in the Server Layout/Page.
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/", "/(ar|en)/:path*", "/admin/:path*"],
 };

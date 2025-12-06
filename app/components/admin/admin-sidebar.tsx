@@ -1,9 +1,8 @@
 "use client";
 
-import { Link } from "@heroui/link";
+import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { Button } from "@heroui/button";
 import { authClient } from "@/app/lib/auth-client";
-import { useRouter, usePathname } from "next/navigation";
 import {
   X,
   LayoutDashboard,
@@ -14,6 +13,9 @@ import {
   LogOut,
   Ticket,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
+import ThemeSwitcher from "@/app/components/ThemeSwitcher";
 
 interface AdminSidebarProps {
   isOpen: boolean;
@@ -23,6 +25,8 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations("Admin");
+  const tHome = useTranslations("HomePage");
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -35,12 +39,12 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   };
 
   const links = [
-    { href: "/", label: "Storefront", icon: Home },
-    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin/products", label: "Products", icon: Package },
-    { href: "/admin/categories", label: "Categories", icon: ListTree },
-    { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
-    { href: "/admin/coupons", label: "Coupons", icon: Ticket },
+    { href: "/", label: t("storefront"), icon: Home },
+    { href: "/admin", label: t("dashboard"), icon: LayoutDashboard },
+    { href: "/admin/products", label: t("products"), icon: Package },
+    { href: "/admin/categories", label: t("categories"), icon: ListTree },
+    { href: "/admin/orders", label: t("orders"), icon: ShoppingCart },
+    { href: "/admin/coupons", label: t("coupons"), icon: Ticket },
   ];
 
   return (
@@ -55,9 +59,9 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     >
       <div className="mb-8 flex justify-between items-center">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-primary">Zamalek Store</h1>
+          <h1 className="text-2xl font-bold text-primary">{tHome("title")}</h1>
           <p className="text-tiny text-default-500 uppercase font-bold tracking-wider">
-            Admin Panel
+            {t("panel")}
           </p>
         </div>
         <Button
@@ -91,17 +95,22 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         })}
       </nav>
 
-      <div className="mt-auto pt-4 border-t border-divider">
+      <div className="mt-auto pt-4 border-t border-divider flex flex-col gap-4">
+        <div className="flex items-center justify-between px-2">
+          <ThemeSwitcher />
+          <LanguageSwitcher />
+        </div>
         <Button
-          variant="light"
-          color="danger"
-          className="justify-start gap-4"
-          size="lg"
           fullWidth
-          onPress={handleSignOut}
+          variant="flat"
+          color="danger"
+          onPress={async () => {
+            await authClient.signOut();
+            router.push("/");
+          }}
         >
           <LogOut size={20} />
-          Sign Out
+          {t("signOut")}
         </Button>
       </div>
     </aside>
