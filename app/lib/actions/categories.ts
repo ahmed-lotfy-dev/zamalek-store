@@ -67,9 +67,10 @@ export async function createCategory(formData: FormData) {
   }
 
   const name = formData.get("name") as string;
+  const image = formData.get("image") as string;
 
   await prisma.category.create({
-    data: { name },
+    data: { name, image },
   });
 
   revalidatePath("/admin/categories");
@@ -95,10 +96,11 @@ export async function updateCategory(id: string, formData: FormData) {
   }
 
   const name = formData.get("name") as string;
+  const image = formData.get("image") as string;
 
   await prisma.category.update({
     where: { id },
-    data: { name },
+    data: { name, image },
   });
 
   revalidatePath("/admin/categories");

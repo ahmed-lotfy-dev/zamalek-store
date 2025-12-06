@@ -224,6 +224,19 @@ export async function createProduct(formData: FormData) {
   const stock = parseInt(formData.get("stock") as string);
   const categoryId = formData.get("categoryId") as string;
   const imageUrl = formData.get("imageUrl") as string;
+  const imagesJson = formData.get("images") as string;
+  let images: string[] = [];
+
+  if (imagesJson) {
+    try {
+      images = JSON.parse(imagesJson);
+    } catch (e) {
+      console.error("Error parsing images:", e);
+    }
+  } else if (imageUrl) {
+    // Fallback for backward compatibility or single image input
+    images = [imageUrl];
+  }
 
   const variantsJson = formData.get("variants") as string;
   let variants: any[] = [];
@@ -255,7 +268,7 @@ export async function createProduct(formData: FormData) {
       price,
       stock,
       categoryId,
-      images: imageUrl ? [imageUrl] : [],
+      images,
       variants: {
         create: variants.map((v) => ({
           color: v.color,
@@ -296,6 +309,18 @@ export async function updateProduct(id: string, formData: FormData) {
   const stock = parseInt(formData.get("stock") as string);
   const categoryId = formData.get("categoryId") as string;
   const imageUrl = formData.get("imageUrl") as string;
+  const imagesJson = formData.get("images") as string;
+
+  let images: string[] = [];
+  if (imagesJson) {
+    try {
+      images = JSON.parse(imagesJson);
+    } catch (e) {
+      console.error("Error parsing images:", e);
+    }
+  } else if (imageUrl) {
+    images = [imageUrl];
+  }
 
   const variantsJson = formData.get("variants") as string;
   let variants: any[] = [];
@@ -336,8 +361,8 @@ export async function updateProduct(id: string, formData: FormData) {
     },
   };
 
-  if (imageUrl) {
-    data.images = [imageUrl];
+  if (images.length > 0) {
+    data.images = images;
   }
 
   await prisma.product.update({

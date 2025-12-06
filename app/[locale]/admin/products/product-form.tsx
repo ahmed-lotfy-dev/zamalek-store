@@ -6,6 +6,7 @@ import { translateText } from "@/app/lib/actions/translate";
 import { Button, Input, Textarea, Select, SelectItem } from "@heroui/react";
 import { Plus, Trash, Languages } from "lucide-react";
 import { toast } from "@/app/components/ui/toast";
+import MultiImageUpload from "@/app/components/admin/multi-image-upload";
 
 type Category = {
   id: string;
@@ -47,6 +48,7 @@ export default function ProductForm({
   const [descriptionEn, setDescriptionEn] = useState(
     product?.descriptionEn || ""
   );
+  const [images, setImages] = useState<string[]>(product?.images || []);
 
   const action = product ? updateProduct.bind(null, product.id) : createProduct;
 
@@ -166,14 +168,13 @@ export default function ProductForm({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Input
-          label="Image URL"
-          name="imageUrl"
-          defaultValue={product?.images[0]}
-          type="url"
-          placeholder="https://example.com/image.jpg"
-          variant="bordered"
+        <MultiImageUpload
+          value={images}
+          onChange={setImages}
+          folder="products"
+          label="Product Images"
         />
+        <input type="hidden" name="images" value={JSON.stringify(images)} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">

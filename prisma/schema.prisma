@@ -141,6 +141,7 @@ model Category {
   id        String    @id @default(cuid())
   name      String
   nameEn    String?   // Optional English Name
+  image     String?   // Category Image URL
   products  Product[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
