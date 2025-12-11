@@ -1,12 +1,12 @@
 [phases.setup]
-nixPkgs = ['nodejs_22']
+nixPkgs = ['bun']
 
 [phases.install]
-# Cache node_modules between builds
-cmds = ['npm ci --prefer-offline --no-audit']
+# Cache node_modules between builds with Bun
+cmds = ['bun install']
 
 [phases.build]
-cmds = ['npm run build']
+cmds = ['bun run build']
 
 [start]
-cmd = 'npm start'
+cmd = 'bun start'

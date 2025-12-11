@@ -1,23 +1,23 @@
 # Build stage
-FROM node:22-alpine AS builder
+FROM oven/bun:1-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY package.json bun.lockb* ./
 COPY prisma ./prisma/
 
-# Install dependencies
-RUN npm ci --prefer-offline --no-audit
+# Install dependencies with Bun
+RUN bun install
 
 # Copy source
 COPY . .
 
-# Generate Prisma client and build
-RUN npx prisma generate --no-engine && \
-    npm run build
+# Generate Prisma client and build with Bun
+RUN bunx prisma generate --no-engine && \
+    bun run build
 
-# Production stage
-FROM node:22-alpine AS runner
+# Production stage  
+FROM oven/bun:1-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -31,4 +31,4 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["bun", "server.js"]
