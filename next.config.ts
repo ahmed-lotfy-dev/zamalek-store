@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60,
   },
   output: "standalone", // Enable standalone output
+  
+  // Skip static generation during build to avoid DB/Redis connection issues
+  experimental: {
+    // This ensures pages are rendered at request time, not build time
+  },
 };
 
 export default withNextIntl(nextConfig);

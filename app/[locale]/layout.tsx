@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   description: "Official Zamalek Store",
 };
 
+// Force dynamic rendering to avoid build-time connections
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({
   children,
   params,
