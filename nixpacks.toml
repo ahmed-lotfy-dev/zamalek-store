@@ -1,0 +1,12 @@
+[phases.setup]
+nixPkgs = ['nodejs_22']
+
+[phases.install]
+# Cache node_modules between builds
+cmds = ['npm ci --prefer-offline --no-audit']
+
+[phases.build]
+cmds = ['npm run build']
+
+[start]
+cmd = 'npm start'
