@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@heroui/react";
+import { Button } from "@heroui/button";
 import { Link } from "@/i18n/routing";
 
 export default function PromoBanner() {

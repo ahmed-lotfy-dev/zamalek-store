@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@heroui/react";
+import { Button } from "@heroui/button";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
@@ -18,8 +18,8 @@ export default function HeroSection() {
           className="h-full w-full object-cover"
         />
         {/* Overlay Gradient - Cinematic Look */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
+        <div className="absolute inset-0 bg-linear-to-r from-black/90 via-black/60 to-transparent z-10" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent z-10" />
       </div>
 
       {/* Content */}
@@ -32,7 +32,7 @@ export default function HeroSection() {
           >
             <h1 className="text-5xl font-black tracking-tight text-white sm:text-7xl mb-6 leading-[1.1]">
               {t("heroTitle")} <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-white">
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-white">
                 {t("heroSubtitle")}
               </span>
             </h1>

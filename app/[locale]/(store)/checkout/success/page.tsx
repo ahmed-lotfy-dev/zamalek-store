@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardBody, CardHeader, Button } from "@heroui/react";
+import { Card, CardHeader } from "@heroui/card";
+import { Button } from "@heroui/button"
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
@@ -112,7 +113,7 @@ export default function CheckoutSuccessPage() {
             </div>
             <h1 className="text-2xl font-bold text-center">Payment Failed</h1>
           </CardHeader>
-          <CardBody className="flex flex-col gap-6 p-8 text-center">
+          <div className="flex flex-col gap-6 p-8 text-center">
             <p className="text-default-500">
               We could not verify your payment. Please try again or contact
               support.
@@ -125,7 +126,7 @@ export default function CheckoutSuccessPage() {
             >
               Try Again
             </Button>
-          </CardBody>
+          </div>
         </Card>
       </div>
     );
@@ -142,7 +143,7 @@ export default function CheckoutSuccessPage() {
             Payment Successful!
           </h1>
         </CardHeader>
-        <CardBody className="flex flex-col gap-6 p-8 text-center">
+        <div className="flex flex-col gap-6 p-8 text-center">
           <p className="text-default-500">
             Thank you for your purchase. Your order has been confirmed and will
             be shipped shortly.
@@ -165,7 +166,7 @@ export default function CheckoutSuccessPage() {
               Continue Shopping
             </Button>
           </div>
-        </CardBody>
+        </div>
       </Card>
     </div>
   );

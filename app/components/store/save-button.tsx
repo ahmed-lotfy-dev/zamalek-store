@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@heroui/react";
+import { Button } from "@heroui/button";
 import { Heart } from "lucide-react";
 import { toggleSavedItem } from "@/app/lib/actions/saved-items";
 import { useOptimistic, startTransition } from "react";
@@ -38,8 +38,6 @@ export default function SaveButton({ productId, isSaved }: SaveButtonProps) {
   return (
     <Button
       isIconOnly
-      radius="full"
-      variant="light"
       onPress={handleToggle}
       className="bg-white/70 backdrop-blur-md hover:bg-white/90 text-danger"
       aria-label={optimisticIsSaved ? "Unsave" : "Save"}

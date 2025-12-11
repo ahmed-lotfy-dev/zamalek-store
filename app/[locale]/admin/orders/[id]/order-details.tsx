@@ -1,13 +1,13 @@
 "use client";
 
+import { Divider } from "@heroui/divider";
 import {
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
-  Divider,
-  Image,
-} from "@heroui/react";
+  CardFooter
+} from "@heroui/card";
+import { Image } from "@heroui/image"
 import { useRouter } from "next/navigation";
 import OrderStatusSelect from "../order-status-select";
 

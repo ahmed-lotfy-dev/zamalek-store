@@ -1,6 +1,6 @@
 "use client";
 
-import { Pagination } from "@heroui/react";
+import { Pagination } from "@heroui/pagination"
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
 import { useCallback } from "react";

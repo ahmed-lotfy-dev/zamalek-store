@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { createProduct, updateProduct } from "@/app/lib/actions/products";
 import { translateText } from "@/app/lib/actions/translate";
-import { Button, Input, Textarea, Select, SelectItem } from "@heroui/react";
+import { Button } from "@heroui/button";
+import { Input, Textarea, } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
 import { Plus, Trash, Languages } from "lucide-react";
 import { toast } from "@/app/components/ui/toast";
 import MultiImageUpload from "@/app/components/admin/multi-image-upload";

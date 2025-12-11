@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardBody, CardHeader, Button } from "@heroui/react";
+import { Card, CardHeader } from "@heroui/card";
 import { XCircle } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
@@ -20,7 +20,7 @@ function ErrorContent() {
           </div>
           <h1 className="text-2xl font-bold text-center">Payment Failed</h1>
         </CardHeader>
-        <CardBody className="flex flex-col gap-6 p-8 text-center">
+        <div className="flex flex-col gap-6 p-8 text-center">
           <p className="text-default-500">
             {message ||
               "We couldn't process your payment. Please try again or use a different payment method."}
@@ -29,24 +29,20 @@ function ErrorContent() {
             <p className="text-small text-default-400">Error Code: {code}</p>
           )}
           <div className="flex flex-col gap-3">
-            <Button
-              as={Link}
+            <Link
               href="/checkout"
-              color="primary"
               className="w-full font-medium"
             >
               Try Again
-            </Button>
-            <Button
-              as={Link}
+            </Link>
+            <Link
               href="/"
-              variant="bordered"
               className="w-full font-medium"
             >
               Return to Home
-            </Button>
+            </Link>
           </div>
-        </CardBody>
+        </div>
       </Card>
     </div>
   );

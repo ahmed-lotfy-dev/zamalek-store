@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Image, Button, Chip } from "@heroui/react";
+import { Button } from "@heroui/button";
+import { Image } from "@heroui/image";
+import { Chip } from "@heroui/chip";
+
 import { useCart } from "@/app/context/cart-context";
 import SaveButton from "./save-button";
 import { ShoppingCart, Minus, Plus } from "lucide-react";
@@ -83,11 +86,11 @@ export default function ProductDetails({
     const itemToAdd =
       hasVariants && selectedVariant
         ? {
-            ...product,
-            id: selectedVariant.id,
-            name: `${displayName} - ${selectedColor} / ${selectedSize}`,
-            stock: selectedVariant.stock,
-          }
+          ...product,
+          id: selectedVariant.id,
+          name: `${displayName} - ${selectedColor} / ${selectedSize}`,
+          stock: selectedVariant.stock,
+        }
         : { ...product, name: displayName };
 
     for (let i = 0; i < quantity; i++) {
@@ -117,9 +120,8 @@ export default function ProductDetails({
           }
           width="100%"
           alt={displayName}
-          className={`w-full h-full object-cover ${
-            isOutOfStock ? "grayscale opacity-75" : ""
-          }`}
+          className={`w-full h-full object-cover ${isOutOfStock ? "grayscale opacity-75" : ""
+            }`}
         />
         {isOutOfStock && (
           <div className="absolute top-4 left-4 z-20 bg-default-900/80 text-white px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider">
@@ -236,8 +238,8 @@ export default function ProductDetails({
             {isOutOfStock
               ? t("outOfStock")
               : !isSelectionComplete
-              ? t("selectOptions")
-              : t("addToCart")}
+                ? t("selectOptions")
+                : t("addToCart")}
           </Button>
         </div>
       </div>

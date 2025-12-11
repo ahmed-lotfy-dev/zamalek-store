@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Input, Listbox, ListboxItem, Spinner } from "@heroui/react";
+import { Input } from "@heroui/input";
+import { Spinner } from "@heroui/spinner";
+import { Listbox, ListboxItem } from "@heroui/listbox";
+
 import { Search } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { searchProducts } from "@/app/lib/actions/products";

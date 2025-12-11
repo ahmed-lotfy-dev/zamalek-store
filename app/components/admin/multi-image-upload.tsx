@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Button, Image, Progress } from "@heroui/react";
+import { Button } from "@heroui/button";
+import { Progress } from "@heroui/progress";
+import { Image } from "@heroui/image";
+
 import { Upload, X, Plus } from "lucide-react";
 import { getPresignedUrl } from "@/app/lib/actions/upload";
 import { optimizeImage, validateImageFile } from "@/app/lib/image-optimizer";
@@ -83,9 +86,8 @@ export default function MultiImageUpload({
               setProgress((completedFiles / totalFiles) * 100);
               resolve();
             } else {
-              const errorMsg = `Upload failed with status ${xhr.status}: ${
-                xhr.responseText || "Unknown error"
-              }`;
+              const errorMsg = `Upload failed with status ${xhr.status}: ${xhr.responseText || "Unknown error"
+                }`;
               console.error(errorMsg);
               reject(new Error(errorMsg));
             }

@@ -1,22 +1,11 @@
 "use client";
 
 import React from "react";
-import {
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  NavbarMenuToggle,
-  NavbarMenu,
-  NavbarMenuItem,
-  Button,
-  Badge,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Avatar,
-} from "@heroui/react";
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem } from "@heroui/navbar";
+import { Badge } from "@heroui/badge";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
+import { Avatar } from "@heroui/avatar";
+import { Button } from "@heroui/button";
 import { ShoppingBag, Heart } from "lucide-react";
 import { useCart } from "@/app/context/cart-context";
 import CartDrawer from "./store/cart-drawer";
@@ -87,15 +76,14 @@ export default function StoreNavbar({ user }: { user?: any }) {
             <LanguageSwitcher />
           </NavbarItem>
           <NavbarItem>
-            <Button
-              isIconOnly
-              variant="light"
-              as={Link}
-              href="/saved"
-              aria-label="Saved Items"
-            >
-              <Heart className="w-5 h-5" />
-            </Button>
+            <Link href="/saved" aria-label="Saved Items">
+              <Button
+                isIconOnly
+                color="primary"
+              >
+                <Heart className="w-5 h-5" />
+              </Button>
+            </Link>
           </NavbarItem>
           <NavbarItem>
             <Badge
@@ -106,7 +94,7 @@ export default function StoreNavbar({ user }: { user?: any }) {
             >
               <Button
                 isIconOnly
-                variant="light"
+                color="primary"
                 onPress={() => setIsCartOpen(true)}
               >
                 <ShoppingBag className="w-5 h-5" />
@@ -115,9 +103,11 @@ export default function StoreNavbar({ user }: { user?: any }) {
           </NavbarItem>
           {user?.role === "ADMIN" && (
             <NavbarItem className="hidden md:flex">
-              <Button as={Link} color="primary" href="/admin" variant="flat">
-                {t("adminDashboard")}
-              </Button>
+              <Link href="/admin">
+                <Button color="primary">
+                  {t("adminDashboard")}
+                </Button>
+              </Link>
             </NavbarItem>
           )}
           {user ? (
@@ -167,9 +157,11 @@ export default function StoreNavbar({ user }: { user?: any }) {
             </NavbarItem>
           ) : (
             <NavbarItem>
-              <Button as={Link} color="primary" href="/sign-in" variant="flat">
-                {t("signIn")}
-              </Button>
+              <Link href="/sign-in">
+                <Button color="primary">
+                  {t("signIn")}
+                </Button>
+              </Link>
             </NavbarItem>
           )}
         </NavbarContent>

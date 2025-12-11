@@ -15,6 +15,7 @@ import AdminSidebar from "@/app/components/admin/admin-sidebar";
 import { Link } from "@heroui/link";
 import { authClient } from "@/app/lib/auth-client";
 import { useRouter } from "next/navigation";
+
 import {
   Navbar,
   NavbarBrand,
@@ -22,7 +23,7 @@ import {
   NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
-} from "@heroui/react";
+} from "@heroui/navbar";
 
 export default function AdminShell({
   children,
@@ -118,7 +119,7 @@ export default function AdminShell({
 
       {/* Sidebar (Desktop Only) */}
       <div className="hidden md:block">
-        <AdminSidebar isOpen={true} onClose={() => {}} />
+        <AdminSidebar isOpen={true} onClose={() => { }} />
       </div>
 
       {/* Main Content */}

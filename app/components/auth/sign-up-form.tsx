@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
 import {
-  Button,
-  Input,
   Card,
   CardHeader,
   CardBody,
   CardFooter,
-} from "@heroui/react";
+} from "@heroui/card";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
 import { Link } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";

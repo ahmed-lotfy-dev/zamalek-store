@@ -1,6 +1,9 @@
 "use client";
 
-import { Card, CardBody, CardFooter, Image, Button } from "@heroui/react";
+import { Card } from "@heroui/card";
+import { Button } from "@heroui/button";
+
+import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useLocale } from "next-intl";
 
@@ -42,18 +45,14 @@ export default function ProductCard({
 
   return (
     <Card
-      shadow="sm"
       key={product.id}
-      className={`group relative overflow-hidden ${
+      className={`group relative overflow-hidden shadow-sm ${
         isOutOfStock ? "opacity-75" : ""
       }`}
     >
-      <CardBody className="overflow-visible p-0">
+      <div className="overflow-visible p-0">
         <div className="relative aspect-3/4 w-full overflow-hidden">
           <Image
-            shadow="none"
-            radius="none"
-            width="100%"
             alt={displayName}
             className={`w-full h-full object-cover transition-transform duration-300 ${
               isOutOfStock ? "grayscale" : "group-hover:scale-105"
@@ -84,18 +83,16 @@ export default function ProductCard({
           {!isOutOfStock && (
             <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0 z-20">
               <Button
+                {...({ color: "primary", radius: "full", onPress: () => addToCart(product) } as any)}
                 className="w-full font-medium shadow-lg"
-                color="primary"
-                radius="full"
-                onPress={() => addToCart(product)}
               >
                 Add to Cart
               </Button>
             </div>
           )}
         </div>
-      </CardBody>
-      <CardFooter className="flex flex-col items-start gap-1 p-4">
+      </div>
+      <div className="flex flex-col items-start gap-1 p-4">
         <div className="flex justify-between items-start w-full">
           <div className="flex flex-col gap-1">
             <p className="text-tiny text-default-500 uppercase font-bold">
@@ -109,7 +106,7 @@ export default function ProductCard({
             {formatCurrency(Number(product.price))}
           </p>
         </div>
-      </CardFooter>
+      </div>
     </Card>
   );
 }

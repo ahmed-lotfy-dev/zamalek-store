@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckboxGroup, Checkbox, Slider } from "@heroui/react";
+import { Slider } from "@heroui/slider";
+import { CheckboxGroup, Checkbox } from "@heroui/checkbox";
 import { useTranslations, useLocale } from "next-intl";
 import { useFormat } from "@/app/hooks/use-format";
 
