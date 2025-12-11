@@ -13,7 +13,7 @@ RUN bun install
 COPY . .
 
 # Generate Prisma client and build with Bun
-RUN bunx prisma generate --no-engine && \
+RUN bunx prisma generate && \
     bun run build
 
 # Production stage  
