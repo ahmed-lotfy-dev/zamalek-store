@@ -2,13 +2,8 @@
 
 import { useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-} from "@heroui/card";
 import { Button } from "@heroui/button";
+import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { Link } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
@@ -59,7 +54,7 @@ export default function SignUpForm() {
             label={t("name")}
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onValueChange={setName}
             placeholder={t("namePlaceholder")}
             variant="bordered"
             isRequired
@@ -69,7 +64,7 @@ export default function SignUpForm() {
             label={t("email")}
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onValueChange={setEmail}
             placeholder={t("emailPlaceholder")}
             variant="bordered"
             isRequired
@@ -79,7 +74,7 @@ export default function SignUpForm() {
             label={t("password")}
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onValueChange={setPassword}
             placeholder={t("passwordPlaceholder")}
             variant="bordered"
             isRequired
