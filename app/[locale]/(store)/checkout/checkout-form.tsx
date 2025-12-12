@@ -1,13 +1,9 @@
 "use client";
 
 import { useCart } from "@/app/context/cart-context";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Divider } from "@heroui/divider";
-import { RadioGroup, Radio } from "@heroui/radio";
-import { Select, SelectItem } from "@heroui/select";
-import { Image } from "@heroui/image";
+import { Button, Card, CardContent, CardHeader, Input, Label, Radio, RadioGroup, Select, ListBox, TextField } from "@heroui/react";
+
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "@/i18n/routing";
 import { toast } from "@/app/components/ui/toast";
@@ -172,7 +168,7 @@ export default function CheckoutForm({
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">{t("cartEmpty")}</h1>
-        <Button color="primary" onPress={() => router.push("/products")}>
+        <Button variant="primary" onPress={() => router.push("/products")}>
           {t("continueShopping")}
         </Button>
       </div>
@@ -193,34 +189,42 @@ export default function CheckoutForm({
                 {t("selectAddress")}
               </p>
             </CardHeader>
-            <CardBody className="overflow-visible py-2">
+            <CardContent className="overflow-visible py-2">
               {savedAddresses.length > 0 && (
                 <div className="mb-6">
                   <Select
-                    label={t("savedAddresses")}
-                    placeholder={t("selectAddressPlaceholder")}
                     className="max-w-xs"
-                    onChange={(e) => {
-                      const address = savedAddresses.find(
-                        (a) => a.id === e.target.value
-                      );
-                      if (address) {
-                        setFormData((prev) => ({
-                          ...prev,
-                          address: address.street,
-                          city: address.city,
-                          // We might want to add zip/state/country to formData if needed
-                        }));
+                    onSelectionChange={(keys) => {
+                      if (keys) {
+                        const addrId = Array.from(keys as unknown as Set<string>)[0];
+                        const address = savedAddresses.find((a) => a.id === addrId);
+                        if (address) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            address: address.street,
+                            city: address.city,
+                          }));
+                        }
                       }
                     }}
                   >
-                    {savedAddresses.map((addr) => (
-                      <SelectItem key={addr.id}>
-                        {addr.street}, {addr.city}
-                      </SelectItem>
-                    ))}
+                    <Label>{t("savedAddresses")}</Label>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {savedAddresses.map((addr) => (
+                          <ListBox.Item key={addr.id} id={addr.id} textValue={`${addr.street}, ${addr.city}`}>
+                            {addr.street}, {addr.city}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
                   </Select>
-                  <Divider className="my-4" />
+                  <hr className="my-4 border-default-200" />
                 </div>
               )}
 
@@ -230,85 +234,96 @@ export default function CheckoutForm({
                 className="space-y-4"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label={t("fullName")}
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    isRequired
-                    variant="bordered"
-                  />
-                  <Input
-                    label={t("email")}
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    isRequired
-                    variant="bordered"
-                  />
+                  <TextField isRequired>
+                    <Label>{t("fullName")}</Label>
+                    <Input
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                    />
+                  </TextField>
+                  <TextField isRequired>
+                    <Label>{t("email")}</Label>
+                    <Input
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                    />
+                  </TextField>
                 </div>
-                <Input
-                  label={t("phone")}
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  isRequired
-                  variant="bordered"
-                />
-                <Input
-                  label={t("address")}
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  isRequired
-                  variant="bordered"
-                />
-                <Input
-                  label={t("city")}
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  isRequired
-                  variant="bordered"
-                />
+                <TextField isRequired>
+                  <Label>{t("phone")}</Label>
+                  <Input
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                  />
+                </TextField>
+                <TextField isRequired>
+                  <Label>{t("address")}</Label>
+                  <Input
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                  />
+                </TextField>
+                <TextField isRequired>
+                  <Label>{t("city")}</Label>
+                  <Input
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                  />
+                </TextField>
               </form>
-            </CardBody>
+            </CardContent>
           </Card>
 
           <Card className="p-4">
             <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
               <h2 className="text-xl font-bold">{t("paymentMethod")}</h2>
             </CardHeader>
-            <CardBody className="overflow-visible py-2">
+            <CardContent className="overflow-visible py-2">
               <RadioGroup
                 value={formData.paymentMethod}
-                onValueChange={(val) =>
+                onChange={(val) =>
                   setFormData((prev) => ({ ...prev, paymentMethod: val }))
                 }
               >
-                <Radio value="cod" description={t("codDesc")}>
-                  {t("cod")}
-                </Radio>
-                <Radio value="paymob" description={t("paymobDesc")}>
-                  {t("paymob")}
-                </Radio>
-                <Radio value="paymob_wallet" description={t("walletDesc")}>
-                  {t("wallet")}
-                </Radio>
-                <Radio
-                  value="kashier"
-                  description="Pay securely with Credit/Debit Card"
-                >
-                  {t("kashier")}
-                </Radio>
-                <Radio
-                  value="stripe"
-                  description="Pay securely with Credit Card (Stripe)"
-                >
-                  {t("stripe")}
-                </Radio>
+                <div className="space-y-2">
+                  <Radio value="cod">
+                    <div>
+                      <div className="font-medium">{t("cod")}</div>
+                      <div className="text-xs text-default-500">{t("codDesc")}</div>
+                    </div>
+                  </Radio>
+                  <Radio value="paymob">
+                    <div>
+                      <div className="font-medium">{t("paymob")}</div>
+                      <div className="text-xs text-default-500">{t("paymobDesc")}</div>
+                    </div>
+                  </Radio>
+                  <Radio value="paymob_wallet">
+                    <div>
+                      <div className="font-medium">{t("wallet")}</div>
+                      <div className="text-xs text-default-500">{t("walletDesc")}</div>
+                    </div>
+                  </Radio>
+                  <Radio value="kashier">
+                    <div>
+                      <div className="font-medium">{t("kashier")}</div>
+                      <div className="text-xs text-default-500">Pay securely with Credit/Debit Card</div>
+                    </div>
+                  </Radio>
+                  <Radio value="stripe">
+                    <div>
+                      <div className="font-medium">{t("stripe")}</div>
+                      <div className="text-xs text-default-500">Pay securely with Credit Card (Stripe)</div>
+                    </div>
+                  </Radio>
+                </div>
               </RadioGroup>
 
               {/* Wallet Selection Fields - Show when Paymob Wallet is selected */}
@@ -319,47 +334,56 @@ export default function CheckoutForm({
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Select
-                      label={t("selectNetwork")}
-                      placeholder="Choose wallet type"
-                      selectedKeys={
-                        formData.walletType ? [formData.walletType] : []
-                      }
+                      selectedKey={formData.walletType || undefined}
                       onSelectionChange={(keys) => {
-                        const selected = Array.from(keys)[0] as string;
-                        setFormData((prev) => ({
-                          ...prev,
-                          walletType: selected,
-                        }));
+                        if (keys) {
+                          const selected = Array.from(keys as unknown as Set<string>)[0];
+                          setFormData((prev) => ({
+                            ...prev,
+                            walletType: selected,
+                          }));
+                        }
                       }}
                       isRequired
-                      variant="bordered"
+                      placeholder="Choose wallet type"
+                      className="w-full"
                     >
-                      {walletOptions.map((wallet) => (
-                        <SelectItem key={wallet.value}>
-                          {wallet.label}
-                        </SelectItem>
-                      ))}
+                      <Label>{t("selectNetwork")} *</Label>
+                      <Select.Trigger>
+                        <Select.Value />
+                        <Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <ListBox>
+                          {walletOptions.map((wallet) => (
+                            <ListBox.Item key={wallet.value} id={wallet.value} textValue={wallet.label}>
+                              {wallet.label}
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                          ))}
+                        </ListBox>
+                      </Select.Popover>
                     </Select>
-                    <Input
-                      label={t("mobileNumber")}
-                      placeholder="01234567890"
-                      type="tel"
-                      value={formData.walletNumber}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          walletNumber: e.target.value,
-                        }))
-                      }
-                      isRequired
-                      variant="bordered"
-                      description={t("mobileNumberDesc")}
-                    />
+                    <TextField isRequired>
+                      <Label>{t("mobileNumber")}</Label>
+                      <Input
+                        placeholder="01234567890"
+                        type="tel"
+                        value={formData.walletNumber}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            walletNumber: e.target.value,
+                          }))
+                        }
+                      />
+                      <div className="text-xs text-default-500 mt-1">{t("mobileNumberDesc")}</div>
+                    </TextField>
                   </div>
                   <p className="text-sm text-default-600">{t("walletNote")}</p>
                 </div>
               )}
-            </CardBody>
+            </CardContent>
           </Card>
         </div>
 
@@ -369,18 +393,16 @@ export default function CheckoutForm({
             <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
               <h2 className="text-xl font-bold">{t("orderSummary")}</h2>
             </CardHeader>
-            <CardBody className="overflow-visible py-2">
+            <CardContent className="overflow-visible py-2">
               <div className="space-y-4 my-4">
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4 items-center">
-                    <div className="w-16 h-16 bg-default-100 rounded-lg overflow-hidden shrink-0">
+                    <div className="w-16 h-16 bg-default-100 rounded-lg overflow-hidden shrink-0 relative">
                       <Image
                         src={item.image}
                         alt={item.name}
-                        classNames={{
-                          wrapper: "w-full h-full",
-                          img: "w-full h-full object-cover",
-                        }}
+                        fill
+                        className="object-cover"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -398,7 +420,7 @@ export default function CheckoutForm({
                 ))}
               </div>
 
-              <Divider className="my-4" />
+              <hr className="my-4 border-default-200" />
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
@@ -419,7 +441,7 @@ export default function CheckoutForm({
                   </div>
                 )}
 
-                <Divider className="my-2" />
+                <hr className="my-2 border-default-200" />
                 <div className="flex justify-between text-lg font-bold">
                   <span>{t("total")}</span>
                   <span>
@@ -435,16 +457,14 @@ export default function CheckoutForm({
                       placeholder={t("couponCode")}
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
-                      size="sm"
-                      variant="bordered"
+                      className="flex-1"
                     />
                     <Button
-                      size="sm"
-                      color="primary"
-                      variant="flat"
-                      isLoading={isValidatingCoupon}
+                      variant="secondary"
+                      isPending={isValidatingCoupon}
                       onPress={handleApplyCoupon}
                       isDisabled={!couponCode.trim()}
+                      className="shrink-0"
                     >
                       {t("apply")}
                     </Button>
@@ -460,11 +480,9 @@ export default function CheckoutForm({
                       </span>
                     </div>
                     <Button
-                      size="sm"
-                      color="danger"
-                      variant="light"
+                      variant="danger"
                       onPress={handleRemoveCoupon}
-                      className="min-w-0 h-8 px-2"
+                      className="min-w-0 h-8 px-2 text-xs"
                     >
                       {t("remove")}
                     </Button>
@@ -473,16 +491,15 @@ export default function CheckoutForm({
               </div>
 
               <Button
-                color="primary"
-                size="lg"
-                className="w-full mt-6 font-semibold"
+                variant="primary"
+                className="w-full mt-6 font-semibold text-lg py-6"
                 type="submit"
                 form="checkout-form"
-                isLoading={isLoading}
+                isPending={isLoading}
               >
                 {t("placeOrder")}
               </Button>
-            </CardBody>
+            </CardContent>
           </Card>
         </div>
       </div>

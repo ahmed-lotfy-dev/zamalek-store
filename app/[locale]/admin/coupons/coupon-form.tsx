@@ -1,10 +1,8 @@
 "use client";
 
 import { createCoupon, updateCoupon } from "@/app/lib/actions/coupons";
-import { Button } from "@heroui/button";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Input } from "@heroui/input";
-import { RadioGroup, Radio } from "@heroui/radio";
+import { Button, Card, CardContent, CardHeader, Input, Label, Radio, RadioGroup, TextField } from "@heroui/react";
+
 import { useRouter } from "@/i18n/routing";
 import { useState } from "react";
 import { toast } from "@/app/components/ui/toast";
@@ -76,15 +74,15 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div className="flex items-center gap-4">
-        <Button
-          as={Link}
-          href="/admin/coupons"
-          variant="light"
-          isIconOnly
-          radius="full"
-        >
-          <ArrowLeft size={20} />
-        </Button>
+        <Link href="/admin/coupons">
+          <Button
+            variant="ghost"
+            isIconOnly
+            className="rounded-full"
+          >
+            <ArrowLeft size={20} />
+          </Button>
+        </Link>
         <h1 className="text-2xl font-bold">
           {coupon ? t("editTitle") : t("createTitle")}
         </h1>
@@ -94,96 +92,99 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
         <CardHeader>
           <h2 className="text-lg font-semibold">{t("details")}</h2>
         </CardHeader>
-        <CardBody>
+        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <Input
-              label={t("code")}
-              placeholder={t("codePlaceholder")}
-              name="code"
-              value={formData.code}
-              onChange={handleChange}
-              isRequired
-              variant="bordered"
-              description={t("codeDesc")}
-            />
+            <TextField isRequired>
+              <Label>{t("code")}</Label>
+              <Input
+                placeholder={t("codePlaceholder")}
+                name="code"
+                value={formData.code}
+                onChange={handleChange}
+              />
+              <div className="text-xs text-default-500 mt-1">{t("codeDesc")}</div>
+            </TextField>
 
-            <RadioGroup
-              label={t("type")}
-              value={formData.type}
-              onValueChange={(val) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  type: val as "PERCENTAGE" | "FIXED",
-                }))
-              }
-              orientation="horizontal"
-            >
-              <Radio value="PERCENTAGE">{t("percentage")}</Radio>
-              <Radio value="FIXED">{t("fixed")}</Radio>
-            </RadioGroup>
+            <div>
+              <Label>{t("type")}</Label>
+              <RadioGroup
+                value={formData.type}
+                onChange={(val) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    type: val as "PERCENTAGE" | "FIXED",
+                  }))
+                }
+                orientation="horizontal"
+                className="mt-2"
+              >
+                <Radio value="PERCENTAGE">{t("percentage")}</Radio>
+                <Radio value="FIXED">{t("fixed")}</Radio>
+              </RadioGroup>
+            </div>
 
-            <Input
-              label={
-                formData.type === "PERCENTAGE"
+            <TextField isRequired>
+              <Label>
+                {formData.type === "PERCENTAGE"
                   ? t("percentageOff")
-                  : t("discountAmount")
-              }
-              placeholder={formData.type === "PERCENTAGE" ? "10" : "50.00"}
-              name="amount"
-              type="number"
-              max={formData.type === "PERCENTAGE" ? 20 : undefined}
-              value={formData.amount}
-              onChange={handleChange}
-              isRequired
-              variant="bordered"
-              startContent={
-                <div className="pointer-events-none flex items-center">
+                  : t("discountAmount")}
+              </Label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center z-10">
                   <span className="text-default-400 text-small">
                     {formData.type === "PERCENTAGE" ? "%" : "$"}
                   </span>
                 </div>
-              }
-            />
+                <Input
+                  placeholder={formData.type === "PERCENTAGE" ? "10" : "50.00"}
+                  name="amount"
+                  type="number"
+                  max={formData.type === "PERCENTAGE" ? 20 : undefined}
+                  value={formData.amount}
+                  onChange={handleChange}
+                  className="pl-8"
+                />
+              </div>
+            </TextField>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label={t("maxUses")}
-                placeholder={t("maxUsesPlaceholder")}
-                name="maxUses"
-                type="number"
-                min={0}
-                value={formData.maxUses}
-                onChange={handleChange}
-                variant="bordered"
-                description={t("maxUsesDesc")}
-              />
+              <TextField>
+                <Label>{t("maxUses")}</Label>
+                <Input
+                  placeholder={t("maxUsesPlaceholder")}
+                  name="maxUses"
+                  type="number"
+                  min={0}
+                  value={formData.maxUses}
+                  onChange={handleChange}
+                />
+                <div className="text-xs text-default-500 mt-1">{t("maxUsesDesc")}</div>
+              </TextField>
 
-              <Input
-                label={t("expiresAt")}
-                name="expiresAt"
-                type="date"
-                value={formData.expiresAt}
-                onChange={handleChange}
-                variant="bordered"
-                placeholder=" "
-              />
+              <TextField>
+                <Label>{t("expiresAt")}</Label>
+                <Input
+                  name="expiresAt"
+                  type="date"
+                  value={formData.expiresAt}
+                  onChange={handleChange}
+                  placeholder=" "
+                />
+              </TextField>
             </div>
 
             <div className="flex justify-end gap-2 mt-4">
-              <Button
-                as={Link}
-                href="/admin/coupons"
-                variant="flat"
-                color="default"
-              >
-                {t("cancel")}
-              </Button>
-              <Button color="primary" type="submit" isLoading={isLoading}>
+              <Link href="/admin/coupons">
+                <Button variant="ghost">
+                  {t("cancel")}
+                </Button>
+              </Link>
+              <Button variant="primary" type="submit" isPending={isLoading}>
                 {coupon ? t("update") : t("create")}
               </Button>
             </div>
           </form>
-        </CardBody>
+        </CardContent>
       </Card>
     </div>
   );
