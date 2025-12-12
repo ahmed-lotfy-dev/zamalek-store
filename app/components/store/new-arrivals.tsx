@@ -2,7 +2,8 @@
 
 import ProductCard from "@/app/components/product-card";
 import { useTranslations } from "next-intl";
-import { Button } from "@heroui/button";
+import { Button } from "@heroui/react";
+
 import { Link } from "@/i18n/routing";
 import { ArrowRight } from "lucide-react";
 

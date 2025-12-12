@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@heroui/button";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
+import { Button } from "@heroui/react";
 
 export default function HeroSection() {
   const t = useTranslations("HomePage");

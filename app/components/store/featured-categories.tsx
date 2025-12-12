@@ -1,15 +1,10 @@
 "use client";
 
-import {
-  Card,
-  CardHeader,
-} from "@heroui/card";
-import { Image } from "@heroui/image";
-import { Button } from "@heroui/button";
 import { Link } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { Button, Card, CardHeader, Image } from "@heroui/react";
 
 export default function FeaturedCategories({
   categories,
