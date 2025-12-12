@@ -1,8 +1,7 @@
 "use client";
 
 import { createCategory } from "@/app/lib/actions/categories";
-import { Input } from "@heroui/input";
-import { Button } from "@heroui/button"
+import { Button, Input } from "@heroui/react";
 
 export default function CategoryForm() {
   return (

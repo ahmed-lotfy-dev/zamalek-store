@@ -1,7 +1,7 @@
 "use client";
 
 import { deleteCategory } from "@/app/lib/actions/categories";
-import { Button } from "@heroui/button"
+import { Button } from "@heroui/react";
 
 import { Link } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";

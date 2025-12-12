@@ -1,7 +1,6 @@
 'use client'
 import { createCategory, updateCategory } from "@/app/lib/actions/categories";
-import { Input } from "@heroui/input";
-import { Button } from "@heroui/button"
+import { Button, Input } from "@heroui/react";
 
 import ImageUpload from "@/app/components/admin/image-upload";
 import { useState } from "react";
