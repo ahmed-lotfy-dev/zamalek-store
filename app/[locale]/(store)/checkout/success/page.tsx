@@ -1,13 +1,12 @@
 "use client";
 
-import { Card, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button"
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { verifyStripePayment } from "@/app/lib/actions/checkout";
 import { useCart } from "@/app/context/cart-context";
+import { Button, Card, CardHeader } from "@heroui/react";
 
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();

@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, CardHeader } from "@heroui/card";
 import { XCircle } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { Card, CardHeader } from "@heroui/react";
 
 function ErrorContent() {
   const searchParams = useSearchParams();
