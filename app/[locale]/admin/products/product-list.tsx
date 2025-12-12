@@ -1,7 +1,7 @@
 "use client";
 
 import { deleteProduct } from "@/app/lib/actions/products";
-import { Button } from "@heroui/button";
+import { Button } from "@heroui/react";
 
 import { Link } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";

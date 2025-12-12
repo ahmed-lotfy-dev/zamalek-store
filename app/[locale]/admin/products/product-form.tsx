@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { createProduct, updateProduct } from "@/app/lib/actions/products";
 import { translateText } from "@/app/lib/actions/translate";
-import { Button } from "@heroui/button";
-import { Input, Textarea, } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
+import { Button, Input, TextField, Label, Select, ListBox, TextArea } from "@heroui/react";
+
 import { Plus, Trash, Languages } from "lucide-react";
 import { toast } from "@/app/components/ui/toast";
 import MultiImageUpload from "@/app/components/admin/multi-image-upload";
@@ -107,64 +106,58 @@ export default function ProductForm({
         <h2 className="text-xl font-bold">Product Details</h2>
         <Button
           size="sm"
-          color="secondary"
-          variant="flat"
-          startContent={<Languages size={16} />}
+          variant="primary"
           onPress={handleAutoTranslate}
-          isLoading={isTranslating}
+          isPending={isTranslating}
+          className="flex items-center gap-2"
         >
+          <Languages size={16} />
           Auto-Translate to English
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="flex flex-col gap-2">
+        <TextField className="flex flex-col gap-2" isRequired>
+          <Label>Product Name (Arabic)</Label>
           <Input
-            label="Product Name (Arabic)"
             name="name"
             value={name}
-            onValueChange={setName}
-            isRequired
+            onChange={(e) => setName(e.target.value)}
             placeholder="اسم المنتج"
-            variant="bordered"
-            description="Primary name in Arabic"
           />
-        </div>
-        <div className="flex flex-col gap-2">
+          <span className="text-xs text-default-400">Primary name in Arabic</span>
+        </TextField>
+        <TextField className="flex flex-col gap-2">
+          <Label>Product Name (English)</Label>
           <Input
-            label="Product Name (English)"
             name="nameEn"
             value={nameEn || ""}
-            onValueChange={setNameEn}
+            onChange={(e) => setNameEn(e.target.value)}
             placeholder="Product Name"
-            variant="bordered"
-            description="Optional English translation"
           />
-        </div>
+          <span className="text-xs text-default-400">Optional English translation</span>
+        </TextField>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
-          <Textarea
-            label="Description (Arabic)"
+          <Label>Description (Arabic) *</Label>
+          <TextArea
             name="description"
             value={description}
-            onValueChange={setDescription}
-            isRequired
+            onChange={(e) => setDescription(e.target.value)}
             placeholder="وصف المنتج..."
-            variant="bordered"
-            minRows={4}
+            rows={4}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Textarea
-            label="Description (English)"
+          <Label>Description (English)</Label>
+          <TextArea
             name="descriptionEn"
             value={descriptionEn || ""}
-            onValueChange={setDescriptionEn}
+            onChange={(e) => setDescriptionEn(e.target.value)}
             placeholder="Product description..."
-            variant="bordered"
-            minRows={4}
+            rows={4}
           />
         </div>
       </div>
@@ -180,45 +173,52 @@ export default function ProductForm({
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-2">
+        <TextField className="flex flex-col gap-2" isRequired>
+          <Label>Price ($)</Label>
           <Input
-            label="Price ($)"
             name="price"
             defaultValue={product?.price.toString()}
             type="number"
             step="0.01"
-            isRequired
             placeholder="0.00"
-            variant="bordered"
           />
-        </div>
+        </TextField>
 
-        <div className="flex flex-col gap-2">
+        <TextField className="flex flex-col gap-2" isRequired>
+          <Label>Total Stock</Label>
           <Input
-            label="Total Stock"
             name="stock"
             defaultValue={product?.stock.toString()}
             type="number"
-            isRequired
             placeholder="0"
-            variant="bordered"
-            description="If variants are added, this can be the sum or a general stock."
           />
-        </div>
+          <span className="text-xs text-default-400">If variants are added, this can be the sum or a general stock.</span>
+        </TextField>
       </div>
 
       <div className="flex flex-col gap-2">
         <Select
-          label="Category"
           name="categoryId"
-          defaultSelectedKeys={product ? [product.categoryId] : []}
+          defaultSelectedKey={product ? product.categoryId : undefined}
           isRequired
           placeholder="Select a category"
-          variant="bordered"
+          className="w-full"
         >
-          {categories.map((category) => (
-            <SelectItem key={category.id}>{category.name}</SelectItem>
-          ))}
+          <Label>Category *</Label>
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              {categories.map((category) => (
+                <ListBox.Item key={category.id} id={category.id} textValue={category.name}>
+                  {category.name}
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
         </Select>
         {categories.length === 0 && (
           <p className="text-xs text-amber-500">
@@ -233,12 +233,12 @@ export default function ProductForm({
           <h3 className="text-lg font-semibold">Variants</h3>
           <Button
             size="sm"
-            variant="flat"
-            color="primary"
-            startContent={<Plus size={16} />}
+            variant="secondary"
             onPress={addVariant}
             type="button"
+            className="flex items-center gap-2"
           >
+            <Plus size={16} />
             Add Variant
           </Button>
         </div>
@@ -256,16 +256,12 @@ export default function ProductForm({
                 placeholder="Color"
                 value={variant.color}
                 onChange={(e) => updateVariant(index, "color", e.target.value)}
-                size="sm"
-                variant="bordered"
                 className="flex-1"
               />
               <Input
                 placeholder="Size"
                 value={variant.size}
                 onChange={(e) => updateVariant(index, "size", e.target.value)}
-                size="sm"
-                variant="bordered"
                 className="flex-1"
               />
               <Input
@@ -275,15 +271,12 @@ export default function ProductForm({
                 onChange={(e) =>
                   updateVariant(index, "stock", parseInt(e.target.value) || 0)
                 }
-                size="sm"
-                variant="bordered"
                 className="w-24"
               />
               <Button
                 isIconOnly
                 size="sm"
-                color="danger"
-                variant="light"
+                variant="danger-soft"
                 onPress={() => removeVariant(index)}
                 type="button"
               >
@@ -297,9 +290,9 @@ export default function ProductForm({
         <input type="hidden" name="variants" value={JSON.stringify(variants)} />
       </div>
 
-      <Button type="submit" color="primary" className="mt-4">
+      <Button type="submit" variant="primary" className="mt-4">
         {product ? "Update Product" : "Create Product"}
       </Button>
-    </form>
+    </form >
   );
 }
