@@ -35,6 +35,13 @@ Storing thousands of high-res jersey photos on the main server would be too expe
 *   **Admin Dashboard:** I built a custom dashboard where store managers can upload products, track orders, and generate sales reports.
 *   **Real-time Email:** Using a background worker (BullMQ) to send order confirmation emails without slowing down the checkout response.
 
+### ⚡ The HeroUI v3 Migration (Bundle Size Optimization)
+When building for production, I noticed the bundle size was larger than necessary. The issue? I was importing components from the monolithic `@heroui/react` package.
+*   **The Problem:** Importing from `@heroui/react` pulls in the entire component library, even if you only use a few components. This hurts performance, especially on mobile connections.
+*   **The Solution:** HeroUI v3 uses a **modular package architecture**. Instead of `import { Button, Input } from '@heroui/react'`, I now import each component from its specific package: `@heroui/button`, `@heroui/input`, `@heroui/card`.
+*   **The Result:** Webpack can now tree-shake unused components, reducing the bundle size. Only the components I actually use get shipped to the browser.
+*   **Bonus:** The v3 API also uses cleaner patterns, like `onValueChange` instead of `onChange` for form inputs, which gives you the value directly instead of a synthetic event object.
+
 ## 4. What I Learned
 This project pushed me to go beyond simple CRUD apps. I learned:
 *   How to handle **real-world financial transactions** securely.

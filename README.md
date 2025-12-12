@@ -94,7 +94,7 @@ Zamalek Store is a production-ready e-commerce platform designed for a local bri
 - **[React 19](https://react.dev/)** - UI library
 - **[TypeScript](https://www.typescriptlang.org/)** - Type safety
 - **[Tailwind CSS 4](https://tailwindcss.com/)** - Utility-first CSS
-- **[HeroUI](https://heroui.com/)** - Beautiful React components
+- **[HeroUI v3 (Beta)](https://heroui.com/)** - Beautiful React components with modular imports for optimal bundle size
 - **[next-intl](https://next-intl-docs.vercel.app/)** - Internationalization
 - **[Framer Motion](https://www.framer.com/motion/)** - Animations
 
@@ -379,6 +379,29 @@ See [`docs/database_design.md`](docs/database_design.md) for detailed schema.
 - **Caching** - Redis caching for frequently accessed data
 - **Database Indexing** - Optimized database queries
 - **CDN** - Static assets served from CDN
+- **HeroUI v3 Modular Imports** - Tree-shakable component imports for smaller bundle size
+
+### HeroUI v3 Migration
+
+We migrated from HeroUI v2 to v3 (beta) to optimize our bundle size. The key improvement:
+
+**Before (v2):**
+```tsx
+import { Button, Input, Card } from "@heroui/react";  // Imports entire library
+```
+
+**After (v3):**
+```tsx
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Card } from "@heroui/card";
+```
+
+**Why this matters:**
+- **Better Tree-Shaking**: Only the components you use get bundled
+- **Smaller Bundle Size**: Reduces JavaScript payload sent to browsers
+- **Faster Load Times**: Especially important for users on mobile connections in Egypt
+- **Cleaner API**: New patterns like `onValueChange` instead of `onChange` for better developer experience
 
 ---
 
