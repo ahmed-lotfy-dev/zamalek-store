@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Button } from "@heroui/button";
-import { Progress } from "@heroui/progress";
-import { Image } from "@heroui/image";
+import { Button, Image, Progress } from "@heroui/react";
 
 import { Upload, X, Plus } from "lucide-react";
 import { getPresignedUrl } from "@/app/lib/actions/upload";
