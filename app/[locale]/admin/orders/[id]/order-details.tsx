@@ -1,15 +1,8 @@
 "use client";
 
-import { Divider } from "@heroui/divider";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter
-} from "@heroui/card";
-import { Image } from "@heroui/image"
 import { useRouter } from "next/navigation";
 import OrderStatusSelect from "../order-status-select";
+import { Card, CardContent, CardFooter, CardHeader, Divider, Image } from "@heroui/react";
 
 export default function OrderDetails({ order }: { order: any }) {
   const router = useRouter();
@@ -33,7 +26,7 @@ export default function OrderDetails({ order }: { order: any }) {
           </div>
         </CardHeader>
         <Divider />
-        <CardBody>
+        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h3 className="font-semibold mb-2">Customer Details</h3>
@@ -48,7 +41,7 @@ export default function OrderDetails({ order }: { order: any }) {
               </p>
             </div>
           </div>
-        </CardBody>
+        </CardContent>
       </Card>
 
       {/* Order Items */}
@@ -57,7 +50,7 @@ export default function OrderDetails({ order }: { order: any }) {
           <h3 className="font-semibold">Order Items</h3>
         </CardHeader>
         <Divider />
-        <CardBody>
+        <CardContent>
           <div className="flex flex-col gap-4">
             {order.orderItems.map((item: any) => (
               <div
@@ -87,7 +80,7 @@ export default function OrderDetails({ order }: { order: any }) {
               </div>
             ))}
           </div>
-        </CardBody>
+        </CardContent>
         <Divider />
         <CardFooter className="justify-end">
           <div className="flex gap-8 items-center">

@@ -1,7 +1,8 @@
 "use client";
 
 import { updateOrderStatus } from "@/app/lib/actions/orders";
-import { Select, SelectItem } from "@heroui/select";
+import { Select, ListBox, Label } from "@heroui/react";
+
 import { OrderStatus } from "@prisma/client";
 import { useState } from "react";
 import { toast } from "@/app/components/ui/toast";
@@ -39,16 +40,31 @@ export default function OrderStatusSelect({
 
   return (
     <Select
-      size="sm"
-      selectedKeys={[status]}
-      onChange={(e) => handleStatusChange(e.target.value)}
+      selectedKey={status}
+      onSelectionChange={(keys) => {
+        if (keys && keys !== "all") {
+          const newStatus = Array.from(keys as unknown as Set<string>)[0];
+          handleStatusChange(newStatus);
+        }
+      }}
       isDisabled={isLoading}
-      aria-label="Order Status"
       className="min-w-[140px]"
     >
-      {Object.values(OrderStatus).map((s) => (
-        <SelectItem key={s}>{s}</SelectItem>
-      ))}
+      <Label>Status</Label>
+      <Select.Trigger>
+        <Select.Value />
+        <Select.Indicator />
+      </Select.Trigger>
+      <Select.Popover>
+        <ListBox>
+          {Object.values(OrderStatus).map((s) => (
+            <ListBox.Item key={s} id={s} textValue={s}>
+              {s}
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+          ))}
+        </ListBox>
+      </Select.Popover>
     </Select>
   );
 }

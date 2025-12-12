@@ -1,12 +1,9 @@
 "use client";
 
-import { Tooltip } from "@heroui/tooltip";
-import { Button } from "@heroui/button"
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from "@heroui/table"
-
 import { EyeIcon } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import { Button, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip } from "@heroui/react";
 
 import { getStatusColor } from "@/app/lib/utils";
 import OrderStatusSelect from "./order-status-select";
