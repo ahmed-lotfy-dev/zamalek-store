@@ -2,7 +2,8 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Button } from "@heroui/button";
+import { Button } from "@heroui/react";
+
 import { Moon, Sun } from "lucide-react";
 
 export default function ThemeSwitcher() {

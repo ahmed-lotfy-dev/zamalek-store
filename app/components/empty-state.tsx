@@ -1,7 +1,6 @@
 "use client";
 
-import { Link } from "@heroui/link";
-import { Button } from "@heroui/button";
+import { Button, Link } from "@heroui/react";
 
 export default function EmptyState() {
   return (

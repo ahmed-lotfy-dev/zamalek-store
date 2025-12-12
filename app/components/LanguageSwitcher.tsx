@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/routing";
-import { Button } from "@heroui/button";
+import { Button } from "@heroui/react";
 
 import { Globe } from "lucide-react";
 
