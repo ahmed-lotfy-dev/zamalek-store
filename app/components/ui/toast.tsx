@@ -1,9 +1,8 @@
 "use client";
 
-import { addToast } from "@heroui/toast";
+import { toast as sonnerToast, Toaster } from "sonner";
 
 type ToastProps = {
-  title?: string;
   description?: string;
   action?: {
     label: string;
@@ -13,33 +12,30 @@ type ToastProps = {
 
 export const toast = {
   success: (message: string, options?: ToastProps) => {
-    addToast({
-      title: message,
+    sonnerToast.success(message, {
       description: options?.description,
-      color: "success",
+      action: options?.action,
     });
   },
   error: (message: string, options?: ToastProps) => {
-    addToast({
-      title: message,
+    sonnerToast.error(message, {
       description: options?.description,
-      color: "danger",
+      action: options?.action,
     });
   },
   info: (message: string, options?: ToastProps) => {
-    addToast({
-      title: message,
+    sonnerToast.info(message, {
       description: options?.description,
-      color: "primary",
+      action: options?.action,
     });
   },
   warning: (message: string, options?: ToastProps) => {
-    addToast({
-      title: message,
+    sonnerToast.warning(message, {
       description: options?.description,
-      color: "warning",
+      action: options?.action,
     });
   },
 };
 
-// We don't need to export Toaster anymore as we'll use ToastProvider
+// Export Toaster to be added to root layout
+export { Toaster };
