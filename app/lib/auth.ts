@@ -19,7 +19,6 @@ export const auth = betterAuth({
   baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
   trustedOrigins: [
     process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
-    "https://c474df6c358f.ngrok-free.app",
     "http://localhost:3000",
   ],
   // Add other plugins or providers here

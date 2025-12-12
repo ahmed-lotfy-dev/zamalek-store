@@ -1,7 +1,8 @@
 "use client";
 
 import { Link, usePathname, useRouter } from "@/i18n/routing";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/app/lib/utils"
 
 import { authClient } from "@/app/lib/auth-client";
 import {
@@ -20,7 +21,7 @@ import ThemeSwitcher from "@/app/components/ThemeSwitcher";
 
 interface AdminSidebarProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void; // Optional here as we handle desktop/mobile differently
 }
 
 export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
@@ -28,16 +29,6 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const router = useRouter();
   const t = useTranslations("Admin");
   const tHome = useTranslations("HomePage");
-
-  const handleSignOut = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/");
-        },
-      },
-    });
-  };
 
   const links = [
     { href: "/", label: t("storefront"), icon: Home },
@@ -50,67 +41,71 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
   return (
     <aside
-      className={`
-        fixed md:static inset-y-0 left-0 z-50
-        w-64 bg-content1 border-r border-divider p-6
-        transform transition-transform duration-200 ease-in-out
-        ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-        flex flex-col min-h-screen
-      `}
+      className={cn(
+        "bg-card border-r flex flex-col h-full",
+        // Mobile styles handled by Sheet, so this component can be just the content
+        "w-full md:w-64"
+      )}
     >
-      <div className="mb-8 flex justify-between items-center">
+      <div className="p-6 flex justify-between items-center border-b">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold text-primary">{tHome("title")}</h1>
-          <p className="text-tiny text-default-500 uppercase font-bold tracking-wider">
+          <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
             {t("panel")}
           </p>
         </div>
-        <Button
-          isIconOnly
-          variant="light"
-          className="md:hidden"
-          onPress={onClose}
-        >
-          <X size={20} />
-        </Button>
+        {onClose && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="md:hidden"
+            onClick={onClose}
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        )}
       </div>
-      <nav className="flex flex-col gap-2 flex-1">
+
+      <nav className="flex flex-col gap-1 p-4 flex-1 overflow-y-auto">
         {links.map((link) => {
           const Icon = link.icon;
           const isActive = pathname === link.href;
           return (
-            <Button
+            <Link
               key={link.href}
-              as={Link}
               href={link.href}
-              variant={isActive ? "flat" : "light"}
-              color={isActive ? "primary" : "default"}
-              className="justify-start gap-4"
-              size="lg"
-              fullWidth
+              className="w-full block"
+              onClick={onClose}
             >
-              <Icon size={20} />
-              {link.label}
-            </Button>
+              <Button
+                variant={isActive ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start gap-3 h-12 text-base",
+                  isActive ? "text-primary font-medium" : "text-muted-foreground font-normal"
+                )}
+              >
+                <Icon className="h-5 w-5" />
+                {link.label}
+              </Button>
+            </Link>
           );
         })}
       </nav>
 
-      <div className="mt-auto pt-4 border-t border-divider flex flex-col gap-4">
+      <div className="p-4 border-t flex flex-col gap-4 bg-muted/20">
         <div className="flex items-center justify-between px-2">
           <ThemeSwitcher />
           <LanguageSwitcher />
         </div>
         <Button
-          fullWidth
-          variant="flat"
-          color="danger"
-          onPress={async () => {
+          className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+          variant="ghost"
+          onClick={async () => {
             await authClient.signOut();
             router.push("/");
           }}
         >
-          <LogOut size={20} />
+          <LogOut className="h-5 w-5 mr-2" />
           {t("signOut")}
         </Button>
       </div>

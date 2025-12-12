@@ -8,7 +8,9 @@ import Filters from "./filters";
 import SortSelect from "./sort-select";
 import SearchBar from "./search-bar";
 import EmptyState from "@/app/components/empty-state";
-import { Spinner, Switch } from "@heroui/react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/app/hooks/use-format";
@@ -116,13 +118,13 @@ export default function ProductListing({
           />
 
           <div className="flex items-center justify-between px-1">
-            <span className="text-small text-default-500">
+            <Label htmlFor="stock-switch" className="text-sm font-medium">
               {t("hideOutOfStock")}
-            </span>
+            </Label>
             <Switch
-              size="sm"
-              isSelected={hideOutOfStock}
-              onValueChange={handleStockChange}
+              id="stock-switch"
+              checked={hideOutOfStock}
+              onCheckedChange={handleStockChange}
               aria-label="Hide out of stock items"
             />
           </div>
@@ -135,7 +137,7 @@ export default function ProductListing({
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-2xl font-bold">{t("shopAll")}</h2>
-              <span className="text-default-500">
+              <span className="text-muted-foreground">
                 {formatNumber(metadata.totalCount)} {t("products")}
               </span>
             </div>
@@ -153,7 +155,7 @@ export default function ProductListing({
 
           {isPending ? (
             <div className="flex justify-center py-20">
-              <Spinner size="lg" />
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
             </div>
           ) : products.length === 0 ? (
             <EmptyState />

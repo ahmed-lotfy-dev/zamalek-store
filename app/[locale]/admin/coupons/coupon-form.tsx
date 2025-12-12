@@ -1,11 +1,15 @@
 "use client";
 
 import { createCoupon, updateCoupon } from "@/app/lib/actions/coupons";
-import { Button, Card, CardContent, CardHeader, Input, Label, Radio, RadioGroup, TextField } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { useRouter } from "@/i18n/routing";
 import { useState } from "react";
-import { toast } from "@/app/components/ui/toast";
+import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
@@ -77,10 +81,10 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
         <Link href="/admin/coupons">
           <Button
             variant="ghost"
-            isIconOnly
+            size="icon"
             className="rounded-full"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
         <h1 className="text-2xl font-bold">
@@ -90,40 +94,46 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
 
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-semibold">{t("details")}</h2>
+          <CardTitle className="text-lg font-semibold">{t("details")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <TextField isRequired>
+            <div className="flex flex-col gap-2">
               <Label>{t("code")}</Label>
               <Input
                 placeholder={t("codePlaceholder")}
                 name="code"
                 value={formData.code}
                 onChange={handleChange}
+                required
               />
-              <div className="text-xs text-default-500 mt-1">{t("codeDesc")}</div>
-            </TextField>
+              <div className="text-xs text-muted-foreground">{t("codeDesc")}</div>
+            </div>
 
-            <div>
+            <div className="flex flex-col gap-2">
               <Label>{t("type")}</Label>
               <RadioGroup
                 value={formData.type}
-                onChange={(val) =>
+                onValueChange={(val) =>
                   setFormData((prev) => ({
                     ...prev,
                     type: val as "PERCENTAGE" | "FIXED",
                   }))
                 }
-                orientation="horizontal"
-                className="mt-2"
+                className="flex items-center gap-4 mt-1"
               >
-                <Radio value="PERCENTAGE">{t("percentage")}</Radio>
-                <Radio value="FIXED">{t("fixed")}</Radio>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="PERCENTAGE" id="r1" />
+                  <Label htmlFor="r1">{t("percentage")}</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="FIXED" id="r2" />
+                  <Label htmlFor="r2">{t("fixed")}</Label>
+                </div>
               </RadioGroup>
             </div>
 
-            <TextField isRequired>
+            <div className="flex flex-col gap-2">
               <Label>
                 {formData.type === "PERCENTAGE"
                   ? t("percentageOff")
@@ -131,7 +141,7 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
               </Label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center z-10">
-                  <span className="text-default-400 text-small">
+                  <span className="text-muted-foreground text-sm">
                     {formData.type === "PERCENTAGE" ? "%" : "$"}
                   </span>
                 </div>
@@ -145,10 +155,10 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
                   className="pl-8"
                 />
               </div>
-            </TextField>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <TextField>
+              <div className="flex flex-col gap-2">
                 <Label>{t("maxUses")}</Label>
                 <Input
                   placeholder={t("maxUsesPlaceholder")}
@@ -158,28 +168,27 @@ export default function CouponForm({ coupon }: { coupon?: Coupon }) {
                   value={formData.maxUses}
                   onChange={handleChange}
                 />
-                <div className="text-xs text-default-500 mt-1">{t("maxUsesDesc")}</div>
-              </TextField>
+                <div className="text-xs text-muted-foreground">{t("maxUsesDesc")}</div>
+              </div>
 
-              <TextField>
+              <div className="flex flex-col gap-2">
                 <Label>{t("expiresAt")}</Label>
                 <Input
                   name="expiresAt"
                   type="date"
                   value={formData.expiresAt}
                   onChange={handleChange}
-                  placeholder=" "
                 />
-              </TextField>
+              </div>
             </div>
 
             <div className="flex justify-end gap-2 mt-4">
               <Link href="/admin/coupons">
-                <Button variant="ghost">
+                <Button variant="ghost" type="button">
                   {t("cancel")}
                 </Button>
               </Link>
-              <Button variant="primary" type="submit" isPending={isLoading}>
+              <Button type="submit" disabled={isLoading}>
                 {coupon ? t("update") : t("create")}
               </Button>
             </div>

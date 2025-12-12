@@ -1,20 +1,20 @@
 "use client";
 
-import { Button, Link } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function EmptyState() {
   return (
-    <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-default-300 bg-default-50">
-      <p className="text-default-500">No products found.</p>
-      <Button
-        as={Link}
-        href="/admin/products/new"
-        color="primary"
-        variant="light"
-        className="mt-2"
-      >
-        Add your first product
-      </Button>
+    <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-muted-foreground/30 bg-muted/20">
+      <p className="text-muted-foreground">No products found.</p>
+      <Link href="/admin/products/new">
+        <Button
+          variant="ghost"
+          className="text-primary mt-2"
+        >
+          Add your first product
+        </Button>
+      </Link>
     </div>
   );
 }

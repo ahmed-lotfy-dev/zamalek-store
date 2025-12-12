@@ -1,7 +1,7 @@
 "use client";
 
 import ProductCard from "@/app/components/product-card";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 
 import { Link } from "@/i18n/routing";
 import { Heart } from "lucide-react";
@@ -14,23 +14,21 @@ export default function SavedItemsList({ savedItems }: SavedItemsListProps) {
   if (savedItems.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="bg-default-100 p-4 rounded-full mb-4">
-          <Heart className="w-8 h-8 text-default-500" />
+        <div className="bg-muted p-4 rounded-full mb-4">
+          <Heart className="w-8 h-8 text-muted-foreground" />
         </div>
         <h2 className="text-xl font-semibold mb-2">No saved items yet</h2>
-        <p className="text-default-500 mb-6 max-w-md">
+        <p className="text-muted-foreground mb-6 max-w-md">
           Start saving your favorite items by clicking the heart icon on any
           product.
         </p>
-        <Button
-          as={Link}
-          href="/products"
-          color="primary"
-          variant="flat"
-          size="lg"
-        >
-          Browse Products
-        </Button>
+        <Link href="/products">
+          <Button
+            size="lg"
+          >
+            Browse Products
+          </Button>
+        </Link>
       </div>
     );
   }

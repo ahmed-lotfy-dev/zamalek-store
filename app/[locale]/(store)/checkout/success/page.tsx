@@ -6,7 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { verifyStripePayment } from "@/app/lib/actions/checkout";
 import { useCart } from "@/app/context/cart-context";
-import { Button, Card, CardHeader } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader } from "@/components/ui/card";
 
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
@@ -60,7 +61,6 @@ export default function CheckoutSuccessPage() {
           const rawQueryString = window.location.search.substring(1); // Remove '?'
 
           // Import dynamically to avoid server-side import issues in client component if not handled by Next.js
-          // But verifyKashierPayment is a server action, so it's fine
           const { verifyKashierPayment } = await import(
             "@/app/lib/actions/checkout"
           );
@@ -96,7 +96,7 @@ export default function CheckoutSuccessPage() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8 flex items-center justify-center">
           <Loader2 className="animate-spin w-8 h-8 text-primary" />
-          <p className="mt-4 text-default-500">Verifying payment...</p>
+          <p className="mt-4 text-muted-foreground">Verifying payment...</p>
         </Card>
       </div>
     );
@@ -107,24 +107,23 @@ export default function CheckoutSuccessPage() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="flex flex-col items-center gap-4 pt-8 pb-0">
-            <div className="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center text-danger">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center text-destructive">
               <XCircle size={40} />
             </div>
             <h1 className="text-2xl font-bold text-center">Payment Failed</h1>
           </CardHeader>
           <div className="flex flex-col gap-6 p-8 text-center">
-            <p className="text-default-500">
+            <p className="text-muted-foreground">
               We could not verify your payment. Please try again or contact
               support.
             </p>
-            <Button
-              as={Link}
-              href="/checkout"
-              color="primary"
-              className="w-full"
-            >
-              Try Again
-            </Button>
+            <Link href="/checkout" className="w-full">
+              <Button
+                className="w-full"
+              >
+                Try Again
+              </Button>
+            </Link>
           </div>
         </Card>
       </div>
@@ -135,7 +134,7 @@ export default function CheckoutSuccessPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="flex flex-col items-center gap-4 pt-8 pb-0">
-          <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center text-success">
+          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-green-600">
             <CheckCircle size={40} />
           </div>
           <h1 className="text-2xl font-bold text-center">
@@ -143,27 +142,26 @@ export default function CheckoutSuccessPage() {
           </h1>
         </CardHeader>
         <div className="flex flex-col gap-6 p-8 text-center">
-          <p className="text-default-500">
+          <p className="text-muted-foreground">
             Thank you for your purchase. Your order has been confirmed and will
             be shipped shortly.
           </p>
           <div className="flex flex-col gap-3">
-            <Button
-              as={Link}
-              href="/profile"
-              color="primary"
-              className="w-full font-medium"
-            >
-              View Order History
-            </Button>
-            <Button
-              as={Link}
-              href="/"
-              variant="bordered"
-              className="w-full font-medium"
-            >
-              Continue Shopping
-            </Button>
+            <Link href="/profile" className="w-full">
+              <Button
+                className="w-full font-medium"
+              >
+                View Order History
+              </Button>
+            </Link>
+            <Link href="/" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full font-medium"
+              >
+                Continue Shopping
+              </Button>
+            </Link>
           </div>
         </div>
       </Card>

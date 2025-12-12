@@ -1,7 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Select, ListBox, Label } from "@heroui/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export default function SortSelect({
   sortOption,
@@ -19,32 +26,20 @@ export default function SortSelect({
   ];
 
   return (
-    <Select
-      selectedKey={sortOption}
-      onSelectionChange={(keys) => {
-        if (keys && keys !== "all") {
-          const selected = Array.from(keys as unknown as Set<string>)[0];
-          setSortOption(selected);
-        }
-      }}
-      placeholder={t("sortBy")}
-      className="w-full sm:w-auto sm:min-w-[200px]"
-    >
-      <Label>{t("sortBy")}</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover>
-        <ListBox>
+    <div className="flex items-center gap-2">
+      <Label className="hidden sm:block whitespace-nowrap">{t("sortBy")}</Label>
+      <Select value={sortOption} onValueChange={setSortOption}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder={t("sortBy")} />
+        </SelectTrigger>
+        <SelectContent>
           {sortOptions.map((option) => (
-            <ListBox.Item key={option.key} id={option.key} textValue={option.label}>
+            <SelectItem key={option.key} value={option.key}>
               {option.label}
-              <ListBox.ItemIndicator />
-            </ListBox.Item>
+            </SelectItem>
           ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
+        </SelectContent>
+      </Select>
+    </div>
   );
 }

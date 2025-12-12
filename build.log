@@ -1,0 +1,158 @@
+
+> zamalek-store@0.1.0 build
+> prisma generate && next build
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v7.1.0) to ./node_modules/@prisma/client in 101ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+   ▲ Next.js 16.0.6 (Turbopack)
+   - Environments: .env
+
+   Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 5 errors:
+./app/components/store/product-details.tsx:1:10
+Ecmascript file had an error
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { useState } [36mfrom[39m [32m"react"[39m[33m;[39m
+ [90m   |[39m          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [36mimport[39m { [33mButton[39m[33m,[39m [33mChip[39m } [36mfrom[39m [32m"@heroui/react"[39m[33m;[39m
+ [90m 3 |[39m [36mimport[39m [33mImage[39m [36mfrom[39m [32m"next/image"[39m[33m;[39m
+ [90m 4 |[39m [36mimport[39m { useCart } [36mfrom[39m [32m"@/app/context/cart-context"[39m[33m;[39m[0m
+
+You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+
+
+Import trace:
+  Server Component:
+    ./app/components/store/product-details.tsx
+    ./app/[locale]/(store)/products/[slug]/page.tsx
+
+
+./app/components/store/search-bar.tsx:4:1
+Export Listbox doesn't exist in target module
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useState[33m,[39m useEffect[33m,[39m useRef } [36mfrom[39m [32m"react"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m { [33mInput[39m[33m,[39m [33mListbox[39m[33m,[39m [33mListboxItem[39m[33m,[39m [33mSpinner[39m } [36mfrom[39m [32m"@heroui/react"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m
+ [90m 6 |[39m [36mimport[39m { [33mSearch[39m } [36mfrom[39m [32m"lucide-react"[39m[33m;[39m
+ [90m 7 |[39m [36mimport[39m { useRouter } [36mfrom[39m [32m"@/i18n/routing"[39m[33m;[39m[0m
+
+The export Listbox was not found in module [project]/node_modules/@heroui/react/dist/index.js [app-client] (ecmascript).
+Did you mean to import ListBox?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/store/search-bar.tsx [Client Component Browser]
+    ./app/components/store/product-listing.tsx [Client Component Browser]
+    ./app/components/store/product-listing.tsx [Server Component]
+    ./app/[locale]/(store)/products/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/store/search-bar.tsx [Client Component SSR]
+    ./app/components/store/product-listing.tsx [Client Component SSR]
+    ./app/components/store/product-listing.tsx [Server Component]
+    ./app/[locale]/(store)/products/page.tsx [Server Component]
+
+
+./app/components/store/search-bar.tsx:4:1
+Export Listbox doesn't exist in target module
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useState[33m,[39m useEffect[33m,[39m useRef } [36mfrom[39m [32m"react"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m { [33mInput[39m[33m,[39m [33mListbox[39m[33m,[39m [33mListboxItem[39m[33m,[39m [33mSpinner[39m } [36mfrom[39m [32m"@heroui/react"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m
+ [90m 6 |[39m [36mimport[39m { [33mSearch[39m } [36mfrom[39m [32m"lucide-react"[39m[33m;[39m
+ [90m 7 |[39m [36mimport[39m { useRouter } [36mfrom[39m [32m"@/i18n/routing"[39m[33m;[39m[0m
+
+The export Listbox was not found in module [project]/node_modules/@heroui/react/dist/index.js [app-ssr] (ecmascript).
+Did you mean to import ListBox?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/store/search-bar.tsx [Client Component Browser]
+    ./app/components/store/product-listing.tsx [Client Component Browser]
+    ./app/components/store/product-listing.tsx [Server Component]
+    ./app/[locale]/(store)/products/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/store/search-bar.tsx [Client Component SSR]
+    ./app/components/store/product-listing.tsx [Client Component SSR]
+    ./app/components/store/product-listing.tsx [Server Component]
+    ./app/[locale]/(store)/products/page.tsx [Server Component]
+
+
+./app/components/store/search-bar.tsx:4:1
+Export ListboxItem doesn't exist in target module
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useState[33m,[39m useEffect[33m,[39m useRef } [36mfrom[39m [32m"react"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m { [33mInput[39m[33m,[39m [33mListbox[39m[33m,[39m [33mListboxItem[39m[33m,[39m [33mSpinner[39m } [36mfrom[39m [32m"@heroui/react"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m
+ [90m 6 |[39m [36mimport[39m { [33mSearch[39m } [36mfrom[39m [32m"lucide-react"[39m[33m;[39m
+ [90m 7 |[39m [36mimport[39m { useRouter } [36mfrom[39m [32m"@/i18n/routing"[39m[33m;[39m[0m
+
+The export ListboxItem was not found in module [project]/node_modules/@heroui/react/dist/index.js [app-client] (ecmascript).
+Did you mean to import ListBoxItem?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/store/search-bar.tsx [Client Component Browser]
+    ./app/components/store/product-listing.tsx [Client Component Browser]
+    ./app/components/store/product-listing.tsx [Server Component]
+    ./app/[locale]/(store)/products/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/store/search-bar.tsx [Client Component SSR]
+    ./app/components/store/product-listing.tsx [Client Component SSR]
+    ./app/components/store/product-listing.tsx [Server Component]
+    ./app/[locale]/(store)/products/page.tsx [Server Component]
+
+
+./app/components/store/search-bar.tsx:4:1
+Export ListboxItem doesn't exist in target module
+[0m [90m 2 |[39m
+ [90m 3 |[39m [36mimport[39m { useState[33m,[39m useEffect[33m,[39m useRef } [36mfrom[39m [32m"react"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mimport[39m { [33mInput[39m[33m,[39m [33mListbox[39m[33m,[39m [33mListboxItem[39m[33m,[39m [33mSpinner[39m } [36mfrom[39m [32m"@heroui/react"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m
+ [90m 6 |[39m [36mimport[39m { [33mSearch[39m } [36mfrom[39m [32m"lucide-react"[39m[33m;[39m
+ [90m 7 |[39m [36mimport[39m { useRouter } [36mfrom[39m [32m"@/i18n/routing"[39m[33m;[39m[0m
+
+The export ListboxItem was not found in module [project]/node_modules/@heroui/react/dist/index.js [app-ssr] (ecmascript).
+Did you mean to import ListBoxItem?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/store/search-bar.tsx [Client Component Browser]
+    ./app/components/store/product-listing.tsx [Client Component Browser]
+    ./app/components/store/product-listing.tsx [Server Component]
+    ./app/[locale]/(store)/products/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/store/search-bar.tsx [Client Component SSR]
+    ./app/components/store/product-listing.tsx [Client Component SSR]
+    ./app/components/store/product-listing.tsx [Server Component]
+    ./app/[locale]/(store)/products/page.tsx [Server Component]
+
+
+    at <unknown> (./app/components/store/product-details.tsx:1:10)
+    at <unknown> (./app/components/store/search-bar.tsx:4:1)
+    at <unknown> (./app/components/store/search-bar.tsx:4:1)
+    at <unknown> (./app/components/store/search-bar.tsx:4:1)
+    at <unknown> (./app/components/store/search-bar.tsx:4:1)

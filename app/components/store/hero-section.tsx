@@ -3,7 +3,7 @@
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 
 export default function HeroSection() {
   const t = useTranslations("HomePage");
@@ -40,26 +40,23 @@ export default function HeroSection() {
               {t("welcome")}
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button
-                as={Link}
-                href="/products"
-                color="primary"
-                size="lg"
-                radius="full"
-                className="font-bold px-10 text-lg h-14 shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
-              >
-                {t("shopNow")}
-              </Button>
-              <Button
-                as={Link}
-                href="/products"
-                variant="bordered"
-                className="text-white border-white/30 backdrop-blur-md font-bold px-10 text-lg h-14 hover:bg-white/10 hover:border-white transition-all"
-                size="lg"
-                radius="full"
-              >
-                {t("featuredCategories")}
-              </Button>
+              <Link href="/products">
+                <Button
+                  size="lg"
+                  className="font-bold px-10 text-lg h-14 shadow-lg shadow-primary/20 hover:scale-105 transition-transform rounded-full"
+                >
+                  {t("shopNow")}
+                </Button>
+              </Link>
+              <Link href="/products">
+                <Button
+                  variant="outline"
+                  className="bg-transparent text-white border-white/30 backdrop-blur-md font-bold px-10 text-lg h-14 hover:bg-white/10 hover:text-white hover:border-white transition-all rounded-full"
+                  size="lg"
+                >
+                  {t("featuredCategories")}
+                </Button>
+              </Link>
             </div>
           </motion.div>
         </div>

@@ -1,12 +1,18 @@
 "use client";
 
 import { useCart } from "@/app/context/cart-context";
-import { Button, Card, CardContent, CardHeader, Input, Label, Radio, RadioGroup, Select, ListBox, TextField } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "@/i18n/routing";
-import { toast } from "@/app/components/ui/toast";
+import { toast } from "sonner";
 import { createOrder } from "@/app/lib/actions/checkout";
 import { validateCoupon } from "@/app/lib/actions/coupons";
 import { useTranslations } from "next-intl";
@@ -168,7 +174,7 @@ export default function CheckoutForm({
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">{t("cartEmpty")}</h1>
-        <Button variant="primary" onPress={() => router.push("/products")}>
+        <Button onClick={() => router.push("/products")}>
           {t("continueShopping")}
         </Button>
       </div>
@@ -182,22 +188,21 @@ export default function CheckoutForm({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Shipping & Payment */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="p-4">
-            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-              <h2 className="text-xl font-bold">{t("shippingInfo")}</h2>
-              <p className="text-small text-default-500 mt-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("shippingInfo")}</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
                 {t("selectAddress")}
               </p>
             </CardHeader>
-            <CardContent className="overflow-visible py-2">
+            <CardContent>
               {savedAddresses.length > 0 && (
                 <div className="mb-6">
-                  <Select
-                    className="max-w-xs"
-                    onSelectionChange={(keys) => {
-                      if (keys) {
-                        const addrId = Array.from(keys as unknown as Set<string>)[0];
-                        const address = savedAddresses.find((a) => a.id === addrId);
+                  <div className="flex flex-col gap-2 max-w-xs">
+                    <Label>{t("savedAddresses")}</Label>
+                    <Select
+                      onValueChange={(val) => {
+                        const address = savedAddresses.find((a) => a.id === val);
                         if (address) {
                           setFormData((prev) => ({
                             ...prev,
@@ -205,26 +210,21 @@ export default function CheckoutForm({
                             city: address.city,
                           }));
                         }
-                      }
-                    }}
-                  >
-                    <Label>{t("savedAddresses")}</Label>
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an address" />
+                      </SelectTrigger>
+                      <SelectContent>
                         {savedAddresses.map((addr) => (
-                          <ListBox.Item key={addr.id} id={addr.id} textValue={`${addr.street}, ${addr.city}`}>
+                          <SelectItem key={addr.id} value={addr.id}>
                             {addr.street}, {addr.city}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
+                          </SelectItem>
                         ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
-                  <hr className="my-4 border-default-200" />
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Separator className="my-4" />
                 </div>
               )}
 
@@ -234,137 +234,139 @@ export default function CheckoutForm({
                 className="space-y-4"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <TextField isRequired>
+                  <div className="flex flex-col gap-2">
                     <Label>{t("fullName")}</Label>
                     <Input
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
+                      required
                     />
-                  </TextField>
-                  <TextField isRequired>
+                  </div>
+                  <div className="flex flex-col gap-2">
                     <Label>{t("email")}</Label>
                     <Input
                       name="email"
                       type="email"
                       value={formData.email}
                       onChange={handleInputChange}
+                      required
                     />
-                  </TextField>
+                  </div>
                 </div>
-                <TextField isRequired>
+                <div className="flex flex-col gap-2">
                   <Label>{t("phone")}</Label>
                   <Input
                     name="phone"
                     type="tel"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    required
                   />
-                </TextField>
-                <TextField isRequired>
+                </div>
+                <div className="flex flex-col gap-2">
                   <Label>{t("address")}</Label>
                   <Input
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
+                    required
                   />
-                </TextField>
-                <TextField isRequired>
+                </div>
+                <div className="flex flex-col gap-2">
                   <Label>{t("city")}</Label>
                   <Input
                     name="city"
                     value={formData.city}
                     onChange={handleInputChange}
+                    required
                   />
-                </TextField>
+                </div>
               </form>
             </CardContent>
           </Card>
 
-          <Card className="p-4">
-            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-              <h2 className="text-xl font-bold">{t("paymentMethod")}</h2>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("paymentMethod")}</CardTitle>
             </CardHeader>
-            <CardContent className="overflow-visible py-2">
+            <CardContent>
               <RadioGroup
                 value={formData.paymentMethod}
-                onChange={(val) =>
+                onValueChange={(val) =>
                   setFormData((prev) => ({ ...prev, paymentMethod: val }))
                 }
+                className="space-y-4"
               >
-                <div className="space-y-2">
-                  <Radio value="cod">
-                    <div>
-                      <div className="font-medium">{t("cod")}</div>
-                      <div className="text-xs text-default-500">{t("codDesc")}</div>
-                    </div>
-                  </Radio>
-                  <Radio value="paymob">
-                    <div>
-                      <div className="font-medium">{t("paymob")}</div>
-                      <div className="text-xs text-default-500">{t("paymobDesc")}</div>
-                    </div>
-                  </Radio>
-                  <Radio value="paymob_wallet">
-                    <div>
-                      <div className="font-medium">{t("wallet")}</div>
-                      <div className="text-xs text-default-500">{t("walletDesc")}</div>
-                    </div>
-                  </Radio>
-                  <Radio value="kashier">
-                    <div>
-                      <div className="font-medium">{t("kashier")}</div>
-                      <div className="text-xs text-default-500">Pay securely with Credit/Debit Card</div>
-                    </div>
-                  </Radio>
-                  <Radio value="stripe">
-                    <div>
-                      <div className="font-medium">{t("stripe")}</div>
-                      <div className="text-xs text-default-500">Pay securely with Credit Card (Stripe)</div>
-                    </div>
-                  </Radio>
+                <div className="flex items-start space-x-3 space-y-0">
+                  <RadioGroupItem value="cod" id="cod" className="mt-1" />
+                  <div className="grid gap-0.5 leading-none">
+                    <Label htmlFor="cod" className="font-medium cursor-pointer">{t("cod")}</Label>
+                    <p className="text-sm text-muted-foreground">{t("codDesc")}</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3 space-y-0">
+                  <RadioGroupItem value="paymob" id="paymob" className="mt-1" />
+                  <div className="grid gap-0.5 leading-none">
+                    <Label htmlFor="paymob" className="font-medium cursor-pointer">{t("paymob")}</Label>
+                    <p className="text-sm text-muted-foreground">{t("paymobDesc")}</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3 space-y-0">
+                  <RadioGroupItem value="paymob_wallet" id="paymob_wallet" className="mt-1" />
+                  <div className="grid gap-0.5 leading-none">
+                    <Label htmlFor="paymob_wallet" className="font-medium cursor-pointer">{t("wallet")}</Label>
+                    <p className="text-sm text-muted-foreground">{t("walletDesc")}</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3 space-y-0">
+                  <RadioGroupItem value="kashier" id="kashier" className="mt-1" />
+                  <div className="grid gap-0.5 leading-none">
+                    <Label htmlFor="kashier" className="font-medium cursor-pointer">{t("kashier")}</Label>
+                    <p className="text-sm text-muted-foreground">Pay securely with Credit/Debit Card</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3 space-y-0">
+                  <RadioGroupItem value="stripe" id="stripe" className="mt-1" />
+                  <div className="grid gap-0.5 leading-none">
+                    <Label htmlFor="stripe" className="font-medium cursor-pointer">{t("stripe")}</Label>
+                    <p className="text-sm text-muted-foreground">Pay securely with Credit Card (Stripe)</p>
+                  </div>
                 </div>
               </RadioGroup>
 
               {/* Wallet Selection Fields - Show when Paymob Wallet is selected */}
               {formData.paymentMethod === "paymob_wallet" && (
-                <div className="mt-4 space-y-4 p-4 border border-primary-200 rounded-lg bg-primary-50">
-                  <h3 className="text-lg font-semibold text-primary-700">
+                <div className="mt-6 space-y-4 p-4 border rounded-lg bg-muted/50">
+                  <h3 className="text-lg font-semibold">
                     {t("walletDetails")}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Select
-                      selectedKey={formData.walletType || undefined}
-                      onSelectionChange={(keys) => {
-                        if (keys) {
-                          const selected = Array.from(keys as unknown as Set<string>)[0];
+                    <div className="flex flex-col gap-2">
+                      <Label>{t("selectNetwork")} *</Label>
+                      <Select
+                        value={formData.walletType || ""}
+                        onValueChange={(val) =>
                           setFormData((prev) => ({
                             ...prev,
-                            walletType: selected,
-                          }));
+                            walletType: val,
+                          }))
                         }
-                      }}
-                      isRequired
-                      placeholder="Choose wallet type"
-                      className="w-full"
-                    >
-                      <Label>{t("selectNetwork")} *</Label>
-                      <Select.Trigger>
-                        <Select.Value />
-                        <Select.Indicator />
-                      </Select.Trigger>
-                      <Select.Popover>
-                        <ListBox>
+                        required
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose wallet type" />
+                        </SelectTrigger>
+                        <SelectContent>
                           {walletOptions.map((wallet) => (
-                            <ListBox.Item key={wallet.value} id={wallet.value} textValue={wallet.label}>
+                            <SelectItem key={wallet.value} value={wallet.value}>
                               {wallet.label}
-                              <ListBox.ItemIndicator />
-                            </ListBox.Item>
+                            </SelectItem>
                           ))}
-                        </ListBox>
-                      </Select.Popover>
-                    </Select>
-                    <TextField isRequired>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex flex-col gap-2">
                       <Label>{t("mobileNumber")}</Label>
                       <Input
                         placeholder="01234567890"
@@ -377,10 +379,10 @@ export default function CheckoutForm({
                           }))
                         }
                       />
-                      <div className="text-xs text-default-500 mt-1">{t("mobileNumberDesc")}</div>
-                    </TextField>
+                      <div className="text-xs text-muted-foreground">{t("mobileNumberDesc")}</div>
+                    </div>
                   </div>
-                  <p className="text-sm text-default-600">{t("walletNote")}</p>
+                  <p className="text-sm text-muted-foreground">{t("walletNote")}</p>
                 </div>
               )}
             </CardContent>
@@ -389,15 +391,15 @@ export default function CheckoutForm({
 
         {/* Right Column: Order Summary */}
         <div className="lg:col-span-1">
-          <Card className="p-4 sticky top-24">
-            <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
-              <h2 className="text-xl font-bold">{t("orderSummary")}</h2>
+          <Card className="sticky top-24">
+            <CardHeader>
+              <CardTitle>{t("orderSummary")}</CardTitle>
             </CardHeader>
-            <CardContent className="overflow-visible py-2">
-              <div className="space-y-4 my-4">
+            <CardContent>
+              <div className="space-y-4 mb-4">
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4 items-center">
-                    <div className="w-16 h-16 bg-default-100 rounded-lg overflow-hidden shrink-0 relative">
+                    <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden shrink-0 relative border">
                       <Image
                         src={item.image}
                         alt={item.name}
@@ -409,7 +411,7 @@ export default function CheckoutForm({
                       <p className="font-medium text-sm line-clamp-2">
                         {item.name}
                       </p>
-                      <p className="text-default-500 text-xs">
+                      <p className="text-muted-foreground text-xs">
                         {t("qty")}: {formatNumber(item.quantity)}
                       </p>
                     </div>
@@ -420,20 +422,20 @@ export default function CheckoutForm({
                 ))}
               </div>
 
-              <hr className="my-4 border-default-200" />
+              <Separator className="my-4" />
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-default-500">{t("subtotal")}</span>
+                  <span className="text-muted-foreground">{t("subtotal")}</span>
                   <span>{formatCurrency(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-default-500">{t("shipping")}</span>
+                  <span className="text-muted-foreground">{t("shipping")}</span>
                   <span>{t("free")}</span>
                 </div>
 
                 {appliedCoupon && (
-                  <div className="flex justify-between text-sm text-success font-medium">
+                  <div className="flex justify-between text-sm text-green-600 font-medium">
                     <span>
                       {t("discount")} ({appliedCoupon.code})
                     </span>
@@ -441,7 +443,7 @@ export default function CheckoutForm({
                   </div>
                 )}
 
-                <hr className="my-2 border-default-200" />
+                <Separator className="my-2" />
                 <div className="flex justify-between text-lg font-bold">
                   <span>{t("total")}</span>
                   <span>
@@ -461,28 +463,28 @@ export default function CheckoutForm({
                     />
                     <Button
                       variant="secondary"
-                      isPending={isValidatingCoupon}
-                      onPress={handleApplyCoupon}
-                      isDisabled={!couponCode.trim()}
+                      disabled={!couponCode.trim() || isValidatingCoupon}
+                      onClick={handleApplyCoupon}
                       className="shrink-0"
                     >
                       {t("apply")}
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex justify-between items-center bg-success-50 p-2 rounded-lg border border-success-200">
+                  <div className="flex justify-between items-center bg-green-50 p-2 rounded-lg border border-green-200">
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-success-700">
+                      <span className="text-xs font-bold text-green-700">
                         {t("couponApplied")}
                       </span>
-                      <span className="text-xs text-success-600">
+                      <span className="text-xs text-green-600">
                         {appliedCoupon.code}
                       </span>
                     </div>
                     <Button
-                      variant="danger"
-                      onPress={handleRemoveCoupon}
-                      className="min-w-0 h-8 px-2 text-xs"
+                      variant="destructive"
+                      onClick={handleRemoveCoupon}
+                      className="h-8 px-2 text-xs"
+                      size="sm"
                     >
                       {t("remove")}
                     </Button>
@@ -491,11 +493,10 @@ export default function CheckoutForm({
               </div>
 
               <Button
-                variant="primary"
                 className="w-full mt-6 font-semibold text-lg py-6"
                 type="submit"
                 form="checkout-form"
-                isPending={isLoading}
+                disabled={isLoading}
               >
                 {t("placeOrder")}
               </Button>

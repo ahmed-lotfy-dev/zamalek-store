@@ -10,27 +10,27 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { Card, CardContent, CardHeader } from "@heroui/react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface TopProductsChartProps {
   data: { name: string; sales: number }[];
 }
 
 const COLORS = [
-  "hsl(var(--heroui-primary))",
-  "hsl(var(--heroui-secondary))",
-  "hsl(var(--heroui-success))",
-  "hsl(var(--heroui-warning))",
-  "hsl(var(--heroui-danger))",
+  "hsl(var(--primary))",
+  "hsl(var(--secondary))",
+  "hsl(var(--muted))", // Using muted for variation if needed, or stick to primary opacity
+  "hsl(var(--accent))",
+  "hsl(var(--destructive))",
 ];
 
 export default function TopProductsChart({ data }: TopProductsChartProps) {
   return (
     <Card className="h-[400px]">
       <CardHeader>
-        <h3 className="text-lg font-semibold">Top 5 Products by Revenue</h3>
+        <CardTitle className="text-lg font-semibold">Top 5 Products by Revenue</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-[340px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
@@ -42,13 +42,13 @@ export default function TopProductsChart({ data }: TopProductsChartProps) {
               bottom: 5,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-muted" />
             <XAxis type="number" hide />
             <YAxis
               dataKey="name"
               type="category"
               width={100}
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 12, fill: "hsl(var(--foreground))" }}
               tickLine={false}
               axisLine={false}
             />
@@ -56,10 +56,12 @@ export default function TopProductsChart({ data }: TopProductsChartProps) {
               formatter={(value: number) => [`$${value.toFixed(2)}`, "Revenue"]}
               cursor={{ fill: "transparent" }}
               contentStyle={{
-                backgroundColor: "hsl(var(--heroui-background))",
-                border: "1px solid hsl(var(--heroui-divider))",
+                backgroundColor: "hsl(var(--card))",
+                borderColor: "hsl(var(--border))",
                 borderRadius: "8px",
+                color: "hsl(var(--card-foreground))",
               }}
+              itemStyle={{ color: "hsl(var(--foreground))" }}
             />
             <Bar dataKey="sales" radius={[0, 4, 4, 0]} barSize={32}>
               {data.map((entry, index) => (

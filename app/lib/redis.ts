@@ -1,23 +1,27 @@
 import IORedis from "ioredis";
 
-let redisConnection: IORedis | null = null;
+const globalForRedis = global as unknown as { redis: IORedis };
 
 export const getRedisConnection = () => {
-  if (!redisConnection) {
-    redisConnection = new IORedis({
-      host: process.env.REDIS_HOST || "localhost",
+  if (!globalForRedis.redis) {
+    globalForRedis.redis = new IORedis({
+      host: process.env.REDIS_HOST || "127.0.0.1",
       port: parseInt(process.env.REDIS_PORT || "6379"),
-      password: process.env.REDIS_PASSWORD, // Add password support
+      password: process.env.REDIS_PASSWORD || undefined,
       maxRetriesPerRequest: null,
-      lazyConnect: true, // Don't connect immediately
     });
   }
-  return redisConnection;
+  return globalForRedis.redis;
 };
 
 // For backward compatibility
 export const connection = new Proxy({} as IORedis, {
   get(target, prop) {
-    return getRedisConnection()[prop as keyof IORedis];
+    const redis = getRedisConnection();
+    const value = redis[prop as keyof IORedis];
+    if (typeof value === "function") {
+      return value.bind(redis);
+    }
+    return value;
   },
 });

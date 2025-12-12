@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Chip, Image } from "@heroui/react";
-
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 import { useCart } from "@/app/context/cart-context";
 import SaveButton from "./save-button";
 import { ShoppingCart, Minus, Plus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useFormat } from "@/app/hooks/use-format";
+import { cn } from "@/app/lib/utils"
 
 type Product = {
   id: string;
@@ -76,8 +78,6 @@ export default function ProductDetails({
 
   const handleAddToCart = () => {
     if (!isSelectionComplete) {
-      // Should show error/toast, but for now just return.
-      // The button should be disabled anyway.
       return;
     }
 
@@ -111,20 +111,20 @@ export default function ProductDetails({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
       {/* Image Gallery */}
-      <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-default-100 lg:max-w-sm">
+      <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-secondary lg:max-w-sm">
         <Image
           src={
             product.images[0] || "https://placehold.co/600x600?text=No+Image"
           }
-          width="100%"
           alt={displayName}
-          className={`w-full h-full object-cover ${isOutOfStock ? "grayscale opacity-75" : ""
+          fill
+          className={`object-cover ${isOutOfStock ? "grayscale opacity-75" : ""
             }`}
         />
         {isOutOfStock && (
-          <div className="absolute top-4 left-4 z-20 bg-default-900/80 text-white px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider">
+          <Badge variant="destructive" className="absolute top-4 left-4 z-20 px-4 py-1 text-sm">
             {t("outOfStock")}
-          </div>
+          </Badge>
         )}
       </div>
 
@@ -133,19 +133,19 @@ export default function ProductDetails({
         <div>
           <div className="flex justify-between items-start">
             <div className="flex flex-col gap-2">
-              <p className="text-small text-primary uppercase font-bold tracking-wider">
+              <p className="text-sm font-bold tracking-wider text-muted-foreground uppercase">
                 {displayCategory}
               </p>
               <h1 className="text-3xl md:text-4xl font-bold">{displayName}</h1>
             </div>
             <SaveButton productId={product.id} isSaved={isSaved} />
           </div>
-          <p className="text-2xl font-bold mt-4">
+          <p className="text-2xl font-bold mt-4 text-primary">
             {formatCurrency(Number(product.price))}
           </p>
         </div>
 
-        <div className="prose dark:prose-invert max-w-none text-default-500">
+        <div className="prose dark:prose-invert max-w-none text-muted-foreground">
           <p>{displayDescription}</p>
         </div>
 
@@ -157,15 +157,18 @@ export default function ProductDetails({
                 <span className="font-medium">{t("color")}</span>
                 <div className="flex flex-wrap gap-2">
                   {colors.map((color) => (
-                    <Chip
+                    <button
                       key={color}
-                      variant={selectedColor === color ? "solid" : "bordered"}
-                      color={selectedColor === color ? "primary" : "default"}
-                      className="cursor-pointer"
                       onClick={() => setSelectedColor(color)}
+                      className={cn(
+                        "inline-flex items-center justify-center rounded-full px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border",
+                        selectedColor === color
+                          ? "border-primary bg-primary text-primary-foreground shadow hover:bg-primary/90"
+                          : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                      )}
                     >
                       {color}
-                    </Chip>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -176,15 +179,18 @@ export default function ProductDetails({
                 <span className="font-medium">{t("size")}</span>
                 <div className="flex flex-wrap gap-2">
                   {sizes.map((size) => (
-                    <Chip
+                    <button
                       key={size}
-                      variant={selectedSize === size ? "solid" : "bordered"}
-                      color={selectedSize === size ? "primary" : "default"}
-                      className="cursor-pointer"
                       onClick={() => setSelectedSize(size)}
+                      className={cn(
+                        "inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring border",
+                        selectedSize === size
+                          ? "border-primary bg-primary text-primary-foreground shadow hover:bg-primary/90"
+                          : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                      )}
                     >
                       {size}
-                    </Chip>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -196,30 +202,30 @@ export default function ProductDetails({
           {!isOutOfStock && isSelectionComplete && (
             <div className="flex items-center gap-4">
               <span className="font-medium">{t("quantity")}</span>
-              <div className="flex items-center gap-2 border border-divider rounded-lg p-1">
+              <div className="flex items-center gap-2 border rounded-lg p-1">
                 <Button
-                  isIconOnly
-                  size="sm"
-                  variant="light"
-                  onPress={decrementQuantity}
-                  isDisabled={quantity <= 1}
+                  size="icon"
+                  variant="ghost"
+                  onClick={decrementQuantity}
+                  disabled={quantity <= 1}
+                  className="h-8 w-8"
                 >
-                  <Minus size={16} />
+                  <Minus className="h-4 w-4" />
                 </Button>
                 <span className="w-8 text-center font-medium">
                   {formatNumber(quantity)}
                 </span>
                 <Button
-                  isIconOnly
-                  size="sm"
-                  variant="light"
-                  onPress={incrementQuantity}
-                  isDisabled={quantity >= currentStock}
+                  size="icon"
+                  variant="ghost"
+                  onClick={incrementQuantity}
+                  disabled={quantity >= currentStock}
+                  className="h-8 w-8"
                 >
-                  <Plus size={16} />
+                  <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              <span className="text-small text-default-400">
+              <span className="text-sm text-muted-foreground">
                 {formatNumber(currentStock)} {t("available")}
               </span>
             </div>
@@ -227,12 +233,11 @@ export default function ProductDetails({
 
           <Button
             size="lg"
-            color="primary"
-            className="w-full font-semibold"
-            startContent={<ShoppingCart size={20} />}
-            onPress={handleAddToCart}
-            isDisabled={isOutOfStock || !isSelectionComplete}
+            className="w-full font-semibold gap-2"
+            onClick={handleAddToCart}
+            disabled={isOutOfStock || !isSelectionComplete}
           >
+            <ShoppingCart className="h-5 w-5" />
             {isOutOfStock
               ? t("outOfStock")
               : !isSelectionComplete

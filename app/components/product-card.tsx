@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useLocale } from "next-intl";
-import { Button, Card } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 type Product = {
   id: string;
@@ -21,6 +23,7 @@ import { useCart } from "@/app/context/cart-context";
 import SaveButton from "./store/save-button";
 
 import { useFormat } from "@/app/hooks/use-format";
+import { ShoppingCart } from "lucide-react";
 
 export default function ProductCard({
   product,
@@ -44,17 +47,16 @@ export default function ProductCard({
   return (
     <Card
       key={product.id}
-      className={`group relative overflow-hidden shadow-sm ${
-        isOutOfStock ? "opacity-75" : ""
-      }`}
+      className={`group relative overflow-hidden border-none shadow-sm ${isOutOfStock ? "opacity-75" : ""
+        }`}
     >
       <div className="overflow-visible p-0">
-        <div className="relative aspect-3/4 w-full overflow-hidden">
+        <div className="relative aspect-3/4 w-full overflow-hidden rounded-t-lg">
           <Image
             alt={displayName}
-            className={`w-full h-full object-cover transition-transform duration-300 ${
-              isOutOfStock ? "grayscale" : "group-hover:scale-105"
-            }`}
+            fill
+            className={`w-full h-full object-cover transition-transform duration-300 ${isOutOfStock ? "grayscale" : "group-hover:scale-105"
+              }`}
             src={
               product.images[0] || "https://placehold.co/600x800?text=No+Image"
             }
@@ -67,9 +69,9 @@ export default function ProductCard({
 
           {/* Out of Stock Badge */}
           {isOutOfStock && (
-            <div className="absolute top-2 left-2 z-20 bg-default-900/80 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+            <Badge variant="destructive" className="absolute top-2 left-2 z-20">
               Out of Stock
-            </div>
+            </Badge>
           )}
 
           {/* Save Button */}
@@ -79,32 +81,36 @@ export default function ProductCard({
 
           {/* Add to Cart Overlay */}
           {!isOutOfStock && (
-            <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0 z-20">
+            <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full transition-transform duration-300 group-hover:translate-y-0 z-20 pointer-events-none">
               <Button
-                {...({ color: "primary", radius: "full", onPress: () => addToCart(product) } as any)}
-                className="w-full font-medium shadow-lg"
+                variant="default"
+                className="w-full font-medium shadow-lg pointer-events-auto rounded-full"
+                onClick={() => addToCart(product)}
               >
                 Add to Cart
+                <ShoppingCart className="ml-2 h-4 w-4" />
               </Button>
             </div>
           )}
         </div>
       </div>
-      <div className="flex flex-col items-start gap-1 p-4">
+      <CardContent className="flex flex-col items-start gap-1 p-4">
         <div className="flex justify-between items-start w-full">
-          <div className="flex flex-col gap-1">
-            <p className="text-tiny text-default-500 uppercase font-bold">
+          <div className="flex flex-col gap-1 w-full">
+            <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
               {displayCategory}
             </p>
-            <h3 className="font-medium text-large text-default-900 line-clamp-1">
+            <h3 className="font-medium text-lg leading-tight line-clamp-1 group-hover:underline decoration-primary underline-offset-4">
               {displayName}
             </h3>
           </div>
-          <p className="text-large font-bold text-primary">
-            {formatCurrency(Number(product.price))}
-          </p>
         </div>
-      </div>
+      </CardContent>
+      <CardFooter className="p-4 pt-0">
+        <p className="text-lg font-bold text-primary">
+          {formatCurrency(Number(product.price))}
+        </p>
+      </CardFooter>
     </Card>
   );
 }

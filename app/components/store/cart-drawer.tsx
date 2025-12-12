@@ -1,14 +1,24 @@
 "use client";
 
 import { useCart } from "@/app/context/cart-context";
-import { Button, Card, CardContent, Image } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+  SheetDescription
+} from "@/components/ui/sheet";
+import Image from "next/image";
 
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/app/hooks/use-format";
-
 import { useLocale } from "next-intl";
 
 export default function CartDrawer() {
@@ -26,153 +36,123 @@ export default function CartDrawer() {
   const isRtl = locale === "ar";
 
   return (
-    <AnimatePresence>
-      {isCartOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsCartOpen(false)}
-            className="fixed inset-0 bg-black z-40"
-          />
+    <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
+      <SheetContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-md flex flex-col p-0 h-full">
+        <SheetHeader className="p-4 border-b">
+          <div className="flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5" />
+            <SheetTitle>
+              {t("title")} ({formatNumber(items.length)})
+            </SheetTitle>
+          </div>
+          <SheetDescription className="sr-only">
+            Shopping Cart content
+          </SheetDescription>
+        </SheetHeader>
 
-          {/* Drawer */}
-          <motion.div
-            initial={{ x: isRtl ? "-100%" : "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: isRtl ? "-100%" : "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className={`fixed inset-y-0 ${
-              isRtl ? "left-0" : "right-0"
-            } z-50 w-full max-w-md bg-background shadow-xl flex flex-col`}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-divider">
-              <div className="flex items-center gap-2">
-                <ShoppingBag className="w-5 h-5" />
-                <h2 className="text-lg font-semibold">
-                  {t("title")} ({formatNumber(items.length)})
-                </h2>
-              </div>
+        <ScrollArea className="flex-1 p-4">
+          {items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] text-muted-foreground space-y-4">
+              <ShoppingBag className="w-16 h-16 opacity-20" />
+              <p>{t("empty")}</p>
               <Button
-                isIconOnly
-                variant="light"
-                onPress={() => setIsCartOpen(false)}
+                variant="link"
+                className="text-primary"
+                onClick={() => setIsCartOpen(false)}
               >
-                <X className="w-5 h-5" />
+                {t("startShopping")}
               </Button>
             </div>
-
-            {/* Items */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {items.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-default-500 space-y-4">
-                  <ShoppingBag className="w-16 h-16 opacity-20" />
-                  <p>{t("empty")}</p>
-                  <Button
-                    color="primary"
-                    variant="flat"
-                    onPress={() => setIsCartOpen(false)}
-                  >
-                    {t("startShopping")}
-                  </Button>
-                </div>
-              ) : (
-                items.map((item) => (
-                  <Card key={item.id} className="w-full shadow-sm">
-                    <CardContent className="flex flex-row gap-4 p-3">
-                      <div className="relative w-20 h-20 shrink-0 bg-default-100 rounded-lg overflow-hidden">
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          classNames={{
-                            wrapper: "w-full h-full",
-                            img: "w-full h-full object-cover",
-                          }}
-                        />
+          ) : (
+            <div className="space-y-4">
+              {items.map((item) => (
+                <Card key={item.id} className="w-full shadow-sm overflow-hidden">
+                  <CardContent className="flex flex-row gap-4 p-3">
+                    <div className="relative w-20 h-20 shrink-0 bg-secondary rounded-lg overflow-hidden">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-medium line-clamp-2 text-sm leading-tight">
+                          {item.name}
+                        </h3>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6 text-destructive hover:text-destructive/90 -mr-2 -mt-2"
+                          onClick={() => removeFromCart(item.id)}
+                        >
+                          <X className="w-3 h-3" />
+                          <span className="sr-only">Remove</span>
+                        </Button>
                       </div>
-                      <div className="flex-1 flex flex-col justify-between">
-                        <div className="flex justify-between items-start">
-                          <h3 className="font-medium line-clamp-2 text-sm">
-                            {item.name}
-                          </h3>
+                      <div className="flex justify-between items-end mt-2">
+                        <p className="font-semibold text-primary">
+                          {formatCurrency(item.price)}
+                        </p>
+                        <div className="flex items-center gap-2 bg-secondary rounded-md p-1">
                           <Button
-                            isIconOnly
-                            size="sm"
-                            variant="light"
-                            color="danger"
-                            className="min-w-6 w-6 h-6 -mr-2 -mt-2"
-                            onPress={() => removeFromCart(item.id)}
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6"
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity - 1)
+                            }
                           >
-                            <X className="w-3 h-3" />
+                            <Minus className="w-3 h-3" />
+                            <span className="sr-only">Decrease</span>
+                          </Button>
+                          <span className="text-xs font-medium w-4 text-center">
+                            {formatNumber(item.quantity)}
+                          </span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6"
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity + 1)
+                            }
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span className="sr-only">Increase</span>
                           </Button>
                         </div>
-                        <div className="flex justify-between items-end mt-2">
-                          <p className="font-semibold text-primary">
-                            {formatCurrency(item.price)}
-                          </p>
-                          <div className="flex items-center gap-2 bg-default-100 rounded-lg p-1">
-                            <Button
-                              isIconOnly
-                              size="sm"
-                              variant="light"
-                              className="w-6 h-6 min-w-6"
-                              onPress={() =>
-                                updateQuantity(item.id, item.quantity - 1)
-                              }
-                            >
-                              <Minus className="w-3 h-3" />
-                            </Button>
-                            <span className="text-xs font-medium w-4 text-center">
-                              {formatNumber(item.quantity)}
-                            </span>
-                            <Button
-                              isIconOnly
-                              size="sm"
-                              variant="light"
-                              className="w-6 h-6 min-w-6"
-                              onPress={() =>
-                                updateQuantity(item.id, item.quantity + 1)
-                              }
-                            >
-                              <Plus className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
+          )}
+        </ScrollArea>
 
-            {/* Footer */}
-            {items.length > 0 && (
-              <div className="p-4 border-t border-divider bg-content1">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-default-500">{t("subtotal")}</span>
-                  <span className="text-xl font-bold">
-                    {formatCurrency(cartTotal)}
-                  </span>
-                </div>
+        {items.length > 0 && (
+          <SheetFooter className="p-4 border-t bg-background mt-auto">
+            <div className="w-full space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">{t("subtotal")}</span>
+                <span className="text-xl font-bold">
+                  {formatCurrency(cartTotal)}
+                </span>
+              </div>
+              <Link href="/checkout" onClick={() => setIsCartOpen(false)} className="w-full block">
                 <Button
-                  as={Link}
-                  href="/checkout"
-                  color="primary"
                   size="lg"
                   className="w-full font-semibold"
-                  endContent={<ShoppingBag className="w-4 h-4" />}
-                  onPress={() => setIsCartOpen(false)}
                 >
                   {t("checkout")}
+                  <ShoppingBag className="w-4 h-4 ml-2" />
                 </Button>
-              </div>
-            )}
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+              </Link>
+            </div>
+          </SheetFooter>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }

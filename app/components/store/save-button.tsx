@@ -4,7 +4,7 @@ import { Heart } from "lucide-react";
 import { toggleSavedItem } from "@/app/lib/actions/saved-items";
 import { useOptimistic, startTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 
 interface SaveButtonProps {
   productId: string;
@@ -27,7 +27,6 @@ export default function SaveButton({ productId, isSaved }: SaveButtonProps) {
       await toggleSavedItem(productId);
       router.refresh();
     } catch (error) {
-      // Revert on error (optional, but optimistic UI usually assumes success)
       console.error("Failed to toggle saved item", error);
       startTransition(() => {
         setOptimisticIsSaved(isSaved);
@@ -37,12 +36,13 @@ export default function SaveButton({ productId, isSaved }: SaveButtonProps) {
 
   return (
     <Button
-      isIconOnly
-      onPress={handleToggle}
-      className="bg-white/70 backdrop-blur-md hover:bg-white/90 text-danger"
+      size="icon"
+      variant="ghost"
+      onClick={handleToggle}
+      className="bg-white/70 backdrop-blur-md hover:bg-white/90 text-destructive rounded-full h-8 w-8"
       aria-label={optimisticIsSaved ? "Unsave" : "Save"}
     >
-      <Heart className={`w-5 h-5 ${optimisticIsSaved ? "fill-current" : ""}`} />
+      <Heart className={`w-4 h-4 ${optimisticIsSaved ? "fill-current" : ""}`} />
     </Button>
   );
 }

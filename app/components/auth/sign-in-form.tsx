@@ -2,30 +2,61 @@
 
 import { useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
-import { Button, Card, CardContent, CardFooter, CardHeader, Input, Label, TextField } from "@heroui/react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
-import { toast } from "@/app/components/ui/toast";
+import { toast } from "sonner"; // Using sonner as Shadcn usually installs it or use-toast
 import { useTranslations } from "next-intl";
 
+const signInSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
 export default function SignInForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const t = useTranslations("Auth");
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<z.infer<typeof signInSchema>>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const handleSignIn = async (values: z.infer<typeof signInSchema>) => {
     setLoading(true);
     try {
       await authClient.signIn.email({
-        email,
-        password,
+        email: values.email,
+        password: values.password,
         fetchOptions: {
           onSuccess: () => {
             router.push("/admin");
+            toast.success(t("signInSuccess") || "Signed in successfully");
           },
           onError: (ctx: any) => {
             const message = ctx.error.message || t("signInError");
@@ -43,43 +74,58 @@ export default function SignInForm() {
 
   return (
     <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="flex flex-col gap-1 items-center justify-center pb-0">
-        <h1 className="text-2xl font-bold">{t("signInTitle")}</h1>
-        <p className="text-small text-default-500">{t("signInSubtitle")}</p>
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold">{t("signInTitle")}</CardTitle>
+        <CardDescription>{t("signInSubtitle")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSignIn} className="flex flex-col gap-4">
-          <TextField isRequired>
-            <Label>{t("email")}</Label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={t("emailPlaceholder")}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSignIn)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("email")}</FormLabel>
+                  <FormControl>
+                    <Input placeholder={t("emailPlaceholder")} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </TextField>
-
-          <TextField isRequired>
-            <Label>{t("password")}</Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={t("passwordPlaceholder")}
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("password")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder={t("passwordPlaceholder")}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </TextField>
-
-          <Button
-            type="submit"
-            isPending={loading}
-            className="w-full font-medium mt-2"
-          >
-            {t("signInButton")}
-          </Button>
-        </form>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                  {t("signingIn") || "Signing in..."}
+                </span>
+              ) : (
+                t("signInButton")
+              )}
+            </Button>
+          </form>
+        </Form>
       </CardContent>
-      <CardFooter className="justify-center pt-0">
-        <div className="text-center text-small">
+      <CardFooter className="justify-center">
+        <div className="text-center text-sm">
           {t("noAccount")}{" "}
           <Link
             href="/sign-up"

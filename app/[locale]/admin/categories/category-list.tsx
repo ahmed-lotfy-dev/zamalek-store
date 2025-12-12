@@ -1,7 +1,15 @@
 "use client";
 
 import { deleteCategory } from "@/app/lib/actions/categories";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 import { Link } from "@/i18n/routing";
 import { useTranslations, useLocale } from "next-intl";
@@ -24,20 +32,22 @@ export default function CategoryList({
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">{t("categories")}</h1>
-        <Button as={Link} href="/admin/categories/new" color="primary">
-          {t("addCategory")}
-        </Button>
+        <Link href="/admin/categories/new">
+          <Button>
+            {t("addCategory")}
+          </Button>
+        </Link>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800">
-            <tr>
-              <th className="p-4 font-medium">{t("name")}</th>
-              <th className="p-4 font-medium text-right">{t("actions")}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t("name")}</TableHead>
+              <TableHead className="text-right">{t("actions")}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {categories.map((category) => {
               const displayName =
                 locale === "en"
@@ -45,45 +55,42 @@ export default function CategoryList({
                   : category.name;
 
               return (
-                <tr
-                  key={category.id}
-                  className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
-                >
-                  <td className="p-4">{displayName}</td>
-                  <td className="p-4 text-right">
+                <TableRow key={category.id}>
+                  <TableCell className="font-medium">{displayName}</TableCell>
+                  <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button
-                        as={Link}
-                        href={`/admin/categories/${category.id}/edit`}
-                        size="sm"
-                        variant="light"
-                      >
-                        {t("edit")}
-                      </Button>
+                      <Link href={`/admin/categories/${category.id}/edit`}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                        >
+                          {t("edit")}
+                        </Button>
+                      </Link>
                       <form action={deleteCategory.bind(null, category.id)}>
                         <Button
                           type="submit"
                           size="sm"
-                          color="danger"
-                          variant="light"
+                          variant="ghost"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           {t("delete")}
                         </Button>
                       </form>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })}
             {categories.length === 0 && (
-              <tr>
-                <td colSpan={2} className="p-8 text-center text-zinc-500">
+              <TableRow>
+                <TableCell colSpan={2} className="h-24 text-center">
                   {t("noCategories")}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

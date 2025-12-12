@@ -3,7 +3,16 @@
 import { DeleteCouponButton } from "./delete-button";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/app/hooks/use-format";
-import { Card, CardContent, Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface CouponsTableProps {
   coupons: any[];
@@ -15,57 +24,65 @@ export function CouponsTable({ coupons }: CouponsTableProps) {
 
   return (
     <Card>
-      <CardContent>
-        <Table aria-label="Coupons table">
+      <CardContent className="p-0">
+        <Table>
           <TableHeader>
-            <TableColumn>{t("code").toUpperCase()}</TableColumn>
-            <TableColumn>{t("type").toUpperCase()}</TableColumn>
-            <TableColumn>{t("discount").toUpperCase()}</TableColumn>
-            <TableColumn>{t("usage").toUpperCase()}</TableColumn>
-            <TableColumn>{t("salesGenerated").toUpperCase()}</TableColumn>
-            <TableColumn>{t("status").toUpperCase()}</TableColumn>
-            <TableColumn>{t("expiresAt").toUpperCase()}</TableColumn>
-            <TableColumn>{t("actions").toUpperCase()}</TableColumn>
+            <TableRow>
+              <TableHead>{t("code")}</TableHead>
+              <TableHead>{t("type")}</TableHead>
+              <TableHead>{t("discount")}</TableHead>
+              <TableHead>{t("usage")}</TableHead>
+              <TableHead>{t("salesGenerated")}</TableHead>
+              <TableHead>{t("status")}</TableHead>
+              <TableHead>{t("expiresAt")}</TableHead>
+              <TableHead>{t("actions")}</TableHead>
+            </TableRow>
           </TableHeader>
-          <TableBody emptyContent={t("noCoupons")}>
-            {coupons.map((coupon) => (
-              <TableRow key={coupon.id}>
-                <TableCell>
-                  <span className="font-mono font-bold">{coupon.code}</span>
-                </TableCell>
-                <TableCell>
-                  <Chip size="sm" variant="flat">
-                    {coupon.type}
-                  </Chip>
-                </TableCell>
-                <TableCell>
-                  {coupon.type === "PERCENTAGE"
-                    ? `${coupon.amount}%`
-                    : formatCurrency(coupon.amount)}
-                </TableCell>
-                <TableCell>
-                  {coupon.usedCount} / {coupon.maxUses ? coupon.maxUses : "∞"}
-                </TableCell>
-                <TableCell className="font-semibold text-success">
-                  {formatCurrency(coupon.totalSales)}
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    color={coupon.isActive ? "success" : "danger"}
-                    size="sm"
-                    variant="dot"
-                  >
-                    {coupon.isActive ? t("active") : t("expired")}
-                  </Chip>
-                </TableCell>
-                <TableCell>
-                  {coupon.expiresAt ? formatDate(coupon.expiresAt) : "Never"}
-                </TableCell>
-                <TableCell>
-                  <DeleteCouponButton id={coupon.id} />
+          <TableBody>
+            {coupons.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                  {t("noCoupons")}
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              coupons.map((coupon) => (
+                <TableRow key={coupon.id}>
+                  <TableCell className="font-mono font-bold">
+                    {coupon.code}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">
+                      {coupon.type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {coupon.type === "PERCENTAGE"
+                      ? `${coupon.amount}%`
+                      : formatCurrency(coupon.amount)}
+                  </TableCell>
+                  <TableCell>
+                    {coupon.usedCount} / {coupon.maxUses ? coupon.maxUses : "∞"}
+                  </TableCell>
+                  <TableCell className="text-green-600 font-semibold">
+                    {formatCurrency(coupon.totalSales)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={coupon.isActive ? "default" : "destructive"}
+                    >
+                      {coupon.isActive ? t("active") : t("expired")}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {coupon.expiresAt ? formatDate(coupon.expiresAt) : "Never"}
+                  </TableCell>
+                  <TableCell>
+                    <DeleteCouponButton id={coupon.id} />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </CardContent>

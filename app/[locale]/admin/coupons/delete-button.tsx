@@ -1,11 +1,11 @@
 "use client";
 
 import { deleteCoupon } from "@/app/lib/actions/coupons";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { toast } from "@/app/components/ui/toast";
+import { toast } from "sonner";
 import { useState } from "react";
 
 export function DeleteCouponButton({ id }: { id: string }) {
@@ -33,14 +33,13 @@ export function DeleteCouponButton({ id }: { id: string }) {
 
   return (
     <Button
-      isIconOnly
-      size="sm"
-      color="danger"
-      variant="light"
-      onPress={handleDelete}
-      isLoading={isLoading}
+      size="icon"
+      variant="ghost"
+      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+      onClick={handleDelete}
+      disabled={isLoading}
     >
-      <Trash2 size={18} />
+      <Trash2 className="h-4 w-4" />
     </Button>
   );
 }

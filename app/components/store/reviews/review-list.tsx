@@ -1,12 +1,10 @@
-
-
 import { Star } from "lucide-react";
 import {
   getProductReviews,
   getProductRatingSummary,
 } from "@/app/lib/actions/reviews";
 import { getTranslations } from "next-intl/server";
-import { Avatar, Progress } from "@heroui/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ReviewListProps {
   productId: string;
@@ -22,7 +20,7 @@ export default async function ReviewList({ productId }: ReviewListProps) {
   return (
     <div className="space-y-8">
       {/* Rating Summary */}
-      <div className="bg-default-50 p-6 rounded-lg border border-divider">
+      <div className="bg-muted/30 p-6 rounded-lg border border-border">
         <div className="flex flex-col md:flex-row gap-8 items-center">
           <div className="text-center">
             <div className="text-5xl font-bold text-primary">
@@ -32,15 +30,14 @@ export default async function ReviewList({ productId }: ReviewListProps) {
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
-                  className={`w-5 h-5 ${
-                    star <= Math.round(averageRating)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-default-300"
-                  }`}
+                  className={`w-5 h-5 ${star <= Math.round(averageRating)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-muted-foreground/30"
+                    }`}
                 />
               ))}
             </div>
-            <div className="text-sm text-default-500">
+            <div className="text-sm text-muted-foreground">
               {totalReviews} {totalReviews === 1 ? t("review") : t("reviews")}
             </div>
           </div>
@@ -53,17 +50,17 @@ export default async function ReviewList({ productId }: ReviewListProps) {
 
               return (
                 <div key={rating} className="flex items-center gap-4">
-                  <div className="flex items-center gap-1 w-12">
+                  <div className="flex items-center gap-1 w-12 text-sm text-foreground">
                     <span className="font-medium">{rating}</span>
-                    <Star className="w-3 h-3 fill-default-500 text-default-500" />
+                    <Star className="w-3 h-3 text-muted-foreground" />
                   </div>
-                  <Progress
-                    value={percentage}
-                    color="primary"
-                    size="sm"
-                    className="flex-1"
-                  />
-                  <div className="w-12 text-right text-sm text-default-500">
+                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                  <div className="w-12 text-right text-sm text-muted-foreground">
                     {count}
                   </div>
                 </div>
@@ -76,25 +73,26 @@ export default async function ReviewList({ productId }: ReviewListProps) {
       {/* Reviews List */}
       <div className="space-y-6">
         {reviews.length === 0 ? (
-          <div className="text-center py-8 text-default-500">
+          <div className="text-center py-8 text-muted-foreground">
             {t("noReviews")}
           </div>
         ) : (
           reviews.map((review) => (
             <div
               key={review.id}
-              className="border-b border-divider pb-6 last:border-0"
+              className="border-b border-border pb-6 last:border-0"
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-3">
-                  <Avatar
-                    src={review.user.image || undefined}
-                    name={review.user.name}
-                    className="w-10 h-10"
-                  />
+                  <Avatar className="w-10 h-10 border border-border">
+                    <AvatarImage src={review.user.image || ""} alt={review.user.name} />
+                    <AvatarFallback className="font-bold bg-muted text-muted-foreground">
+                      {review.user.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
                     <div className="font-semibold">{review.user.name}</div>
-                    <div className="text-xs text-default-500">
+                    <div className="text-xs text-muted-foreground">
                       {new Date(review.createdAt).toLocaleDateString()}
                     </div>
                   </div>
@@ -103,16 +101,15 @@ export default async function ReviewList({ productId }: ReviewListProps) {
                   {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                       key={star}
-                      className={`w-4 h-4 ${
-                        star <= review.rating
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-default-200"
-                      }`}
+                      className={`w-4 h-4 ${star <= review.rating
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-muted-foreground/30"
+                        }`}
                     />
                   ))}
                 </div>
               </div>
-              <p className="text-default-600 mt-2">{review.comment}</p>
+              <p className="text-foreground mt-2">{review.comment}</p>
             </div>
           ))
         )}

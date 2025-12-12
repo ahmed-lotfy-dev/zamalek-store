@@ -1,5 +1,8 @@
 import { getUserProfile } from "@/app/lib/actions/profile";
-import { Avatar, Card, CardContent, CardHeader, Input } from "@heroui/react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -15,44 +18,43 @@ export default async function ProfilePage() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
-          <h2 className="text-xl font-bold">{t("info")}</h2>
-          <p className="text-small text-default-500">{t("infoDesc")}</p>
+        <CardHeader>
+          <CardTitle>{t("info")}</CardTitle>
+          <CardDescription>{t("infoDesc")}</CardDescription>
         </CardHeader>
-        <CardContent className="overflow-visible py-4">
+        <CardContent>
           <div className="flex flex-col md:flex-row gap-6 items-start">
             <div className="flex flex-col items-center gap-2">
-              <Avatar
-                src={user.image || undefined}
-                name={user.name}
-                className="w-24 h-24 text-large"
-              />
+              <div className="relative w-24 h-24 rounded-full overflow-hidden border">
+                <Image
+                  src={user.image || "https://placehold.co/96x96?text=User"}
+                  alt={user.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
             </div>
             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-              <Input
-                label={t("fullName")}
-                value={user.name}
-                isReadOnly
-                variant="bordered"
-              />
-              <Input
-                label={t("email")}
-                value={user.email}
-                isReadOnly
-                variant="bordered"
-              />
-              <Input
-                label={t("role")}
-                value={user.role}
-                isReadOnly
-                variant="bordered"
-              />
-              <Input
-                label={t("memberSince")}
-                value={new Date(user.createdAt).toLocaleDateString()}
-                isReadOnly
-                variant="bordered"
-              />
+              <div className="flex flex-col gap-2">
+                <Label>{t("fullName")}</Label>
+                <Input value={user.name} readOnly className="bg-muted" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>{t("email")}</Label>
+                <Input value={user.email} readOnly className="bg-muted" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>{t("role")}</Label>
+                <Input value={user.role} readOnly className="bg-muted" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label>{t("memberSince")}</Label>
+                <Input
+                  value={new Date(user.createdAt).toLocaleDateString()}
+                  readOnly
+                  className="bg-muted"
+                />
+              </div>
             </div>
           </div>
         </CardContent>

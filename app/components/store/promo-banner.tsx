@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 
 export default function PromoBanner() {
   return (
@@ -21,16 +21,14 @@ export default function PromoBanner() {
           Discover our new training collection designed for performance and
           comfort. Get ready for the season with the official gear.
         </p>
-        <Button
-          as={Link}
-          href="/products?category=training"
-          color="primary"
-          size="lg"
-          radius="full"
-          className="font-semibold px-8"
-        >
-          Shop Training Gear
-        </Button>
+        <Link href="/products?category=training">
+          <Button
+            size="lg"
+            className="font-semibold px-8 rounded-full"
+          >
+            Shop Training Gear
+          </Button>
+        </Link>
       </div>
     </section>
   );

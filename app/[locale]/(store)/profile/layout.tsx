@@ -2,7 +2,10 @@
 
 import { User, Package, MapPin } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { Card, CardContent, Link } from "@heroui/react";
+import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/app/lib/utils"
 
 export default function ProfileLayout({
   children,
@@ -33,13 +36,12 @@ export default function ProfileLayout({
                     <Link
                       key={link.href}
                       href={link.href}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                        isActive
-                          ? "bg-primary text-primary-foreground font-medium"
-                          : "text-default-600 hover:bg-default-100"
-                      }`}
+                      className={cn(
+                        buttonVariants({ variant: isActive ? "default" : "ghost" }),
+                        "justify-start gap-3 w-full"
+                      )}
                     >
-                      <Icon className="w-5 h-5" />
+                      <Icon className="w-4 h-4" />
                       {link.name}
                     </Link>
                   );

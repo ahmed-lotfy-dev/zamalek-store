@@ -2,7 +2,7 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 
 import { Moon, Sun } from "lucide-react";
 
@@ -18,12 +18,12 @@ export default function ThemeSwitcher() {
 
   return (
     <Button
-      isIconOnly
-      variant="light"
-      onPress={() => setTheme(theme === "dark" ? "light" : "dark")}
+      variant="ghost"
+      size="icon"
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       aria-label="Toggle Theme"
     >
-      {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+      {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
     </Button>
   );
 }

@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -45,12 +45,12 @@ export default function MobileMenu({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 left-0 z-50 w-64 bg-content1 shadow-xl flex flex-col md:hidden border-r border-divider"
+            className="fixed inset-y-0 left-0 z-50 w-64 bg-background shadow-xl flex flex-col md:hidden border-r border-border"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-divider">
+            <div className="flex items-center justify-between p-4 border-b border-border">
               <h2 className="text-lg font-bold text-primary">{title}</h2>
-              <Button isIconOnly variant="light" onPress={onClose}>
+              <Button size="icon" variant="ghost" onClick={onClose}>
                 <X size={20} />
               </Button>
             </div>

@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Button, Image, Progress } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { getPresignedUrl } from "@/app/lib/actions/upload";
 import { optimizeImage, validateImageFile } from "@/app/lib/image-optimizer";
+import { Label } from "@/components/ui/label";
 
 interface ImageUploadProps {
   value?: string;
@@ -43,13 +45,7 @@ export default function ImageUpload({
       }
 
       // 2. Optimize image (compress, resize, convert to WebP)
-      console.log(
-        "Optimizing image:",
-        file.name,
-        `${(file.size / 1024).toFixed(1)}KB`
-      );
       setProgress(10);
-
       const optimizedFile = await optimizeImage(file, {
         maxWidth: 1920,
         maxHeight: 1920,
@@ -60,19 +56,10 @@ export default function ImageUpload({
       setProgress(20);
 
       // 3. Get presigned URL
-      console.log(
-        "Getting presigned URL for:",
-        optimizedFile.name,
-        optimizedFile.type
-      );
       const { uploadUrl, publicUrl } = await getPresignedUrl(
         optimizedFile.name,
         optimizedFile.type,
         folder
-      );
-      console.log(
-        "Presigned URL received:",
-        uploadUrl.substring(0, 100) + "..."
       );
       setProgress(30);
 
@@ -90,20 +77,13 @@ export default function ImageUpload({
       };
 
       xhr.onload = () => {
-        console.log(
-          "XHR onload - Status:",
-          xhr.status,
-          "Response:",
-          xhr.responseText
-        );
         if (xhr.status === 200) {
           onChange(publicUrl);
           setIsUploading(false);
           setError(null);
           setProgress(100);
         } else {
-          const errorMsg = `Upload failed with status ${xhr.status}: ${xhr.responseText || "Unknown error"
-            }`;
+          const errorMsg = `Upload failed with status ${xhr.status}: ${xhr.responseText || "Unknown error"}`;
           console.error(errorMsg);
           setError(errorMsg);
           setIsUploading(false);
@@ -111,21 +91,15 @@ export default function ImageUpload({
       };
 
       xhr.onerror = (event) => {
-        console.error("XHR error event:", event);
-        console.error("XHR status:", xhr.status);
-        console.error("XHR readyState:", xhr.readyState);
-        const errorMsg =
-          "Network error - This is likely a CORS issue. Check R2 bucket CORS configuration.";
+        const errorMsg = "Network error - This is likely a CORS issue. Check R2 bucket CORS configuration.";
         setError(errorMsg);
         setIsUploading(false);
       };
 
-      console.log("Sending optimized file to R2...");
       xhr.send(optimizedFile);
     } catch (error) {
       console.error("Error uploading image:", error);
-      const errorMsg =
-        error instanceof Error ? error.message : "Unknown error occurred";
+      const errorMsg = error instanceof Error ? error.message : "Unknown error occurred";
       setError(errorMsg);
       setIsUploading(false);
     }
@@ -140,40 +114,37 @@ export default function ImageUpload({
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-small font-medium text-foreground">{label}</label>
+      <Label>{label}</Label>
 
       {value ? (
-        <div className="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-default-200 group">
+        <div className="relative w-full aspect-video rounded-xl overflow-hidden border group">
           <Image
             src={value}
             alt="Uploaded image"
-            classNames={{
-              wrapper: "w-full h-full",
-              img: "w-full h-full object-cover",
-            }}
+            fill
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
             <Button
-              isIconOnly
-              color="danger"
-              variant="flat"
-              onPress={handleRemove}
+              size="icon"
+              variant="destructive"
+              onClick={handleRemove}
             >
-              <X size={20} />
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
       ) : (
         <div
-          className="w-full aspect-video rounded-xl border-2 border-dashed border-default-300 hover:border-primary hover:bg-primary/5 transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer"
+          className="w-full aspect-video rounded-xl border-2 border-dashed hover:border-primary hover:bg-muted/50 transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer bg-muted/20"
           onClick={() => fileInputRef.current?.click()}
         >
-          <div className="p-4 rounded-full bg-default-100">
-            <Upload className="w-6 h-6 text-default-500" />
+          <div className="p-4 rounded-full bg-muted">
+            <Upload className="w-6 h-6 text-muted-foreground" />
           </div>
           <div className="text-center">
-            <p className="text-small font-medium">Click to upload</p>
-            <p className="text-tiny text-default-400">
+            <p className="text-sm font-medium">Click to upload</p>
+            <p className="text-xs text-muted-foreground">
               SVG, PNG, JPG or GIF (max. 2MB)
             </p>
           </div>
@@ -181,19 +152,18 @@ export default function ImageUpload({
       )}
 
       {error && (
-        <div className="p-3 rounded-lg bg-danger-50 border border-danger-200">
-          <p className="text-small text-danger-600">{error}</p>
+        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+          {error}
         </div>
       )}
 
       {isUploading && (
-        <Progress
-          size="sm"
-          value={progress}
-          color="primary"
-          className="max-w-md"
-          label="Uploading..."
-        />
+        <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       )}
 
       <input

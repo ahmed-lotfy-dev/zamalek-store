@@ -3,7 +3,10 @@ import {
   createAddress,
   deleteAddress,
 } from "@/app/lib/actions/addresses";
-import { Button, Card, CardContent, CardHeader, Input } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { Plus, Trash2, MapPin } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -32,60 +35,62 @@ export default async function AddressesPage() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
-          <h2 className="text-xl font-bold">{t("addressBook")}</h2>
-          <p className="text-small text-default-500">{t("addressBookDesc")}</p>
+        <CardHeader>
+          <CardTitle>{t("addressBook")}</CardTitle>
+          <CardDescription>{t("addressBookDesc")}</CardDescription>
         </CardHeader>
-        <CardContent className="overflow-visible py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Add New Address Form */}
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">{t("addNewAddress")}</h3>
               <form action={handleAddAddress} className="space-y-4">
-                <Input
-                  name="street"
-                  label={t("streetAddress")}
-                  placeholder="123 Main St"
-                  isRequired
-                  variant="bordered"
-                />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                  <Label>{t("streetAddress")}</Label>
                   <Input
-                    name="city"
-                    label={t("city")}
-                    placeholder="Cairo"
-                    isRequired
-                    variant="bordered"
-                  />
-                  <Input
-                    name="state"
-                    label={t("state")}
-                    placeholder="Cairo"
-                    isRequired
-                    variant="bordered"
+                    name="street"
+                    placeholder="123 Main St"
+                    required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    name="zip"
-                    label={t("zip")}
-                    placeholder="11511"
-                    isRequired
-                    variant="bordered"
-                  />
-                  <Input
-                    name="country"
-                    label={t("country")}
-                    defaultValue="Egypt"
-                    isRequired
-                    variant="bordered"
-                  />
+                  <div className="flex flex-col gap-2">
+                    <Label>{t("city")}</Label>
+                    <Input
+                      name="city"
+                      placeholder="Cairo"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label>{t("state")}</Label>
+                    <Input
+                      name="state"
+                      placeholder="Cairo"
+                      required
+                    />
+                  </div>
                 </div>
-                <Button
-                  type="submit"
-                  color="primary"
-                  startContent={<Plus size={18} />}
-                >
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-2">
+                    <Label>{t("zip")}</Label>
+                    <Input
+                      name="zip"
+                      placeholder="11511"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label>{t("country")}</Label>
+                    <Input
+                      name="country"
+                      defaultValue="Egypt"
+                      required
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="gap-2">
+                  <Plus className="h-4 w-4" />
                   {t("saveAddress")}
                 </Button>
               </form>
@@ -95,7 +100,7 @@ export default async function AddressesPage() {
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">{t("savedAddresses")}</h3>
               {addresses.length === 0 ? (
-                <div className="text-center py-8 text-default-500 border border-dashed border-divider rounded-lg">
+                <div className="text-center py-8 text-muted-foreground border border-dashed rounded-lg">
                   <MapPin className="w-12 h-12 mx-auto mb-2 opacity-20" />
                   <p>{t("noAddresses")}</p>
                 </div>
@@ -104,27 +109,25 @@ export default async function AddressesPage() {
                   {addresses.map((address) => (
                     <div
                       key={address.id}
-                      className="p-4 border border-divider rounded-lg flex justify-between items-start group hover:border-primary transition-colors"
+                      className="p-4 border rounded-lg flex justify-between items-start group hover:border-primary transition-colors"
                     >
                       <div className="space-y-1">
                         <p className="font-medium">{address.street}</p>
-                        <p className="text-sm text-default-500">
+                        <p className="text-sm text-muted-foreground">
                           {address.city}, {address.state} {address.zip}
                         </p>
-                        <p className="text-sm text-default-500">
+                        <p className="text-sm text-muted-foreground">
                           {address.country}
                         </p>
                       </div>
                       <form action={handleDeleteAddress.bind(null, address.id)}>
                         <Button
-                          isIconOnly
-                          size="sm"
-                          color="danger"
-                          variant="light"
+                          size="icon"
+                          variant="ghost"
                           type="submit"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
-                          <Trash2 size={18} />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </form>
                     </div>

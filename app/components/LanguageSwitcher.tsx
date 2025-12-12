@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/routing";
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 
 import { Globe } from "lucide-react";
 
@@ -19,9 +19,9 @@ export default function LanguageSwitcher() {
 
   return (
     <Button
-      isIconOnly
-      variant="light"
-      onPress={toggleLocale}
+      variant="ghost"
+      size="icon"
+      onClick={toggleLocale}
       aria-label="Switch Language"
     >
       <span className="font-bold">{locale === "en" ? "AR" : "EN"}</span>

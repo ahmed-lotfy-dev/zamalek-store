@@ -1,11 +1,11 @@
 import { getUserOrders } from "@/app/lib/actions/profile";
-import { Button, Card, CardContent, CardHeader, Chip } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 import { Link } from "@/i18n/routing";
 import { Package, ChevronRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-
-import { getStatusColor } from "@/app/lib/utils";
 
 export default async function OrderHistoryPage() {
   const orders = await getUserOrders();
@@ -13,44 +13,36 @@ export default async function OrderHistoryPage() {
 
   return (
     <Card>
-      <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
-        <h2 className="text-xl font-bold">{t("orderHistory")}</h2>
-        <p className="text-small text-default-500">{t("orderHistoryDesc")}</p>
+      <CardHeader>
+        <CardTitle>{t("orderHistory")}</CardTitle>
+        <CardDescription>{t("orderHistoryDesc")}</CardDescription>
       </CardHeader>
-      <CardContent className="overflow-visible py-4">
+      <CardContent>
         {orders.length === 0 ? (
-          <div className="text-center py-12 text-default-500">
+          <div className="text-center py-12 text-muted-foreground">
             <Package className="w-12 h-12 mx-auto mb-4 opacity-20" />
             <p>{t("noOrders")}</p>
-            <Button
-              as={Link}
-              href="/products"
-              color="primary"
-              variant="flat"
-              className="mt-4"
-            >
-              {t("startShopping")}
-            </Button>
+            <Link href="/products" className="mt-4 inline-block">
+              <Button>
+                {t("startShopping")}
+              </Button>
+            </Link>
           </div>
         ) : (
           <div className="space-y-4">
             {orders.map((order: any) => (
               <div
                 key={order.id}
-                className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border border-divider rounded-lg hover:bg-default-50 transition-colors"
+                className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">#{order.id.slice(-6)}</span>
-                    <Chip
-                      size="sm"
-                      color={getStatusColor(order.status)}
-                      variant="flat"
-                    >
-                      {order.status}
-                    </Chip>
+                    <Badge variant="outline">
+                      {t(`status.${order.status.toLowerCase()}`)}
+                    </Badge>
                   </div>
-                  <p className="text-sm text-default-500">
+                  <p className="text-sm text-muted-foreground">
                     {new Date(order.createdAt).toLocaleDateString()} •{" "}
                     {order.orderItems.length} {t("items")}
                   </p>
@@ -59,15 +51,12 @@ export default async function OrderHistoryPage() {
                   <span className="font-bold text-lg">
                     ${order.total.toFixed(2)}
                   </span>
-                  <Button
-                    as={Link}
-                    href={`/profile/orders/${order.id}`}
-                    size="sm"
-                    variant="light"
-                    endContent={<ChevronRight className="w-4 h-4" />}
-                  >
-                    {t("viewDetails")}
-                  </Button>
+                  <Link href={`/profile/orders/${order.id}`}>
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      {t("viewDetails")}
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             ))}

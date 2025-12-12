@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Button, TextArea, TextField, Label } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 import { Star } from "lucide-react";
 import { createReview } from "@/app/lib/actions/reviews";
-import { toast } from "@/app/components/ui/toast";
+import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 interface ReviewFormProps {
@@ -52,9 +54,9 @@ export default function ReviewForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">{t("rating")}</label>
+        <Label className="text-sm font-medium">{t("rating")}</Label>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
@@ -68,7 +70,7 @@ export default function ReviewForm({
               <Star
                 className={`w-6 h-6 ${star <= (hoverRating || rating)
                   ? "fill-yellow-400 text-yellow-400"
-                  : "text-default-300"
+                  : "text-muted-foreground/30"
                   }`}
               />
             </button>
@@ -76,23 +78,23 @@ export default function ReviewForm({
         </div>
       </div>
 
-      <TextField>
-        <Label>{t("yourReview")}</Label>
-        <TextArea
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="comment">{t("yourReview")}</Label>
+        <Textarea
+          id="comment"
           placeholder={t("placeholder")}
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={3}
-          className="min-h-[80px]"
+          className="min-h-[100px]"
         />
-      </TextField>
+      </div>
 
       <Button
         type="submit"
-        isPending={isSubmitting}
-        isDisabled={rating === 0}
+        disabled={isSubmitting || rating === 0}
       >
-        {t("submit")}
+        {isSubmitting ? "Submitting..." : t("submit")}
       </Button>
     </form>
   );

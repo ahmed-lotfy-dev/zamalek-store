@@ -1,11 +1,17 @@
 "use client";
 
 import { updateOrderStatus } from "@/app/lib/actions/orders";
-import { Select, ListBox, Label } from "@heroui/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { OrderStatus } from "@prisma/client";
 import { useState } from "react";
-import { toast } from "@/app/components/ui/toast";
+import { toast } from "sonner";
 
 export default function OrderStatusSelect({
   orderId,
@@ -40,31 +46,20 @@ export default function OrderStatusSelect({
 
   return (
     <Select
-      selectedKey={status}
-      onSelectionChange={(keys) => {
-        if (keys && keys !== "all") {
-          const newStatus = Array.from(keys as unknown as Set<string>)[0];
-          handleStatusChange(newStatus);
-        }
-      }}
-      isDisabled={isLoading}
-      className="min-w-[140px]"
+      value={status}
+      onValueChange={handleStatusChange}
+      disabled={isLoading}
     >
-      <Label>Status</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover>
-        <ListBox>
-          {Object.values(OrderStatus).map((s) => (
-            <ListBox.Item key={s} id={s} textValue={s}>
-              {s}
-              <ListBox.ItemIndicator />
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
+      <SelectTrigger className="w-[140px]">
+        <SelectValue placeholder="Status" />
+      </SelectTrigger>
+      <SelectContent>
+        {Object.values(OrderStatus).map((s) => (
+          <SelectItem key={s} value={s}>
+            {s}
+          </SelectItem>
+        ))}
+      </SelectContent>
     </Select>
   );
 }

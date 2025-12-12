@@ -3,11 +3,22 @@
 import { useState } from "react";
 import { createProduct, updateProduct } from "@/app/lib/actions/products";
 import { translateText } from "@/app/lib/actions/translate";
-import { Button, Input, TextField, Label, Select, ListBox, TextArea } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { Plus, Trash, Languages } from "lucide-react";
-import { toast } from "@/app/components/ui/toast";
+import { toast } from "sonner";
 import MultiImageUpload from "@/app/components/admin/multi-image-upload";
+import { cn } from "@/app/lib/utils"
 
 type Category = {
   id: string;
@@ -50,6 +61,7 @@ export default function ProductForm({
     product?.descriptionEn || ""
   );
   const [images, setImages] = useState<string[]>(product?.images || []);
+  const [selectedCategory, setSelectedCategory] = useState<string>(product?.categoryId || "");
 
   const action = product ? updateProduct.bind(null, product.id) : createProduct;
 
@@ -100,34 +112,36 @@ export default function ProductForm({
   return (
     <form
       action={action}
-      className="flex flex-col gap-6 bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800"
+      className="flex flex-col gap-6 bg-card p-6 rounded-xl shadow-sm border"
     >
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Product Details</h2>
         <Button
           size="sm"
-          variant="primary"
-          onPress={handleAutoTranslate}
-          isPending={isTranslating}
+          variant="outline"
+          onClick={handleAutoTranslate}
+          disabled={isTranslating}
           className="flex items-center gap-2"
+          type="button"
         >
           <Languages size={16} />
-          Auto-Translate to English
+          {isTranslating ? "Translating..." : "Auto-Translate to English"}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <TextField className="flex flex-col gap-2" isRequired>
+        <div className="flex flex-col gap-2">
           <Label>Product Name (Arabic)</Label>
           <Input
             name="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="اسم المنتج"
+            required
           />
-          <span className="text-xs text-default-400">Primary name in Arabic</span>
-        </TextField>
-        <TextField className="flex flex-col gap-2">
+          <span className="text-xs text-muted-foreground">Primary name in Arabic</span>
+        </div>
+        <div className="flex flex-col gap-2">
           <Label>Product Name (English)</Label>
           <Input
             name="nameEn"
@@ -135,14 +149,14 @@ export default function ProductForm({
             onChange={(e) => setNameEn(e.target.value)}
             placeholder="Product Name"
           />
-          <span className="text-xs text-default-400">Optional English translation</span>
-        </TextField>
+          <span className="text-xs text-muted-foreground">Optional English translation</span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-2">
           <Label>Description (Arabic) *</Label>
-          <TextArea
+          <Textarea
             name="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -152,7 +166,7 @@ export default function ProductForm({
         </div>
         <div className="flex flex-col gap-2">
           <Label>Description (English)</Label>
-          <TextArea
+          <Textarea
             name="descriptionEn"
             value={descriptionEn || ""}
             onChange={(e) => setDescriptionEn(e.target.value)}
@@ -173,7 +187,7 @@ export default function ProductForm({
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <TextField className="flex flex-col gap-2" isRequired>
+        <div className="flex flex-col gap-2">
           <Label>Price ($)</Label>
           <Input
             name="price"
@@ -181,44 +195,36 @@ export default function ProductForm({
             type="number"
             step="0.01"
             placeholder="0.00"
+            required
           />
-        </TextField>
+        </div>
 
-        <TextField className="flex flex-col gap-2" isRequired>
+        <div className="flex flex-col gap-2">
           <Label>Total Stock</Label>
           <Input
             name="stock"
             defaultValue={product?.stock.toString()}
             type="number"
             placeholder="0"
+            required
           />
-          <span className="text-xs text-default-400">If variants are added, this can be the sum or a general stock.</span>
-        </TextField>
+          <span className="text-xs text-muted-foreground">If variants are added, this can be the sum or a general stock.</span>
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Select
-          name="categoryId"
-          defaultSelectedKey={product ? product.categoryId : undefined}
-          isRequired
-          placeholder="Select a category"
-          className="w-full"
-        >
-          <Label>Category *</Label>
-          <Select.Trigger>
-            <Select.Value />
-            <Select.Indicator />
-          </Select.Trigger>
-          <Select.Popover>
-            <ListBox>
-              {categories.map((category) => (
-                <ListBox.Item key={category.id} id={category.id} textValue={category.name}>
-                  {category.name}
-                  <ListBox.ItemIndicator />
-                </ListBox.Item>
-              ))}
-            </ListBox>
-          </Select.Popover>
+        <Label>Category *</Label>
+        <Select name="categoryId" value={selectedCategory} onValueChange={setSelectedCategory} required>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
         {categories.length === 0 && (
           <p className="text-xs text-amber-500">
@@ -228,13 +234,13 @@ export default function ProductForm({
       </div>
 
       {/* Variants Section */}
-      <div className="flex flex-col gap-4 border-t border-zinc-200 dark:border-zinc-800 pt-4">
+      <div className="flex flex-col gap-4 border-t pt-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">Variants</h3>
           <Button
             size="sm"
             variant="secondary"
-            onPress={addVariant}
+            onClick={addVariant}
             type="button"
             className="flex items-center gap-2"
           >
@@ -244,7 +250,7 @@ export default function ProductForm({
         </div>
 
         {variants.length === 0 && (
-          <p className="text-sm text-default-500 italic">
+          <p className="text-sm text-muted-foreground italic">
             No variants added. Product will be treated as a single item.
           </p>
         )}
@@ -274,10 +280,9 @@ export default function ProductForm({
                 className="w-24"
               />
               <Button
-                isIconOnly
-                size="sm"
-                variant="danger-soft"
-                onPress={() => removeVariant(index)}
+                size="icon"
+                variant="destructive"
+                onClick={() => removeVariant(index)}
                 type="button"
               >
                 <Trash size={16} />
@@ -290,7 +295,7 @@ export default function ProductForm({
         <input type="hidden" name="variants" value={JSON.stringify(variants)} />
       </div>
 
-      <Button type="submit" variant="primary" className="mt-4">
+      <Button type="submit" className="mt-4">
         {product ? "Update Product" : "Create Product"}
       </Button>
     </form >
