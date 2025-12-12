@@ -3,9 +3,8 @@ import {
   createAddress,
   deleteAddress,
 } from "@/app/lib/actions/addresses";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
+import { Button, Card, CardContent, CardHeader, Input } from "@heroui/react";
+
 import { Plus, Trash2, MapPin } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -37,7 +36,7 @@ export default async function AddressesPage() {
           <h2 className="text-xl font-bold">{t("addressBook")}</h2>
           <p className="text-small text-default-500">{t("addressBookDesc")}</p>
         </CardHeader>
-        <CardBody className="overflow-visible py-4">
+        <CardContent className="overflow-visible py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Add New Address Form */}
             <div className="space-y-4">
@@ -134,7 +133,7 @@ export default async function AddressesPage() {
               )}
             </div>
           </div>
-        </CardBody>
+        </CardContent>
       </Card>
     </div>
   );

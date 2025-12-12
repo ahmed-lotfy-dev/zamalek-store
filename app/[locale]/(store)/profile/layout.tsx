@@ -1,9 +1,8 @@
 "use client";
 
-import { Card, CardBody } from "@heroui/card";
-import { Link } from "@heroui/link";
 import { User, Package, MapPin } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { Card, CardContent, Link } from "@heroui/react";
 
 export default function ProfileLayout({
   children,
@@ -25,7 +24,7 @@ export default function ProfileLayout({
         {/* Sidebar */}
         <div className="md:col-span-1">
           <Card>
-            <CardBody className="p-2">
+            <CardContent className="p-2">
               <nav className="flex flex-col gap-1">
                 {links.map((link) => {
                   const Icon = link.icon;
@@ -46,7 +45,7 @@ export default function ProfileLayout({
                   );
                 })}
               </nav>
-            </CardBody>
+            </CardContent>
           </Card>
         </div>
 

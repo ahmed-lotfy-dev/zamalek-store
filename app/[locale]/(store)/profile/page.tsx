@@ -1,7 +1,6 @@
 import { getUserProfile } from "@/app/lib/actions/profile";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Input } from "@heroui/input";
-import { Avatar } from "@heroui/avatar";
+import { Avatar, Card, CardContent, CardHeader, Input } from "@heroui/react";
+
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
@@ -20,7 +19,7 @@ export default async function ProfilePage() {
           <h2 className="text-xl font-bold">{t("info")}</h2>
           <p className="text-small text-default-500">{t("infoDesc")}</p>
         </CardHeader>
-        <CardBody className="overflow-visible py-4">
+        <CardContent className="overflow-visible py-4">
           <div className="flex flex-col md:flex-row gap-6 items-start">
             <div className="flex flex-col items-center gap-2">
               <Avatar
@@ -56,7 +55,7 @@ export default async function ProfilePage() {
               />
             </div>
           </div>
-        </CardBody>
+        </CardContent>
       </Card>
     </div>
   );
