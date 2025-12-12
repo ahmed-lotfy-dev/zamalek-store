@@ -8,8 +8,8 @@ import Filters from "./filters";
 import SortSelect from "./sort-select";
 import SearchBar from "./search-bar";
 import EmptyState from "@/app/components/empty-state";
-import { Spinner } from "@heroui/spinner";
-import { Switch } from "@heroui/switch";
+import { Spinner, Switch } from "@heroui/react";
+
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/app/hooks/use-format";
 import StorePagination from "./store-pagination";

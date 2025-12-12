@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@heroui/button";
-import { Image } from "@heroui/image";
-import { Chip } from "@heroui/chip";
+import { Button, Chip, Image } from "@heroui/react";
 
 import { useCart } from "@/app/context/cart-context";
 import SaveButton from "./save-button";

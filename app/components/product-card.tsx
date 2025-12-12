@@ -1,11 +1,9 @@
 "use client";
 
-import { Card } from "@heroui/card";
-import { Button } from "@heroui/button";
-
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useLocale } from "next-intl";
+import { Button, Card } from "@heroui/react";
 
 type Product = {
   id: string;
