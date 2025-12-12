@@ -1,9 +1,8 @@
 "use client";
 
 import { useCart } from "@/app/context/cart-context";
-import { Button } from "@heroui/button";
-import { Card, CardBody } from "@heroui/card";
-import { Image } from "@heroui/image";
+import { Button, Card, CardContent, Image } from "@heroui/react";
+
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
@@ -83,7 +82,7 @@ export default function CartDrawer() {
               ) : (
                 items.map((item) => (
                   <Card key={item.id} className="w-full shadow-sm">
-                    <CardBody className="flex flex-row gap-4 p-3">
+                    <CardContent className="flex flex-row gap-4 p-3">
                       <div className="relative w-20 h-20 shrink-0 bg-default-100 rounded-lg overflow-hidden">
                         <Image
                           src={item.image}
@@ -143,7 +142,7 @@ export default function CartDrawer() {
                           </div>
                         </div>
                       </div>
-                    </CardBody>
+                    </CardContent>
                   </Card>
                 ))
               )}

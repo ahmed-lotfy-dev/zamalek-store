@@ -1,7 +1,7 @@
 "use client";
 
-import { Select, SelectItem } from "@heroui/select";
 import { useTranslations } from "next-intl";
+import { Select, ListBox, Label } from "@heroui/react";
 
 export default function SortSelect({
   sortOption,
@@ -20,16 +20,31 @@ export default function SortSelect({
 
   return (
     <Select
-      label={t("sortBy")}
-      className="w-full sm:w-auto sm:min-w-[200px] outline-none"
-      defaultSelectedKeys={[sortOption]}
-      onChange={(e) => setSortOption(e.target.value)}
-      size="sm"
-      variant="faded"
+      selectedKey={sortOption}
+      onSelectionChange={(keys) => {
+        if (keys && keys !== "all") {
+          const selected = Array.from(keys as unknown as Set<string>)[0];
+          setSortOption(selected);
+        }
+      }}
+      placeholder={t("sortBy")}
+      className="w-full sm:w-auto sm:min-w-[200px]"
     >
-      {sortOptions.map((option) => (
-        <SelectItem key={option.key}>{option.label}</SelectItem>
-      ))}
+      <Label>{t("sortBy")}</Label>
+      <Select.Trigger>
+        <Select.Value />
+        <Select.Indicator />
+      </Select.Trigger>
+      <Select.Popover>
+        <ListBox>
+          {sortOptions.map((option) => (
+            <ListBox.Item key={option.key} id={option.key} textValue={option.label}>
+              {option.label}
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+          ))}
+        </ListBox>
+      </Select.Popover>
     </Select>
   );
 }
