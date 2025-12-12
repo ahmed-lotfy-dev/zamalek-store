@@ -1,7 +1,8 @@
 "use client";
 
 import { Link, usePathname, useRouter } from "@/i18n/routing";
-import { Button } from "@heroui/button";
+import { Button } from "@heroui/react";
+
 import { authClient } from "@/app/lib/auth-client";
 import {
   X,

@@ -1,8 +1,8 @@
 "use client";
 
-import { Pagination } from "@heroui/pagination";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import { Pagination } from "@heroui/react";
 
 interface PaginationControlProps {
   totalCount: number;

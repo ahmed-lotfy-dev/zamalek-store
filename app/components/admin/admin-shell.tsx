@@ -12,18 +12,10 @@ import {
   LogOut,
 } from "lucide-react";
 import AdminSidebar from "@/app/components/admin/admin-sidebar";
-import { Link } from "@heroui/link";
+import { Link, Navbar, NavbarBrand, NavbarContent, NavbarMenu, NavbarMenuItem, NavbarMenuToggle } from "@heroui/react";
+
 import { authClient } from "@/app/lib/auth-client";
 import { useRouter } from "next/navigation";
-
-import {
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarMenuToggle,
-  NavbarMenu,
-  NavbarMenuItem,
-} from "@heroui/navbar";
 
 export default function AdminShell({
   children,

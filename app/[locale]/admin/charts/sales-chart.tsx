@@ -9,7 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Card, CardContent, CardHeader } from "@heroui/react";
 
 interface SalesChartProps {
   data: { date: string; amount: number }[];
@@ -23,7 +23,7 @@ export default function SalesChart({ data }: SalesChartProps) {
           Sales Over Time (Last 30 Days)
         </h3>
       </CardHeader>
-      <CardBody>
+      <CardContent>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
@@ -70,7 +70,7 @@ export default function SalesChart({ data }: SalesChartProps) {
             />
           </LineChart>
         </ResponsiveContainer>
-      </CardBody>
+      </CardContent>
     </Card>
   );
 }

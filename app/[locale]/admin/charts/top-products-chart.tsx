@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Card, CardContent, CardHeader } from "@heroui/react";
 
 interface TopProductsChartProps {
   data: { name: string; sales: number }[];
@@ -30,7 +30,7 @@ export default function TopProductsChart({ data }: TopProductsChartProps) {
       <CardHeader>
         <h3 className="text-lg font-semibold">Top 5 Products by Revenue</h3>
       </CardHeader>
-      <CardBody>
+      <CardContent>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
@@ -71,7 +71,7 @@ export default function TopProductsChart({ data }: TopProductsChartProps) {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </CardBody>
+      </CardContent>
     </Card>
   );
 }
