@@ -42,7 +42,35 @@ When building for production, I noticed the bundle size was larger than necessar
 *   **The Result:** Webpack can now tree-shake unused components, reducing the bundle size. Only the components I actually use get shipped to the browser.
 *   **Bonus:** The v3 API also uses cleaner patterns, like `onValueChange` instead of `onChange` for form inputs, which gives you the value directly instead of a synthetic event object.
 
-## 4. What I Learned
+## 4. The Thinking Process: Technical Deep Dives
+
+### 🔢 Solving the "Decimal" Problem
+One of the trickiest bugs I encountered was passing pricing data from the server (Prisma) to the client (React).
+*   **The Issue:** Prisma uses a custom `Decimal` type for precision. Next.js Server Components can read this, but when passing it to a Client Component, React fails to serialize it because it's not a native JSON type.
+*   **The Fix:** I created a utility to transform data at the boundary. Before passing any product object to a client component, the `price` field is converted to a plain number or string. This ensures the frontend gets clean, usable data without losing the precision usage on the backend.
+
+### 🛡️ Centralized Middleware Architecture
+I wanted to keep my authorization and localization logic clean, so I avoided scattering checks across every page.
+*   **Proxy Pattern:** I implemented a `proxy.ts` module that acts as the central brain for request handling.
+*   **Flow:**
+    1.  **i18n First:** The middleware first resolves the locale (Arabic/English).
+    2.  **Route Protection:** It then checks if the user is accessing an `/admin` route.
+    3.  **Auth Check:** If it's an admin route, it verifies the session token *before* the request even hits the layout.
+    This consolidation means I have **one single place** to debug routing logic, rather than juggling three different middleware responsibilities.
+
+### 🔐 Why Better Auth?
+I initially considered NextAuth (Auth.js) but switched to **Better Auth**.
+*   **Type Safety:** Better Auth provided superior TypeScript inference out of the box.
+*   **Performance:** It felt more lightweight and didn't require as much boilerplate for simple email/password and social login flows.
+*   **Control:** It gave me finer control over session management, which was crucial for the "Hybrid Cart" feature where I needed to merge guest sessions with authenticated user sessions.
+
+### 🔍 Shareable Search State
+For the product listing page, I avoided local state (`useState`) for filters.
+*   **URL-Driven State:** Instead, I pushed all search queries, category filters, and sort options directly to the URL parameters.
+*   **Debouncing:** I implemented a debounced search input that updates the URL after 300ms of typing.
+*   **Benefit:** This means users can share a link like `.../products?search=jersey&sort=price_asc` and the recipient sees *exactly* the same view. It makes the store feel much more professional and accessible.
+
+## 5. What I Learned
 This project pushed me to go beyond simple CRUD apps. I learned:
 *   How to handle **real-world financial transactions** securely.
 *   The complexity of **Server Actions** in Next.js 15 and how to use them for type-safe form submissions.

@@ -188,9 +188,6 @@ zamalek-store/
 │   │       ├── categories/   # Category management
 │   │       ├── orders/       # Order management
 │   │       └── coupons/      # Coupon management
-│   ├── components/
-│   │   ├── admin/            # Admin components
-│   │   └── store/            # Store components
 │   ├── lib/
 │   │   ├── actions/          # Server actions
 │   │   ├── auth.ts           # Authentication config
@@ -198,6 +195,9 @@ zamalek-store/
 │   │   ├── r2.ts             # R2 storage client
 │   │   └── image-optimizer.ts # Image optimization
 │   └── api/                  # API routes
+├── components/
+│   ├── admin/            # Admin components
+│   └── store/            # Store components
 ├── prisma/
 │   ├── schema.prisma         # Database schema
 │   ├── seed.ts               # Database seeding
