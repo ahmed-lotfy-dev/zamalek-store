@@ -1,11 +1,12 @@
-import { Avatar } from "@heroui/avatar";
-import { Progress } from "@heroui/progress";
+
+
 import { Star } from "lucide-react";
 import {
   getProductReviews,
   getProductRatingSummary,
 } from "@/app/lib/actions/reviews";
 import { getTranslations } from "next-intl/server";
+import { Avatar, Progress } from "@heroui/react";
 
 interface ReviewListProps {
   productId: string;

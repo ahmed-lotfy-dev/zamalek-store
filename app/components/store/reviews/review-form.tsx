@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@heroui/button";
-import { Textarea } from "@heroui/input";
+import { Button, TextArea, TextField, Label } from "@heroui/react";
+
 import { Star } from "lucide-react";
 import { createReview } from "@/app/lib/actions/reviews";
 import { toast } from "@/app/components/ui/toast";
@@ -66,30 +66,30 @@ export default function ReviewForm({
               onClick={() => setRating(star)}
             >
               <Star
-                className={`w-6 h-6 ${
-                  star <= (hoverRating || rating)
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "text-default-300"
-                }`}
+                className={`w-6 h-6 ${star <= (hoverRating || rating)
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "text-default-300"
+                  }`}
               />
             </button>
           ))}
         </div>
       </div>
 
-      <Textarea
-        label={t("yourReview")}
-        placeholder={t("placeholder")}
-        value={comment}
-        onValueChange={setComment}
-        minRows={3}
-        variant="bordered"
-      />
+      <TextField>
+        <Label>{t("yourReview")}</Label>
+        <TextArea
+          placeholder={t("placeholder")}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          rows={3}
+          className="min-h-[80px]"
+        />
+      </TextField>
 
       <Button
         type="submit"
-        color="primary"
-        isLoading={isSubmitting}
+        isPending={isSubmitting}
         isDisabled={rating === 0}
       >
         {t("submit")}
