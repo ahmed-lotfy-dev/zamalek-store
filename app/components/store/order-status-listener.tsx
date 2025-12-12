@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { io } from "socket.io-client";
 import { useRouter } from "next/navigation";
-import { addToast } from "@heroui/toast";
+import { toast } from "@/app/components/ui/toast";
 
 export default function OrderStatusListener({ orderId }: { orderId: string }) {
   const router = useRouter();
@@ -18,11 +18,7 @@ export default function OrderStatusListener({ orderId }: { orderId: string }) {
 
     socket.on("status-update", (status) => {
       console.log("Order status updated:", status);
-      addToast({
-        title: "Order Updated",
-        description: `Order status changed to ${status}`,
-        color: "primary",
-      });
+      toast.success(`Order status changed to ${status}`);
       router.refresh();
     });
 

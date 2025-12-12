@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "@heroui/button";
 import { Heart } from "lucide-react";
 import { toggleSavedItem } from "@/app/lib/actions/saved-items";
 import { useOptimistic, startTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@heroui/react";
 
 interface SaveButtonProps {
   productId: string;

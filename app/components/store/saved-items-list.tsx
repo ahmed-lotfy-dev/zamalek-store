@@ -1,7 +1,8 @@
 "use client";
 
 import ProductCard from "@/app/components/product-card";
-import { Button } from "@heroui/button";
+import { Button } from "@heroui/react";
+
 import { Link } from "@/i18n/routing";
 import { Heart } from "lucide-react";
 
