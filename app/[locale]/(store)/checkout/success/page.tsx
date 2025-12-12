@@ -82,9 +82,46 @@ export default function CheckoutSuccessPage() {
       };
       verifyKashier();
       return;
+      verifyKashier();
+      return;
     }
 
-    // 3. Handle COD or others (no specific params)
+    // 3. Handle Paymob (success + merchant_order_id) (or standard Paymob return params)
+    const success = searchParams.get("success");
+    const paymobId = searchParams.get("id");
+
+    if (success === "true" && paymobId) {
+      const verifyPaymob = async () => {
+        try {
+          const params: Record<string, string> = {};
+          searchParams.forEach((value, key) => {
+            params[key] = value;
+          });
+
+          const { verifyPaymobPayment } = await import(
+            "@/app/lib/actions/checkout"
+          );
+
+          const result = await verifyPaymobPayment(params);
+
+          if (result.success) {
+            hasCleared.current = true;
+            setStatus("success");
+            clearCart();
+          } else {
+            console.error("Paymob verification failed:", result.error);
+            setStatus("error");
+          }
+        } catch (error) {
+          console.error("Paymob verification error", error);
+          setStatus("error");
+        }
+      };
+      verifyPaymob();
+      return;
+    }
+
+    // 4. Handle COD or others (no specific params)
     // Clear cart immediately
     hasCleared.current = true;
     setStatus("success");
@@ -147,7 +184,7 @@ export default function CheckoutSuccessPage() {
             be shipped shortly.
           </p>
           <div className="flex flex-col gap-3">
-            <Link href="/profile" className="w-full">
+            <Link href="/profile/orders" className="w-full">
               <Button
                 className="w-full font-medium"
               >

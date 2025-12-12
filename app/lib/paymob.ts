@@ -378,11 +378,19 @@ export const paymob = {
       "success",
     ];
 
-    const concatenatedString = keys
-      .map((key) => {
+    const concatenatedString = keys.map((key) => {
+        // Try nested lookup first (for Webhooks)
         let value = key
           .split(".")
-          .reduce((obj, k) => (obj ? obj[k] : undefined), data);
+          .reduce((obj, k) => (obj && typeof obj === 'object' ? obj[k] : undefined), data);
+
+        // If undefined, try direct lookup (for Redirect params which are flat keys like "source_data.sub_type")
+        if (value === undefined && data[key] !== undefined) {
+          value = data[key];
+        }
+        
+        // Special case: Paymob sometimes sends "true"/"false" strings in redirect distinct from boolean in webhook? 
+        // Usually stringification handles it, but let's be safe.
 
         // Special handling for 'order' which can be an object
         if (key === "order" && typeof value === "object" && value !== null) {

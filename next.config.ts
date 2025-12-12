@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "pub-09b0b8c34b804278951df0f25a7076b2.r2.dev",
       },
+      {
+        protocol: "https",
+        hostname: "placehold.co",
+      },
     ],
     minimumCacheTTL: 60,
   },

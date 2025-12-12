@@ -84,6 +84,7 @@ model Account {
   accessTokenExpiresAt DateTime?
   refreshTokenExpiresAt DateTime?
   scope        String?
+  idToken      String?
   password     String?
   createdAt    DateTime
   updatedAt    DateTime

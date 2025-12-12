@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit } from "next/font/google"; // Modern, athletic font
 import "../globals.css";
 import Providers from "../providers";
 import { NextIntlClientProvider } from "next-intl";
@@ -8,14 +8,10 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Toaster } from "@/app/components/ui/toast";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -51,7 +47,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
+        className={`${outfit.variable} font-sans antialiased overflow-x-hidden selection:bg-primary selection:text-white`}
       >
         <Toaster position="top-right" richColors />
         <NextIntlClientProvider messages={messages}>

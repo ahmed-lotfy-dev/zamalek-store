@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { usePathname } from "@/i18n/routing";
 import { useCart } from "@/app/context/cart-context";
 import { authClient } from "@/app/lib/auth-client";
-import { useLocale, useTranslations } from "next-intl";
-import { ShoppingBag, Heart, Menu, User, LogOut, LayoutDashboard, ShoppingCart } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { ShoppingBag, Heart, Menu, User, LogOut, LayoutDashboard, ShoppingCart, Search } from "lucide-react";
 
 import { cn } from "@/app/lib/utils"
 import { Button } from "@/components/ui/button";
@@ -27,101 +27,128 @@ import CartDrawer from "./store/cart-drawer";
 
 export default function StoreNavbar({ user }: { user?: any }) {
   const { setIsCartOpen, cartCount } = useCart();
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const t = useTranslations("Navigation");
   const tHome = useTranslations("HomePage");
-  const locale = useLocale();
+
+  // Handle scroll effect for glassmorphism
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const menuItems = [
     { name: t("home"), href: "/" },
     { name: t("shop"), href: "/products" },
+    { name: "Jerseys", href: "/products?category=jerseys" },
+    { name: "Training", href: "/products?category=training" },
   ];
 
   return (
     <>
-      <header className="sticky top-0 m-auto z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-        <div className="container flex h-16 items-center px-4 md:px-6">
-          {/* Mobile Menu */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
-              >
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="pr-0">
-              <SheetHeader>
-                <SheetTitle className="text-left font-bold">{tHome("title")}</SheetTitle>
-                <SheetDescription className="sr-only">
-                  Navigation Menu
-                </SheetDescription>
-              </SheetHeader>
-              <div className="flex flex-col gap-4 py-4">
-                {menuItems.map((item, index) => (
-                  <Link
-                    key={index}
-                    href={item.href}
-                    className="block px-2 py-1 text-lg font-medium text-foreground/80 hover:text-foreground"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-                {user?.role === "ADMIN" && (
-                  <Link
-                    href="/admin"
-                    className="block px-2 py-1 text-lg font-medium text-primary hover:text-primary/80"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {t("adminDashboard")}
-                  </Link>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+      <header
+        className={cn(
+          "sticky top-0 z-50 w-full transition-all duration-300 ease-in-out border-b border-transparent",
+          isScrolled
+            ? "glass h-16 shadow-sm border-border/40"
+            : "bg-transparent h-20"
+        )}
+      >
+        <div className="container h-full flex items-center justify-between px-6 max-w-7xl mx-auto">
+          {/* Mobile Menu & Search (Left) */}
+          <div className="flex items-center gap-2 md:hidden">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="-ml-2">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] border-r border-border">
+                <SheetHeader className="text-left mb-6">
+                  <SheetTitle className="text-2xl font-black italic tracking-tighter text-primary">
+                    {tHome("title").toUpperCase()}
+                  </SheetTitle>
+                  <SheetDescription>Explore the official collection.</SheetDescription>
+                </SheetHeader>
+                <nav className="flex flex-col gap-2">
+                  {menuItems.map((item, index) => (
+                    <Link
+                      key={index}
+                      href={item.href}
+                      className={cn(
+                        "text-lg font-medium px-4 py-3 rounded-md transition-colors",
+                        pathname === item.href
+                          ? "bg-primary/10 text-primary"
+                          : "text-foreground hover:bg-muted"
+                      )}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                  {user?.role === "ADMIN" && (
+                    <Link
+                      href="/admin"
+                      className="text-lg font-medium px-4 py-3 rounded-md text-foreground hover:bg-muted"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t("adminDashboard")}
+                    </Link>
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
 
-          {/* Logo */}
-          <div className="mr-4 hidden md:flex">
-            <Link href="/" className="mr-6 flex items-center space-x-2">
-              <span className="hidden font-bold sm:inline-block text-xl">
-                {tHome("title")}
+          {/* Logo (Center Mobile, Left Desktop) */}
+          <div className="flex md:flex-1 justify-center md:justify-start">
+            <Link href="/" className="flex items-center gap-2 group">
+              {/* Optional: Add Logo Icon Here */}
+              <span className="text-2xl md:text-3xl font-black tracking-tighter italic group-hover:text-primary transition-colors duration-300">
+                {tHome("title").toUpperCase()}
               </span>
             </Link>
-            <nav className="flex items-center gap-6 text-sm font-medium">
-              {menuItems.map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.href}
-                  className={cn(
-                    "transition-colors hover:text-foreground/80",
-                    pathname === item.href ? "text-foreground" : "text-foreground/60"
-                  )}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
           </div>
 
-          {/* Mobile Logo (Centered) */}
-          <div className="flex flex-1 md:hidden">
-            <Link href="/" className="font-bold text-xl">
-              {tHome("title")}
-            </Link>
-          </div>
-
+          {/* Desktop Navigation (Center) */}
+          <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+            {menuItems.map((item, index) => (
+              <Link
+                key={index}
+                href={item.href}
+                className={cn(
+                  "text-sm font-semibold uppercase tracking-wide transition-colors hover:text-primary relative group py-2",
+                  pathname === item.href ? "text-primary" : "text-foreground/80"
+                )}
+              >
+                {item.name}
+                <span className={cn(
+                  "absolute bottom-0 left-0 w-full h-[2px] bg-primary scale-x-0 transition-transform duration-300 group-hover:scale-x-100",
+                  pathname === item.href ? "scale-x-100" : ""
+                )} />
+              </Link>
+            ))}
+          </nav>
 
           {/* Right Actions */}
-          <div className="flex flex-1 items-center justify-end space-x-2">
-            <ThemeSwitcher />
-            <LanguageSwitcher />
+          <div className="flex flex-1 items-center justify-end gap-1 md:gap-2">
+            <div className="hidden md:flex">
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+            </div>
+
+            <Button variant="ghost" size="icon" className="hidden md:flex hover:text-primary">
+              <Search className="h-5 w-5" />
+            </Button>
 
             <Link href="/saved">
-              <Button variant="ghost" size="icon" aria-label="Saved Items">
+              <Button variant="ghost" size="icon" className="hover:text-destructive transition-colors">
                 <Heart className="h-5 w-5" />
               </Button>
             </Link>
@@ -129,36 +156,28 @@ export default function StoreNavbar({ user }: { user?: any }) {
             <Button
               variant="ghost"
               size="icon"
-              aria-label="Cart"
               onClick={() => setIsCartOpen(true)}
-              className="relative"
+              className="relative hover:text-primary transition-colors"
             >
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
                 <Badge
-                  variant="destructive"
-                  className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-[10px]"
+                  className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0 flex items-center justify-center text-[10px] bg-primary text-primary-foreground border-2 border-background"
                 >
                   {cartCount}
                 </Badge>
               )}
             </Button>
 
-            {user?.role === "ADMIN" && (
-              <Button variant="default" className="hidden md:flex ml-2" asChild>
-                <Link href="/admin">
-                  {t("adminDashboard")}
-                </Link>
-              </Button>
-            )}
-
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full ml-2">
-                    <Avatar className="h-8 w-8">
+                  <Button variant="ghost" size="icon" className="rounded-full ml-1 md:ml-2 border border-border/50">
+                    <Avatar className="h-7 w-7 md:h-8 md:w-8">
                       <AvatarImage src={user.image} alt={user.name} />
-                      <AvatarFallback>{user.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                      <AvatarFallback className="text-primary font-bold bg-primary/10">
+                        {user.name?.charAt(0)?.toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
@@ -186,7 +205,7 @@ export default function StoreNavbar({ user }: { user?: any }) {
                   </DropdownMenuItem>
                   {user.role === "ADMIN" && (
                     <DropdownMenuItem asChild>
-                      <Link href="/admin" className="cursor-pointer">
+                      <Link href="/admin" className="cursor-pointer text-primary">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         {t("adminDashboard")}
                       </Link>
@@ -194,7 +213,7 @@ export default function StoreNavbar({ user }: { user?: any }) {
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="text-red-600 cursor-pointer focus:text-red-600"
+                    className="text-destructive focus:text-destructive cursor-pointer"
                     onClick={async () => {
                       await authClient.signOut();
                       window.location.href = "/";
@@ -206,7 +225,7 @@ export default function StoreNavbar({ user }: { user?: any }) {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild className="ml-2">
+              <Button asChild className="ml-2 font-semibold rounded-full px-6" size="sm">
                 <Link href="/sign-in">
                   {t("signIn")}
                 </Link>

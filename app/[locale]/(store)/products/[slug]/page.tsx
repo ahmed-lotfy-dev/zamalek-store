@@ -55,7 +55,12 @@ export default async function ProductPage({
           </div>
         </div>
 
-        <RelatedProducts products={relatedProducts} />
+        <RelatedProducts
+          products={relatedProducts.map((p) => ({
+            ...p,
+            price: Number(p.price),
+          }))}
+        />
       </main>
     </div>
   );

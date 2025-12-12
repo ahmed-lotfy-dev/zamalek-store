@@ -116,24 +116,39 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  // Paymob might redirect user here with GET params, but we rely on POST webhook for status update.
-  // We can redirect user to success/error page based on query params.
+  // Paymob redirects user here with GET params.
+  // We verified payload via POST webhook usually, but we also do a basic check or just redirect.
+  // We need to redirect to the localized success page: /[locale]/checkout/success
+
   const { searchParams } = new URL(req.url);
   const success = searchParams.get("success") === "true";
 
   // Determine the base URL
-  // If running behind a proxy, req.url might be localhost.
-  // We try to use the Host header if available.
   const host = req.headers.get("host");
   const protocol = req.headers.get("x-forwarded-proto") || "https";
-
   const baseUrl = host ? `${protocol}://${host}` : new URL(req.url).origin;
 
+  // Determine Locale from Cookies
+  const cookieStore = await import("next/headers").then((mod) => mod.cookies());
+  const locale = cookieStore.get("NEXT_LOCALE")?.value || "ar"; // Default to 'ar' if no cookie
+
   if (success) {
-    return NextResponse.redirect(new URL("/checkout/success", baseUrl));
+    const successUrl = new URL(`/${locale}/checkout/success`, baseUrl);
+    // Forward all search params so the success page can verify and clear cart
+    searchParams.forEach((value, key) => {
+      successUrl.searchParams.set(key, value);
+    });
+    return NextResponse.redirect(successUrl);
   } else {
     // Forward error details to the error page
-    const errorUrl = new URL("/checkout/error", baseUrl);
+    const errorUrl = new URL(`/${locale}/checkout/error`, baseUrl);
+    
+    // Forward all params to error page too, just in case
+    searchParams.forEach((value, key) => {
+      errorUrl.searchParams.set(key, value);
+    });
+    
+    // Ensure specific error params are set if Paymob sent them in data object structure (flattened mostly)
     const message = searchParams.get("data.message");
     const responseCode = searchParams.get("txn_response_code");
 
