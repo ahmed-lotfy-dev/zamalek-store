@@ -1,7 +1,8 @@
 "use client";
 
 import { deleteCoupon } from "@/app/lib/actions/coupons";
-import { Button } from "@heroui/button";
+import { Button } from "@heroui/react";
+
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/app/components/ui/toast";

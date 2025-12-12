@@ -1,18 +1,9 @@
 "use client";
 
-import { Card, CardBody } from "@heroui/card";
-import { Chip } from "@heroui/chip";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableColumn,
-  TableRow,
-  TableCell,
-} from "@heroui/table";
 import { DeleteCouponButton } from "./delete-button";
 import { useTranslations } from "next-intl";
 import { useFormat } from "@/app/hooks/use-format";
+import { Card, CardContent, Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/react";
 
 interface CouponsTableProps {
   coupons: any[];
@@ -24,7 +15,7 @@ export function CouponsTable({ coupons }: CouponsTableProps) {
 
   return (
     <Card>
-      <CardBody>
+      <CardContent>
         <Table aria-label="Coupons table">
           <TableHeader>
             <TableColumn>{t("code").toUpperCase()}</TableColumn>
@@ -77,7 +68,7 @@ export function CouponsTable({ coupons }: CouponsTableProps) {
             ))}
           </TableBody>
         </Table>
-      </CardBody>
+      </CardContent>
     </Card>
   );
 }

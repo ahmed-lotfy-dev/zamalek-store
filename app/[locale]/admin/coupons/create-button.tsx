@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@heroui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { Button } from "@heroui/react";
 
 export function CreateCouponButton() {
   return (
