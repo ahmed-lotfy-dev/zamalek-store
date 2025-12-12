@@ -1,10 +1,6 @@
 import { getUserOrder } from "@/app/lib/actions/profile";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Chip } from "@heroui/chip";
-import { Button } from "@heroui/button";
-import { Link } from "@heroui/link";
-import { Image } from "@heroui/image";
-import { Divider } from "@heroui/divider";
+import { Button, Card, CardContent, CardHeader, Chip, Divider, Image, Link } from "@heroui/react";
+
 import { ArrowLeft, MapPin, Phone, CreditCard } from "lucide-react";
 import { notFound } from "next/navigation";
 
@@ -57,7 +53,7 @@ export default async function OrderDetailsPage({
             <CardHeader className="pb-0 pt-4 px-4">
               <h2 className="text-lg font-bold">Items</h2>
             </CardHeader>
-            <CardBody className="py-4">
+            <CardContent className="py-4">
               <div className="space-y-4">
                 {order.orderItems.map((item: any) => (
                   <div key={item.id} className="flex gap-4">
@@ -90,7 +86,7 @@ export default async function OrderDetailsPage({
                 <span>Total</span>
                 <span>${order.total.toFixed(2)}</span>
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         </div>
 
@@ -100,7 +96,7 @@ export default async function OrderDetailsPage({
             <CardHeader className="pb-0 pt-4 px-4">
               <h2 className="text-lg font-bold">Shipping Details</h2>
             </CardHeader>
-            <CardBody className="py-4 space-y-4">
+            <CardContent className="py-4 space-y-4">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-default-500 mt-0.5" />
                 <div>
@@ -115,14 +111,14 @@ export default async function OrderDetailsPage({
                   <p className="text-default-500 text-sm">{order.phone}</p>
                 </div>
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-0 pt-4 px-4">
               <h2 className="text-lg font-bold">Payment Info</h2>
             </CardHeader>
-            <CardBody className="py-4">
+            <CardContent className="py-4">
               <div className="flex items-start gap-3">
                 <CreditCard className="w-5 h-5 text-default-500 mt-0.5" />
                 <div>
@@ -138,7 +134,7 @@ export default async function OrderDetailsPage({
                   </Chip>
                 </div>
               </div>
-            </CardBody>
+            </CardContent>
           </Card>
         </div>
       </div>

@@ -1,7 +1,6 @@
 import { getUserOrders } from "@/app/lib/actions/profile";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Chip } from "@heroui/chip";
-import { Button } from "@heroui/button";
+import { Button, Card, CardContent, CardHeader, Chip } from "@heroui/react";
+
 import { Link } from "@/i18n/routing";
 import { Package, ChevronRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -18,7 +17,7 @@ export default async function OrderHistoryPage() {
         <h2 className="text-xl font-bold">{t("orderHistory")}</h2>
         <p className="text-small text-default-500">{t("orderHistoryDesc")}</p>
       </CardHeader>
-      <CardBody className="overflow-visible py-4">
+      <CardContent className="overflow-visible py-4">
         {orders.length === 0 ? (
           <div className="text-center py-12 text-default-500">
             <Package className="w-12 h-12 mx-auto mb-4 opacity-20" />
@@ -74,7 +73,7 @@ export default async function OrderHistoryPage() {
             ))}
           </div>
         )}
-      </CardBody>
+      </CardContent>
     </Card>
   );
 }
