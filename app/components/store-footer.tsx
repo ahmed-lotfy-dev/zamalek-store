@@ -1,12 +1,10 @@
 "use client";
 
-import { Link as HeroLink } from "@heroui/link";
-import { Input } from "@heroui/input";
-import { Button } from "@heroui/button";
 import { Facebook, Twitter, Instagram, Mail } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import NewsletterForm from "@/app/components/newsletter-form";
+import { Button, Input, Link as HeroLink } from "@heroui/react";
 
 export default function StoreFooter() {
   const t = useTranslations("Footer");

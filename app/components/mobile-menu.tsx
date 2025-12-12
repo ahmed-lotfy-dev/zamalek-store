@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "@heroui/button";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { Button } from "@heroui/react";
 
 interface MobileMenuProps {
   isOpen: boolean;
