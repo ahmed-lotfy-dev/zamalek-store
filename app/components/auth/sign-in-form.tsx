@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
-import { Button } from "@heroui/button";
-import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
-import { Input } from "@heroui/input";
+import { Button, Card, CardContent, CardFooter, CardHeader, Input, Label, TextField } from "@heroui/react";
+
 import { Link } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 import { toast } from "@/app/components/ui/toast";
@@ -48,38 +47,37 @@ export default function SignInForm() {
         <h1 className="text-2xl font-bold">{t("signInTitle")}</h1>
         <p className="text-small text-default-500">{t("signInSubtitle")}</p>
       </CardHeader>
-      <CardBody>
+      <CardContent>
         <form onSubmit={handleSignIn} className="flex flex-col gap-4">
-          <Input
-            label={t("email")}
-            type="email"
-            value={email}
-            onValueChange={setEmail}
-            placeholder={t("emailPlaceholder")}
-            variant="bordered"
-            isRequired
-          />
+          <TextField isRequired>
+            <Label>{t("email")}</Label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t("emailPlaceholder")}
+            />
+          </TextField>
 
-          <Input
-            label={t("password")}
-            type="password"
-            value={password}
-            onValueChange={setPassword}
-            placeholder={t("passwordPlaceholder")}
-            variant="bordered"
-            isRequired
-          />
+          <TextField isRequired>
+            <Label>{t("password")}</Label>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t("passwordPlaceholder")}
+            />
+          </TextField>
 
           <Button
             type="submit"
-            isLoading={loading}
-            color="primary"
+            isPending={loading}
             className="w-full font-medium mt-2"
           >
             {t("signInButton")}
           </Button>
         </form>
-      </CardBody>
+      </CardContent>
       <CardFooter className="justify-center pt-0">
         <div className="text-center text-small">
           {t("noAccount")}{" "}
