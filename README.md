@@ -2,10 +2,11 @@
 
 **A modern, bilingual e-commerce platform for Zamalek SC merchandise**
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.0.6-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.2-blue)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-7.1-green)](https://www.prisma.io/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
 
 Zamalek Store is a production-ready e-commerce platform designed for a local brick-and-mortar shop in Zamalek, Cairo. Built with modern technologies and best practices, it provides a seamless shopping experience in both Arabic and English.
 
@@ -90,32 +91,39 @@ Zamalek Store is a production-ready e-commerce platform designed for a local bri
 
 ### Frontend
 
-- **[Next.js 15](https://nextjs.org/)** - React framework with App Router
-- **[React 19](https://react.dev/)** - UI library
-- **[TypeScript](https://www.typescriptlang.org/)** - Type safety
-- **[Tailwind CSS 4](https://tailwindcss.com/)** - Utility-first CSS
-- **[HeroUI v3 (Beta)](https://heroui.com/)** - Beautiful React components with modular imports for optimal bundle size
-- **[next-intl](https://next-intl-docs.vercel.app/)** - Internationalization
-- **[Framer Motion](https://www.framer.com/motion/)** - Animations
+- **[Next.js 16.0.6](https://nextjs.org/)** - React framework with App Router
+- **[React 19.2](https://react.dev/)** - Latest UI library
+- **[TypeScript 5.9](https://www.typescriptlang.org/)** - Type safety
+- **[Tailwind CSS 4.1](https://tailwindcss.com/)** - Utility-first CSS framework
+- **[Radix UI](https://www.radix-ui.com/)** - Headless UI components (Avatar, Dialog, Dropdown, Select, etc.)
+- **[next-intl 4.5](https://next-intl-docs.vercel.app/)** - Internationalization
+- **[Framer Motion 12](https://www.framer.com/motion/)** - Animations
+- **[Recharts 3.5](https://recharts.org/)** - Charts for analytics
+- **[Sonner](https://sonner.emilkowal.ski/)** - Toast notifications
 
 ### Backend
 
-- **[PostgreSQL](https://www.postgresql.org/)** - Relational database
-- **[Prisma](https://www.prisma.io/)** - Type-safe ORM
-- **[Better Auth](https://better-auth.com/)** - Authentication
-- **[BullMQ](https://docs.bullmq.io/)** - Job queue with Redis
-- **[Nodemailer](https://nodemailer.com/)** - Email sending
+- **[PostgreSQL](https://www.postgresql.org/)** - Relational database with Prisma adapter
+- **[Prisma 7.1](https://www.prisma.io/)** - Type-safe ORM with migrations
+- **[Better Auth 1.4](https://better-auth.com/)** - Modern authentication library
+- **[BullMQ 5.65](https://docs.bullmq.io/)** - Redis-based job queue for background tasks
+- **[Socket.IO 4.8](https://socket.io/)** - Real-time bidirectional communication
+- **[Nodemailer 6.10](https://nodemailer.com/)** - Email sending
+- **[Zod 4.1](https://zod.dev/)** - Schema validation
 
 ### Infrastructure
 
-- **[Cloudflare R2](https://www.cloudflare.com/products/r2/)** - Object storage (S3-compatible)
-- **[Redis](https://redis.io/)** - Caching and queue management
-- **[Mailtrap](https://mailtrap.io/)** - Email testing/delivery
+- **[Cloudflare R2](https://www.cloudflare.com/products/r2/)** - Object storage (S3-compatible) for images
+- **[Redis](https://redis.io/)** - Caching and queue management (IORedis 5.8)
+- **[Mailtrap](https://mailtrap.io/)** - Email testing and delivery
+- **[Docker](https://www.docker.com/)** - Containerization with Bun runtime
+- **[AWS SDK](https://aws.amazon.com/sdk-for-javascript/)** - S3 client for R2 integration
 
 ### Payment Gateways
 
-- **[Paymob](https://paymob.com/)** - Egyptian payment gateway
+- **[Paymob](https://paymob.com/)** - Egyptian payment gateway (cards, wallets)
 - **[Kashier](https://kashier.io/)** - Alternative payment provider
+- **[Stripe](https://stripe.com/)** - International payment processing (ready for future expansion)
 
 ---
 
@@ -379,29 +387,49 @@ See [`docs/database_design.md`](docs/database_design.md) for detailed schema.
 - **Caching** - Redis caching for frequently accessed data
 - **Database Indexing** - Optimized database queries
 - **CDN** - Static assets served from CDN
-- **HeroUI v3 Modular Imports** - Tree-shakable component imports for smaller bundle size
+- **Radix UI Components** - Lightweight, accessible headless components
 
-### HeroUI v3 Migration
+### Background Worker Architecture
 
-We migrated from HeroUI v2 to v3 (beta) to optimize our bundle size. The key improvement:
+The application uses **BullMQ** with Redis for reliable background job processing:
 
-**Before (v2):**
-```tsx
-import { Button, Input, Card } from "@heroui/react";  // Imports entire library
+**Email Queue System:**
+- **Asynchronous Processing**: Email sending doesn't block HTTP responses
+- **Retry Logic**: Failed jobs retry with exponential backoff (3 attempts)
+- **Job Types**: Order confirmations, status updates, welcome emails
+- **Monitoring**: Job completion and failure tracking
+
+**Worker Process** (`worker.ts`):
+```bash
+npm run worker  # Runs separately from main app
 ```
 
-**After (v3):**
-```tsx
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Card } from "@heroui/card";
-```
+**Benefits:**
+- **Faster Response Times**: Checkout completes instantly
+- **Reliability**: Jobs persist in Redis if worker crashes
+- **Scalability**: Multiple workers can process jobs in parallel
 
-**Why this matters:**
-- **Better Tree-Shaking**: Only the components you use get bundled
-- **Smaller Bundle Size**: Reduces JavaScript payload sent to browsers
-- **Faster Load Times**: Especially important for users on mobile connections in Egypt
-- **Cleaner API**: New patterns like `onValueChange` instead of `onChange` for better developer experience
+---
+
+### Docker Deployment
+
+Production-ready Docker setup with **Bun runtime** for optimal performance:
+
+**Multi-stage Build:**
+1. **Builder Stage**: Installs dependencies, generates Prisma client, builds Next.js
+2. **Runner Stage**: Minimal production image with only necessary files
+
+**Key Features:**
+- **Bun Runtime**: Faster than Node.js for both build and runtime
+- **Alpine Linux**: Minimal base image (~50MB)
+- **Layer Caching**: Optimized for fast rebuilds
+- **Environment Variables**: Configured via `.env` or Docker Compose
+
+**Deployment:**
+```bash
+docker build -t zamalek-store .
+docker run -p 3000:3000 zamalek-store
+```
 
 ---
 

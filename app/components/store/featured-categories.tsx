@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
@@ -14,6 +16,12 @@ export default function FeaturedCategories({
 }: {
   categories: any[];
 }) {
+  const [hasMounted, setHasMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const t = useTranslations("Categories");
 
   // Map categories by English name for easy access
@@ -75,7 +83,7 @@ export default function FeaturedCategories({
           return (
             <motion.div
               key={item.data.id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={hasMounted ? { opacity: 0, y: 30 } : false}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.6 }}

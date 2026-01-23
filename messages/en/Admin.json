@@ -25,5 +25,16 @@
   "noOrders": "No orders found.",
   "viewDetails": "View Details",
   "addCategory": "Add Category",
-  "noCategories": "No categories found. Create one to get started."
+  "noCategories": "No categories found. Create one to get started.",
+  "hero": "Hero Slides",
+  "addSlide": "Add Slide",
+  "title": "Title",
+  "image": "Image",
+  "active": "Active",
+  "noSlides": "No slides found.",
+  "order": "Order",
+  "deleteSlide": "Delete Slide",
+  "deleteSlideConfirm": "Are you sure you want to delete this slide? This action cannot be undone and the image will be removed from storage.",
+  "cancel": "Cancel",
+  "confirm": "Confirm"
 }

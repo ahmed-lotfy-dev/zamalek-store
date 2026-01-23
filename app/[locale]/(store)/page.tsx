@@ -1,8 +1,10 @@
 import { getNewArrivals } from "@/app/lib/actions/products";
 import { getSavedItems } from "@/app/lib/actions/saved-items";
 import { getCategoriesWithImages } from "@/app/lib/actions/categories";
+import { getHeroSlides } from "@/app/lib/actions/hero";
 import NewArrivals from "@/app/components/store/new-arrivals";
 import HeroSection from "@/app/components/store/hero-section";
+import HeroCarousel from "@/app/components/store/hero-carousel";
 import FeaturedCategories from "@/app/components/store/featured-categories";
 import FeaturesSection from "@/app/components/store/features-section";
 import PromoBanner from "@/app/components/store/promo-banner";
@@ -10,10 +12,11 @@ import PromoBanner from "@/app/components/store/promo-banner";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [newArrivals, savedItems, categories] = await Promise.all([
+  const [newArrivals, savedItems, categories, slides] = await Promise.all([
     getNewArrivals(),
     getSavedItems(),
     getCategoriesWithImages(),
+    getHeroSlides(),
   ]);
 
   const savedItemIds = savedItems.map(
@@ -25,7 +28,11 @@ export default async function Home() {
       <main className="mx-auto max-w-7xl px-6 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-16">
           {/* Hero Section */}
-          <HeroSection />
+          {slides.length > 0 ? (
+            <HeroCarousel slides={slides} />
+          ) : (
+            <HeroSection />
+          )}
 
           {/* Features / Trust Signals */}
           <FeaturesSection />

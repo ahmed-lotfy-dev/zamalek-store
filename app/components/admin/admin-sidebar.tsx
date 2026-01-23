@@ -14,6 +14,7 @@ import {
   Home,
   LogOut,
   Ticket,
+  Image,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
@@ -37,6 +38,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     { href: "/admin/categories", label: t("categories"), icon: ListTree },
     { href: "/admin/orders", label: t("orders"), icon: ShoppingCart },
     { href: "/admin/coupons", label: t("coupons"), icon: Ticket },
+    { href: "/admin/hero", label: t("hero"), icon: Image },
   ];
 
   return (
