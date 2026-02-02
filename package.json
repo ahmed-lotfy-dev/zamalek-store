@@ -79,5 +79,8 @@
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
+  },
+  "resolutions": {
+    "fast-xml-parser": "^5.3.4"
   }
 }
